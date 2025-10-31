@@ -8,6 +8,8 @@ import {
   Zap,
 } from 'lucide-react'
 
+import { authClient } from '@/lib/auth-client'
+
 export const Route = createFileRoute('/')({ component: App })
 
 function App() {
@@ -93,6 +95,23 @@ function App() {
             </p>
           </div>
         </div>
+      </section>
+
+      <section>
+        {function () {
+          const session = authClient.useSession();
+          const logout = authClient.signOut;
+          return <div className='p-2'>
+            {session.data ? (
+              <>
+                <p className='text-white'>Welcome back, {JSON.stringify(session.data?.user.name)}!</p>
+                <button className='text-sm text-gray-400 hover:text-gray-300' onClick={() => logout()}>Log out</button>
+              </>
+            ) : (
+              <p>Please log in to access your account. <a href="/authentication/login">login</a></p>
+            )}
+          </div>;
+        }()}
       </section>
 
       <section className="py-16 px-6 max-w-7xl mx-auto">
