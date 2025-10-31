@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { createFileRoute, useRouter, } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 
 import { getClient } from '@/db'
 
