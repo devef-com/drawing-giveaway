@@ -7,8 +7,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { NumberCell  } from './NumberCell'
-import type {NumberSlotStatus} from './NumberCell';
+import { NumberCell } from './NumberCell'
+import type { NumberSlotStatus } from './NumberCell';
 import { cn } from '@/lib/utils'
 
 interface NumberGridProps {
@@ -120,7 +120,14 @@ export function NumberGrid({
       )}
     >
       <div
-        className="grid gap-2 md:gap-3"
+        className={cn(
+          'grid gap-2 md:gap-3',
+          'grid-cols-5',
+          'sm:grid-cols-8',
+          'md:grid-cols-10',
+          'lg:grid-cols-12',
+          'xl:grid-cols-15'
+        )}
         style={{
           gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
         }}

@@ -1,14 +1,13 @@
 /**
  * Number Slots Manager
- * 
+ *
  * Handles efficient management and querying of number slots for drawings.
  * Provides utilities for initialization, reservation, and status tracking.
  */
 
 import { and, eq, inArray, lt, sql } from 'drizzle-orm'
-import type {NumberSlot, Participant} from '@/db/schema';
-import { db } from '@/db'
-import {   numberSlots, participants } from '@/db/schema'
+import { db } from '@/db/index'
+import { numberSlots, participants } from '@/db/schema'
 
 // ============================================================================
 // Types and Interfaces
@@ -61,17 +60,17 @@ export interface ReservationResult {
 /**
  * Initialize number slots for a new drawing
  * Creates all number slot records in bulk for optimal performance
- * 
+ *
  * @param drawingId - The unique identifier of the drawing
  * @param quantity - The total number of slots to create
  * @throws Error if slots already exist for this drawing
- * 
+ *
  * @example
  * await initializeNumberSlots('drawing-123', 300)
  */
 export async function initializeNumberSlots(
   drawingId: string,
-  quantity: number
+  quantity: number,
 ): Promise<void> {
   if (quantity <= 0 || quantity > 10000) {
     throw new Error('Quantity must be between 1 and 10000')
@@ -94,7 +93,7 @@ export async function initializeNumberSlots(
   for (let batch = 0; batch < batches; batch++) {
     const start = batch * BATCH_SIZE
     const end = Math.min(start + BATCH_SIZE, quantity)
-    
+
     const slots = Array.from({ length: end - start }, (_, i) => ({
       drawingId,
       number: start + i + 1,
@@ -108,10 +107,10 @@ export async function initializeNumberSlots(
 /**
  * Get number slots with pagination and filtering
  * Returns minimal data for efficient rendering
- * 
+ *
  * @param query - Query parameters for filtering and pagination
  * @returns Paginated result with slot information and metadata
- * 
+ *
  * @example
  * const result = await getNumberSlots({
  *   drawingId: 'drawing-123',
@@ -121,7 +120,7 @@ export async function initializeNumberSlots(
  * })
  */
 export async function getNumberSlots(
-  query: NumberSlotsQuery
+  query: NumberSlotsQuery,
 ): Promise<NumberSlotsResult> {
   const { drawingId, page = 1, pageSize = 100, status, numbers } = query
 
@@ -180,17 +179,23 @@ export async function getNumberSlots(
 
   // Calculate status counts
   const statusCounts = counts.reduce(
-    (acc, { status: slotStatus, count }) => {
+    (
+      acc: Record<string, number>,
+      { status: slotStatus, count }: { status: string; count: number },
+    ) => {
       acc[slotStatus] = count
       return acc
     },
-    {} as Record<string, number>
+    {} as Record<string, number>,
   )
 
-  const totalCount = Object.values(statusCounts).reduce((a, b) => a + b, 0)
+  const totalCount = (Object.values(statusCounts) as number[]).reduce(
+    (a: number, b: number) => a + b,
+    0,
+  )
 
   return {
-    slots: resultSlots.map((slot) => ({
+    slots: resultSlots.map((slot: any) => ({
       number: slot.number,
       status: slot.status as 'available' | 'reserved' | 'taken',
       participantId: slot.participantId ?? undefined,
@@ -209,12 +214,12 @@ export async function getNumberSlots(
 /**
  * Reserve a number temporarily (e.g., during payment processing)
  * Prevents other users from selecting the same number
- * 
+ *
  * @param drawingId - The drawing identifier
  * @param number - The number to reserve
  * @param expirationMinutes - How long to hold the reservation (default: 15 minutes)
  * @returns Success status and optional message
- * 
+ *
  * @example
  * const result = await reserveNumber('drawing-123', 42, 15)
  * if (result.success) {
@@ -224,10 +229,13 @@ export async function getNumberSlots(
 export async function reserveNumber(
   drawingId: string,
   number: number,
-  expirationMinutes: number = 15
+  expirationMinutes: number = 15,
 ): Promise<ReservationResult> {
   if (expirationMinutes <= 0 || expirationMinutes > 60) {
-    return { success: false, message: 'Expiration must be between 1 and 60 minutes' }
+    return {
+      success: false,
+      message: 'Expiration must be between 1 and 60 minutes',
+    }
   }
 
   // Check if the number is available
@@ -235,10 +243,7 @@ export async function reserveNumber(
     .select()
     .from(numberSlots)
     .where(
-      and(
-        eq(numberSlots.drawingId, drawingId),
-        eq(numberSlots.number, number)
-      )
+      and(eq(numberSlots.drawingId, drawingId), eq(numberSlots.number, number)),
     )
     .limit(1)
 
@@ -267,8 +272,8 @@ export async function reserveNumber(
         and(
           eq(numberSlots.drawingId, drawingId),
           eq(numberSlots.number, number),
-          eq(numberSlots.status, 'available') // Double-check it's still available
-        )
+          eq(numberSlots.status, 'available'), // Double-check it's still available
+        ),
       )
 
     return { success: true, expiresAt }
@@ -285,19 +290,19 @@ export async function reserveNumber(
 /**
  * Confirm a number reservation and assign it to a participant
  * Should be called after payment verification or eligibility check
- * 
+ *
  * @param drawingId - The drawing identifier
  * @param number - The number to confirm
  * @param participantId - The participant who gets the number
  * @throws Error if reservation doesn't exist or has expired
- * 
+ *
  * @example
  * await confirmNumberReservation('drawing-123', 42, participantId)
  */
 export async function confirmNumberReservation(
   drawingId: string,
   number: number,
-  participantId: number
+  participantId: number,
 ): Promise<void> {
   const result = await db
     .update(numberSlots)
@@ -310,8 +315,8 @@ export async function confirmNumberReservation(
       and(
         eq(numberSlots.drawingId, drawingId),
         eq(numberSlots.number, number),
-        eq(numberSlots.status, 'reserved')
-      )
+        eq(numberSlots.status, 'reserved'),
+      ),
     )
 
   // Check if any rows were affected
@@ -324,17 +329,17 @@ export async function confirmNumberReservation(
 /**
  * Release a specific reservation back to available status
  * Useful when a user cancels their selection
- * 
+ *
  * @param drawingId - The drawing identifier
  * @param number - The number to release
  * @returns True if reservation was released, false if not found
- * 
+ *
  * @example
  * const released = await releaseReservation('drawing-123', 42)
  */
 export async function releaseReservation(
   drawingId: string,
-  number: number
+  number: number,
 ): Promise<boolean> {
   const result = await db
     .update(numberSlots)
@@ -348,8 +353,8 @@ export async function releaseReservation(
       and(
         eq(numberSlots.drawingId, drawingId),
         eq(numberSlots.number, number),
-        eq(numberSlots.status, 'reserved')
-      )
+        eq(numberSlots.status, 'reserved'),
+      ),
     )
 
   return (result.rowCount || 0) > 0
@@ -358,9 +363,9 @@ export async function releaseReservation(
 /**
  * Release all expired reservations across all drawings
  * Should be run periodically (e.g., every minute via cron job)
- * 
+ *
  * @returns Number of reservations released
- * 
+ *
  * @example
  * const count = await releaseExpiredReservations()
  * console.log(`Released ${count} expired reservations`)
@@ -377,8 +382,8 @@ export async function releaseExpiredReservations(): Promise<number> {
     .where(
       and(
         eq(numberSlots.status, 'reserved'),
-        lt(numberSlots.expiresAt, new Date())
-      )
+        lt(numberSlots.expiresAt, new Date()),
+      ),
     )
 
   return result.rowCount || 0
@@ -387,16 +392,16 @@ export async function releaseExpiredReservations(): Promise<number> {
 /**
  * Get aggregated statistics for a drawing
  * Useful for displaying progress and availability
- * 
+ *
  * @param drawingId - The drawing identifier
  * @returns Statistics about slot distribution
- * 
+ *
  * @example
  * const stats = await getDrawingStats('drawing-123')
  * console.log(`${stats.percentageTaken}% sold`)
  */
 export async function getDrawingStats(
-  drawingId: string
+  drawingId: string,
 ): Promise<DrawingStats> {
   const counts = await db
     .select({
@@ -407,12 +412,21 @@ export async function getDrawingStats(
     .where(eq(numberSlots.drawingId, drawingId))
     .groupBy(numberSlots.status)
 
-  const stats = counts.reduce((acc, { status, count }) => {
-    acc[status] = count
-    return acc
-  }, {} as Record<string, number>)
+  const stats = counts.reduce(
+    (
+      acc: Record<string, number>,
+      { status, count }: { status: string; count: number },
+    ) => {
+      acc[status] = count
+      return acc
+    },
+    {} as Record<string, number>,
+  )
 
-  const total = Object.values(stats).reduce((a, b) => a + b, 0)
+  const total = (Object.values(stats) as number[]).reduce(
+    (a: number, b: number) => a + b,
+    0,
+  )
   const taken = stats['taken'] || 0
 
   return {
@@ -427,15 +441,15 @@ export async function getDrawingStats(
 /**
  * Get a random available number from a drawing
  * Useful for quick-pick functionality
- * 
+ *
  * @param drawingId - The drawing identifier
  * @returns A random available number or null if none available
- * 
+ *
  * @example
  * const luckyNumber = await getRandomAvailableNumber('drawing-123')
  */
 export async function getRandomAvailableNumber(
-  drawingId: string
+  drawingId: string,
 ): Promise<number | null> {
   const available = await db
     .select({ number: numberSlots.number })
@@ -443,8 +457,8 @@ export async function getRandomAvailableNumber(
     .where(
       and(
         eq(numberSlots.drawingId, drawingId),
-        eq(numberSlots.status, 'available')
-      )
+        eq(numberSlots.status, 'available'),
+      ),
     )
     .orderBy(sql`RANDOM()`)
     .limit(1)
@@ -455,11 +469,11 @@ export async function getRandomAvailableNumber(
 /**
  * Check if a specific number is available
  * Fast lookup for single number availability
- * 
+ *
  * @param drawingId - The drawing identifier
  * @param number - The number to check
  * @returns True if available, false otherwise
- * 
+ *
  * @example
  * if (await isNumberAvailable('drawing-123', 42)) {
  *   // Allow user to select
@@ -467,16 +481,13 @@ export async function getRandomAvailableNumber(
  */
 export async function isNumberAvailable(
   drawingId: string,
-  number: number
+  number: number,
 ): Promise<boolean> {
   const slot = await db
     .select({ status: numberSlots.status })
     .from(numberSlots)
     .where(
-      and(
-        eq(numberSlots.drawingId, drawingId),
-        eq(numberSlots.number, number)
-      )
+      and(eq(numberSlots.drawingId, drawingId), eq(numberSlots.number, number)),
     )
     .limit(1)
 
@@ -486,17 +497,17 @@ export async function isNumberAvailable(
 /**
  * Get all numbers assigned to a specific participant
  * Supports multiple number selection if enabled
- * 
+ *
  * @param drawingId - The drawing identifier
  * @param participantId - The participant identifier
  * @returns Array of numbers owned by the participant
- * 
+ *
  * @example
  * const myNumbers = await getParticipantNumbers('drawing-123', participantId)
  */
 export async function getParticipantNumbers(
   drawingId: string,
-  participantId: number
+  participantId: number,
 ): Promise<Array<number>> {
   const slots = await db
     .select({ number: numberSlots.number })
@@ -504,8 +515,8 @@ export async function getParticipantNumbers(
     .where(
       and(
         eq(numberSlots.drawingId, drawingId),
-        eq(numberSlots.participantId, participantId)
-      )
+        eq(numberSlots.participantId, participantId),
+      ),
     )
     .orderBy(numberSlots.number)
 
@@ -515,12 +526,12 @@ export async function getParticipantNumbers(
 /**
  * Bulk reserve multiple numbers at once
  * Useful for allowing users to select multiple numbers
- * 
+ *
  * @param drawingId - The drawing identifier
  * @param numbers - Array of numbers to reserve
  * @param expirationMinutes - How long to hold the reservations
  * @returns Object with successful and failed reservations
- * 
+ *
  * @example
  * const result = await bulkReserveNumbers('drawing-123', [1, 5, 10], 15)
  * console.log(`Reserved: ${result.successful.length}, Failed: ${result.failed.length}`)
@@ -528,10 +539,12 @@ export async function getParticipantNumbers(
 export async function bulkReserveNumbers(
   drawingId: string,
   numbers: Array<number>,
-  expirationMinutes: number = 15
+  expirationMinutes: number = 15,
 ): Promise<{ successful: Array<number>; failed: Array<number> }> {
   const results = await Promise.allSettled(
-    numbers.map((number) => reserveNumber(drawingId, number, expirationMinutes))
+    numbers.map((number) =>
+      reserveNumber(drawingId, number, expirationMinutes),
+    ),
   )
 
   const successful: Array<number> = []
