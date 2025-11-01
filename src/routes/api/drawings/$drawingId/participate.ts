@@ -39,12 +39,17 @@ export const Route = createFileRoute('/api/drawings/$drawingId/participate')({
               .limit(1)
 
             // Check if number is taken by an approved or pending participant
-            if (existingParticipant.length > 0 && 
-                existingParticipant[0].isEligible !== false) {
-              return new Response(
-                JSON.stringify({ error: 'Number is already taken' }),
-                { status: 400, headers: { 'Content-Type': 'application/json' } }
-              )
+            // isEligible: null = pending, true = approved, false = rejected
+            // Numbers can only be reused if the previous participant was rejected
+            if (existingParticipant.length > 0) {
+              const isApprovedOrPending = existingParticipant[0].isEligible === null || 
+                                          existingParticipant[0].isEligible === true
+              if (isApprovedOrPending) {
+                return new Response(
+                  JSON.stringify({ error: 'Number is already taken' }),
+                  { status: 400, headers: { 'Content-Type': 'application/json' } }
+                )
+              }
             }
           }
 

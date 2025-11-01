@@ -139,7 +139,7 @@ function JoinDrawing() {
               Available: {drawing.quantityOfNumbers - takenNumbers.size} / {drawing.quantityOfNumbers}
             </p>
 
-            <div className="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-15 lg:grid-cols-20 gap-2 max-h-96 overflow-y-auto">
+            <div className="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-12 gap-2 max-h-96 overflow-y-auto">
               {Array.from({ length: drawing.quantityOfNumbers }, (_, i) => i + 1).map(
                 (number) => {
                   const isTaken = takenNumbers.has(number)

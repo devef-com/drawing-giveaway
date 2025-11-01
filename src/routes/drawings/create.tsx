@@ -64,7 +64,8 @@ function CreateDrawing() {
         const data = await response.json()
         navigate({ to: '/drawings' })
       } else {
-        console.error('Failed to create drawing')
+        const error = await response.json()
+        alert(error.message || 'Failed to create drawing. Please try again.')
       }
     } catch (error) {
       console.error('Error creating drawing:', error)
