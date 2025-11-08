@@ -8,6 +8,13 @@
       "when": 1761941508948,
       "tag": "0000_misty_firelord",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1761974835769,
+      "tag": "0001_clumsy_landau",
+      "breakpoints": true
     }
   ]
 }

@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid'
 import { db } from '@/db/index'
 import { drawings } from '@/db/schema'
 import { auth } from '@/lib/auth'
+import { initializeNumberSlots } from '@/lib/number-slots'
 
 export const Route = createFileRoute('/api/drawings/')({
   server: {
@@ -33,7 +34,7 @@ export const Route = createFileRoute('/api/drawings/')({
           console.error('Error fetching drawings:', error)
           return new Response(
             JSON.stringify({ error: 'Failed to fetch drawings' }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
           )
         }
       },
@@ -66,6 +67,10 @@ export const Route = createFileRoute('/api/drawings/')({
             })
             .returning()
 
+          await initializeNumberSlots(
+            newDrawing[0].id,
+            newDrawing[0].quantityOfNumbers,
+          )
           return new Response(JSON.stringify(newDrawing[0]), {
             status: 201,
             headers: { 'Content-Type': 'application/json' },
@@ -74,7 +79,7 @@ export const Route = createFileRoute('/api/drawings/')({
           console.error('Error creating drawing:', error)
           return new Response(
             JSON.stringify({ error: 'Failed to create drawing' }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
           )
         }
       },

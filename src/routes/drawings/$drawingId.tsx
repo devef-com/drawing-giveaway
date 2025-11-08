@@ -19,6 +19,13 @@ function DrawingDetail() {
       return response.json()
     },
     enabled: !!session.data,
+    retry(failureCount, error) {
+      // Retry up to 2 times for network errors
+      if (error instanceof TypeError && failureCount < 2) {
+        return true
+      }
+      return false
+    },
   })
 
   const { data: participants, isLoading: participantsLoading } = useQuery({
@@ -77,7 +84,7 @@ function DrawingDetail() {
       <div className="max-w-6xl mx-auto">
         <Card className="p-6 bg-slate-800/50 border-slate-700 mb-6">
           <h1 className="text-3xl font-bold text-white mb-4">{drawing.title}</h1>
-          
+
           <div className="grid md:grid-cols-2 gap-4 text-white">
             <div>
               <p className="text-gray-400 mb-2">

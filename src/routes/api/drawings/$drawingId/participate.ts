@@ -3,11 +3,18 @@ import { and, eq } from 'drizzle-orm'
 
 import { db } from '@/db/index'
 import { drawings, participants } from '@/db/schema'
+import { confirmNumberReservation } from '@/lib/number-slots'
 
 export const Route = createFileRoute('/api/drawings/$drawingId/participate')({
   server: {
     handlers: {
-      POST: async ({ request, params }: { request: Request; params: { drawingId: string } }) => {
+      POST: async ({
+        request,
+        params,
+      }: {
+        request: Request
+        params: { drawingId: string }
+      }) => {
         try {
           const body = await request.json()
 
@@ -19,10 +26,13 @@ export const Route = createFileRoute('/api/drawings/$drawingId/participate')({
             .limit(1)
 
           if (drawing.length === 0) {
-            return new Response(JSON.stringify({ error: 'Drawing not found' }), {
-              status: 404,
-              headers: { 'Content-Type': 'application/json' },
-            })
+            return new Response(
+              JSON.stringify({ error: 'Drawing not found' }),
+              {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
           }
 
           // If number selection, verify the number is available
@@ -33,8 +43,8 @@ export const Route = createFileRoute('/api/drawings/$drawingId/participate')({
               .where(
                 and(
                   eq(participants.drawingId, params.drawingId),
-                  eq(participants.selectedNumber, body.selectedNumber)
-                )
+                  eq(participants.selectedNumber, body.selectedNumber),
+                ),
               )
               .limit(1)
 
@@ -42,12 +52,16 @@ export const Route = createFileRoute('/api/drawings/$drawingId/participate')({
             // isEligible: null = pending, true = approved, false = rejected
             // Numbers can only be reused if the previous participant was rejected
             if (existingParticipant.length > 0) {
-              const isApprovedOrPending = existingParticipant[0].isEligible === null || 
-                                          existingParticipant[0].isEligible === true
+              const isApprovedOrPending =
+                existingParticipant[0].isEligible === null ||
+                existingParticipant[0].isEligible === true
               if (isApprovedOrPending) {
                 return new Response(
                   JSON.stringify({ error: 'Number is already taken' }),
-                  { status: 400, headers: { 'Content-Type': 'application/json' } }
+                  {
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' },
+                  },
                 )
               }
             }
@@ -66,6 +80,33 @@ export const Route = createFileRoute('/api/drawings/$drawingId/participate')({
             })
             .returning()
 
+          // If number-based drawing, confirm the reservation in number_slots table
+          if (drawing[0].winnerSelection === 'number' && body.selectedNumber) {
+            try {
+              await confirmNumberReservation(
+                params.drawingId,
+                body.selectedNumber,
+                newParticipant[0].id,
+              )
+            } catch (error) {
+              // If reservation confirmation fails, rollback participant creation
+              await db
+                .delete(participants)
+                .where(eq(participants.id, newParticipant[0].id))
+
+              return new Response(
+                JSON.stringify({
+                  error:
+                    'Number reservation expired or already taken. Please select another number.',
+                }),
+                {
+                  status: 409,
+                  headers: { 'Content-Type': 'application/json' },
+                },
+              )
+            }
+          }
+
           return new Response(JSON.stringify(newParticipant[0]), {
             status: 201,
             headers: { 'Content-Type': 'application/json' },
@@ -74,7 +115,7 @@ export const Route = createFileRoute('/api/drawings/$drawingId/participate')({
           console.error('Error creating participant:', error)
           return new Response(
             JSON.stringify({ error: 'Failed to register for drawing' }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
           )
         }
       },
