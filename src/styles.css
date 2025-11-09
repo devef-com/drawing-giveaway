@@ -1,3 +1,4 @@
+/* @import url("https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@200..700&display=swap"); */
 @import 'tailwindcss';
 
 @import 'tw-animate-css';
@@ -6,7 +7,7 @@
 
 body {
   @apply m-0;
-  font-family:
+  font-family: "Stack Sans Text",
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -152,6 +153,10 @@ code {
   --color-border-dark: var(--border-dark);
   --color-teal-primary: var(--teal-primary);
 }
+
+/* @theme {
+  --font-sans: "Stack Sans Text", sans-serif; 
+} */
 
 @layer base {
   * {

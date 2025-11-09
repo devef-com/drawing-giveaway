@@ -61,7 +61,7 @@ function SlotDrawingParticipation() {
     email: '',
     phone: '',
   })
-  
+
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const formSectionRef = useRef<HTMLDivElement>(null)
 
@@ -128,7 +128,7 @@ function SlotDrawingParticipation() {
 
     scrollContainer.addEventListener('scroll', handleScroll)
     return () => scrollContainer.removeEventListener('scroll', handleScroll)
-  }, [currentPage])
+  }, [currentPage, scrollContainerRef.current])
 
   // Handle number selection with reservation
   const handleNumberSelect = (number: number) => {
@@ -173,7 +173,7 @@ function SlotDrawingParticipation() {
       if (allSuccessful) {
         // Scroll to form section
         formSectionRef.current?.scrollIntoView({ behavior: 'smooth' })
-        
+
         // Invalidate slots cache to show updated status
         queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
       } else {
@@ -230,7 +230,7 @@ function SlotDrawingParticipation() {
   // Loading state
   if (drawingLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
         <div className="max-w-7xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <div className="flex items-center justify-center">
@@ -246,7 +246,7 @@ function SlotDrawingParticipation() {
   // Drawing not found
   if (!drawing) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
         <div className="max-w-7xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center text-xl">Drawing not found</p>
@@ -263,7 +263,7 @@ function SlotDrawingParticipation() {
 
   return (
     <div className="relative bg-background-light dark:bg-background-dark font-display min-h-screen">
-      <div className="flex w-full flex-col p-4 sm:max-w-md sm:mx-auto">
+      <div className="flex w-full flex-col p-4 sm:max-w-[600px] sm:mx-auto">
         {/* Drawing Details Card */}
         <Card className="p-6 bg-slate-800/50 border-slate-700 mb-4">
           <div className="flex items-start justify-between flex-wrap gap-4">
@@ -321,7 +321,7 @@ function SlotDrawingParticipation() {
                   return (
                     <div
                       key={pageIndex}
-                      className="flex-shrink-0 w-full snap-start overflow-y-auto"
+                      className="shrink-0 w-full snap-start overflow-y-auto"
                       style={{
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
@@ -342,15 +342,14 @@ function SlotDrawingParticipation() {
                               disabled={!isAvailable}
                               className={`
                                 aspect-square w-full px-0 py-0 rounded-lg flex items-center justify-center 
-                                text-lg font-[200] transition-colors duration-200 cursor-pointer
-                                border ${
-                                  isSelected
-                                    ? 'bg-[#14b8a6] border-[#14b8a6] text-white'
-                                    : isTaken
+                                text-xl font-normal transition-colors duration-200 cursor-pointer
+                                border ${isSelected
+                                  ? 'bg-[#14b8a6] border-[#14b8a6] text-white'
+                                  : isTaken
                                     ? 'bg-red-500/20 border-red-500/50 text-red-300 cursor-not-allowed'
                                     : isReserved
-                                    ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300 cursor-not-allowed'
-                                    : 'border-border-light dark:border-border-dark text-text-light-primary dark:text-text-dark-primary bg-background-light dark:bg-background-dark hover:bg-[#14b8a6]/10'
+                                      ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300 cursor-not-allowed'
+                                      : 'border-border-light dark:border-border-dark text-text-light-primary dark:text-text-dark-primary bg-background-light dark:bg-background-dark hover:bg-[#14b8a6]/10'
                                 }
                               `}
                               style={{
@@ -370,19 +369,19 @@ function SlotDrawingParticipation() {
 
             {/* Floating Footer with Arrow and Dots */}
             {selectedNumbers.length > 0 && (
-              <div 
+              <div
                 className="fixed bottom-0 left-1/2 -translate-x-1/2 mb-2 p-2 rounded-lg"
                 style={{
                   background: 'linear-gradient(to top, rgb(250 250 250) 0%, rgb(250 250 250 / 0.8) 50%, transparent 100%)',
                 }}
               >
-                <div 
+                <div
                   className="w-[47px] h-[47px] grid justify-center items-center mx-auto bg-[#14b8a6] rounded-full cursor-pointer hover:bg-[#0d9488] transition-colors"
                   onClick={handleReserveNumbers}
                 >
                   <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19.4235 9.34772L25.1786 15.1057L19.4235 20.8622" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M6.47449 15.1071H25.1786" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M19.4235 9.34772L25.1786 15.1057L19.4235 20.8622" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M6.47449 15.1071H25.1786" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
                 <div className="flex justify-center items-center mt-3 z-10">
@@ -390,11 +389,10 @@ function SlotDrawingParticipation() {
                     {Array.from({ length: totalPages }, (_, i) => (
                       <div
                         key={i}
-                        className={`rounded-full transition-all duration-200 ${
-                          i === currentPage
-                            ? 'w-3 h-3 bg-[#14b8a6]'
-                            : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
-                        }`}
+                        className={`rounded-full transition-all duration-200 ${i === currentPage
+                          ? 'w-3 h-3 bg-[#14b8a6]'
+                          : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
+                          }`}
                       />
                     ))}
                   </div>
@@ -414,11 +412,10 @@ function SlotDrawingParticipation() {
                   {Array.from({ length: totalPages }, (_, i) => (
                     <div
                       key={i}
-                      className={`rounded-full transition-all duration-200 ${
-                        i === currentPage
-                          ? 'w-3 h-3 bg-[#14b8a6]'
-                          : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
-                      }`}
+                      className={`rounded-full transition-all duration-200 ${i === currentPage
+                        ? 'w-3 h-3 bg-[#14b8a6]'
+                        : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
+                        }`}
                     />
                   ))}
                 </div>
@@ -482,7 +479,7 @@ function SlotDrawingParticipation() {
                 <div className="p-4 bg-yellow-900/30 rounded-lg border border-yellow-700">
                   <div className="flex items-start gap-3">
                     <svg
-                      className="w-6 h-6 text-yellow-400 flex-shrink-0 mt-0.5"
+                      className="w-6 h-6 text-yellow-400 shrink-0 mt-0.5"
                       fill="none"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -537,7 +534,7 @@ function SlotDrawingParticipation() {
           <Card className="p-4 bg-slate-800/30 border-slate-700 mt-4">
             <div className="flex items-start gap-3 text-sm text-gray-400">
               <svg
-                className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5"
+                className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5"
                 fill="none"
                 strokeLinecap="round"
                 strokeLinejoin="round"
