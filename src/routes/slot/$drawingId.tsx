@@ -92,17 +92,30 @@ function SlotDrawingParticipation() {
   // Calculate total pages
   const totalPages = drawing ? Math.ceil(drawing.quantityOfNumbers / NUMBERS_PER_PAGE) : 0
 
-  // Fetch slots for all pages
+  // Fetch slots for current page and adjacent pages (batched loading for optimization)
   const { data: slotsData } = useQuery<NumberSlotsData>({
-    queryKey: ['number-slots', drawingId],
+    queryKey: ['number-slots', drawingId, currentPage],
     queryFn: async () => {
       if (!drawing) return { slots: [] }
-      const numbers = Array.from(
-        { length: drawing.quantityOfNumbers },
-        (_, i) => i + 1
-      )
+
+      // Fetch current page + 1 page before and after for smooth scrolling
+      const pagesToFetch = [
+        Math.max(0, currentPage - 1),
+        currentPage,
+        Math.min(totalPages - 1, currentPage + 1),
+      ].filter((page, index, array) => array.indexOf(page) === index) // Remove duplicates
+
+      const numbersToFetch: number[] = []
+      pagesToFetch.forEach(page => {
+        const startIdx = page * NUMBERS_PER_PAGE
+        const endIdx = Math.min(startIdx + NUMBERS_PER_PAGE, drawing.quantityOfNumbers)
+        for (let i = startIdx; i < endIdx; i++) {
+          numbersToFetch.push(i + 1)
+        }
+      })
+
       const response = await fetch(
-        `/api/drawings/${drawingId}/slots?numbers=${numbers.join(',')}`
+        `/api/drawings/${drawingId}/slots?numbers=${numbersToFetch.join(',')}`
       )
       if (!response.ok) throw new Error('Failed to fetch slots')
       return response.json()
@@ -122,6 +135,9 @@ function SlotDrawingParticipation() {
       const pageWidth = scrollContainer.offsetWidth
       const page = Math.round(scrollLeft / pageWidth)
       if (page !== currentPage) {
+        // setTimeout(() => {
+        //   document.body.scrollIntoView({ behavior: 'smooth', inline: 'nearest' });
+        // }, 200);
         setCurrentPage(page)
       }
     }
@@ -129,6 +145,18 @@ function SlotDrawingParticipation() {
     scrollContainer.addEventListener('scroll', handleScroll)
     return () => scrollContainer.removeEventListener('scroll', handleScroll)
   }, [currentPage, scrollContainerRef.current])
+
+  // Navigate to a specific page
+  const goToPage = (pageIndex: number) => {
+    const scrollContainer = scrollContainerRef.current
+    if (!scrollContainer) return
+
+    const pageWidth = scrollContainer.offsetWidth
+    scrollContainer.scrollTo({
+      left: pageIndex * pageWidth,
+      behavior: 'smooth',
+    })
+  }
 
   // Handle number selection with reservation
   const handleNumberSelect = (number: number) => {
@@ -387,9 +415,10 @@ function SlotDrawingParticipation() {
                 <div className="flex justify-center items-center mt-3 z-10">
                   <div className="flex items-center space-x-2 rounded-full p-1.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
                     {Array.from({ length: totalPages }, (_, i) => (
-                      <div
+                      <button
                         key={i}
-                        className={`rounded-full transition-all duration-200 ${i === currentPage
+                        onClick={() => goToPage(i)}
+                        className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${i === currentPage
                           ? 'w-3 h-3 bg-[#14b8a6]'
                           : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
                           }`}
@@ -410,9 +439,10 @@ function SlotDrawingParticipation() {
               <div className="fixed bottom-0 left-1/2 -translate-x-1/2 mb-4">
                 <div className="flex items-center space-x-2 rounded-full p-1.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
                   {Array.from({ length: totalPages }, (_, i) => (
-                    <div
+                    <button
                       key={i}
-                      className={`rounded-full transition-all duration-200 ${i === currentPage
+                      onClick={() => goToPage(i)}
+                      className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${i === currentPage
                         ? 'w-3 h-3 bg-[#14b8a6]'
                         : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
                         }`}
@@ -425,7 +455,7 @@ function SlotDrawingParticipation() {
         )}
 
         {/* Registration Form */}
-        <div ref={formSectionRef}>
+        <div ref={formSectionRef} className="hidden">
           <Card className="p-6 bg-slate-800/50 border-slate-700 mt-4">
             <h2 className="text-2xl font-bold text-white mb-4">
               {drawing.winnerSelection === 'number' ? 'Confirm Your Registration' : 'Register for Drawing'}
