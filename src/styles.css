@@ -64,6 +64,7 @@ code {
   --text-dark-secondary: #a1a1aa;
   --border-light: #e4e4e7;
   --border-dark: #3f3f46;
+  --teal-primary: #14b8a6;
 }
 
 .dark {
@@ -149,6 +150,7 @@ code {
   --color-text-dark-secondary: var(--text-dark-secondary);
   --color-border-light: var(--border-light);
   --color-border-dark: var(--border-dark);
+  --color-teal-primary: var(--teal-primary);
 }
 
 @layer base {

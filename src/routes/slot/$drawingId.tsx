@@ -15,13 +15,13 @@
  */
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState, useEffect, useRef } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
+import type { DrawingStats } from '@/lib/number-slots'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
-import type { DrawingStats } from '@/lib/number-slots'
 
 export const Route = createFileRoute('/slot/$drawingId')({
   component: SlotDrawingParticipation,
@@ -30,7 +30,7 @@ export const Route = createFileRoute('/slot/$drawingId')({
 interface Drawing {
   id: string
   title: string
-  guidelines: string[] | null
+  guidelines: Array<string> | null
   isPaid: boolean
   price: number
   winnerSelection: 'random' | 'number'
@@ -53,7 +53,7 @@ function SlotDrawingParticipation() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const [selectedNumbers, setSelectedNumbers] = useState<number[]>([])
+  const [selectedNumbers, setSelectedNumbers] = useState<Array<number>>([])
   const [currentPage, setCurrentPage] = useState(0)
   const [isReserving, setIsReserving] = useState(false)
   const [formData, setFormData] = useState({
@@ -131,7 +131,7 @@ function SlotDrawingParticipation() {
   }, [currentPage])
 
   // Handle number selection with reservation
-  const handleNumberSelect = async (number: number) => {
+  const handleNumberSelect = (number: number) => {
     if (isReserving) return
 
     // Check if drawing is paid (allow multiple) or free (allow single)
@@ -191,7 +191,7 @@ function SlotDrawingParticipation() {
 
   // Submit registration mutation
   const participateMutation = useMutation({
-    mutationFn: async (data: typeof formData & { selectedNumbers?: number[] }) => {
+    mutationFn: async (data: typeof formData & { selectedNumbers?: Array<number> }) => {
       const response = await fetch(`/api/drawings/${drawingId}/participate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -216,7 +216,7 @@ function SlotDrawingParticipation() {
     },
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     const registrationData = {
@@ -315,7 +315,7 @@ function SlotDrawingParticipation() {
                   const endIdx = Math.min(startIdx + NUMBERS_PER_PAGE, drawing.quantityOfNumbers)
                   const pageNumbers = Array.from(
                     { length: endIdx - startIdx },
-                    (_, i) => startIdx + i + 1
+                    (_unused, i) => startIdx + i + 1
                   )
 
                   return (
@@ -345,12 +345,12 @@ function SlotDrawingParticipation() {
                                 text-lg font-[200] transition-colors duration-200 cursor-pointer
                                 border ${
                                   isSelected
-                                    ? 'bg-primary border-primary text-white'
+                                    ? 'bg-[#14b8a6] border-[#14b8a6] text-white'
                                     : isTaken
                                     ? 'bg-red-500/20 border-red-500/50 text-red-300 cursor-not-allowed'
                                     : isReserved
                                     ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300 cursor-not-allowed'
-                                    : 'border-border-light dark:border-border-dark text-text-light-primary dark:text-text-dark-primary bg-background-light dark:bg-background-dark hover:bg-primary/10'
+                                    : 'border-border-light dark:border-border-dark text-text-light-primary dark:text-text-dark-primary bg-background-light dark:bg-background-dark hover:bg-[#14b8a6]/10'
                                 }
                               `}
                               style={{
@@ -377,7 +377,7 @@ function SlotDrawingParticipation() {
                 }}
               >
                 <div 
-                  className="w-[47px] h-[47px] grid justify-center items-center mx-auto bg-primary rounded-full cursor-pointer hover:bg-primary/90 transition-colors"
+                  className="w-[47px] h-[47px] grid justify-center items-center mx-auto bg-[#14b8a6] rounded-full cursor-pointer hover:bg-[#0d9488] transition-colors"
                   onClick={handleReserveNumbers}
                 >
                   <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -392,7 +392,7 @@ function SlotDrawingParticipation() {
                         key={i}
                         className={`rounded-full transition-all duration-200 ${
                           i === currentPage
-                            ? 'w-3 h-3 bg-primary'
+                            ? 'w-3 h-3 bg-[#14b8a6]'
                             : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
                         }`}
                       />
@@ -416,7 +416,7 @@ function SlotDrawingParticipation() {
                       key={i}
                       className={`rounded-full transition-all duration-200 ${
                         i === currentPage
-                          ? 'w-3 h-3 bg-primary'
+                          ? 'w-3 h-3 bg-[#14b8a6]'
                           : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
                       }`}
                     />
