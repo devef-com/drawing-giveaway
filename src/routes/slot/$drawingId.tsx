@@ -31,6 +31,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/slot/$drawingId')({
   component: SlotDrawingParticipation,
@@ -73,6 +74,7 @@ function SlotDrawingParticipation() {
   })
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const floatingControlsRef = useRef<HTMLDivElement>(null)
 
   const NUMBERS_PER_PAGE = 6 * 14 // 6 columns × 14 rows = 84 numbers per page
 
@@ -144,9 +146,6 @@ function SlotDrawingParticipation() {
       const pageWidth = scrollContainer.offsetWidth
       const page = Math.round(scrollLeft / pageWidth)
       if (page !== currentPage) {
-        // setTimeout(() => {
-        //   document.body.scrollIntoView({ behavior: 'smooth', inline: 'nearest' });
-        // }, 200);
         setCurrentPage(page)
       }
     }
@@ -154,6 +153,53 @@ function SlotDrawingParticipation() {
     scrollContainer.addEventListener('scroll', handleScroll)
     return () => scrollContainer.removeEventListener('scroll', handleScroll)
   }, [currentPage, scrollContainerRef.current])
+
+  // Position floating controls to stay within scroll container bounds
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current
+    const floatingControls = floatingControlsRef.current
+    if (!scrollContainer || !floatingControls) return
+
+    const updatePosition = () => {
+      const rect = scrollContainer.getBoundingClientRect()
+      const viewportHeight = window.innerHeight
+
+      // Calculate the bottom position of the scroll container
+      const containerBottom = rect.bottom
+
+      // If container is visible, position controls at its bottom
+      if (containerBottom > 0 && containerBottom < viewportHeight) {
+        floatingControls.style.position = 'fixed'
+        floatingControls.style.bottom = `${viewportHeight - containerBottom + 8}px`
+        floatingControls.style.left = '50%'
+        floatingControls.style.transform = 'translateX(-50%)'
+      } else if (rect.top < viewportHeight && rect.bottom > viewportHeight) {
+        // Container extends below viewport, stick to bottom of viewport
+        floatingControls.style.position = 'fixed'
+        floatingControls.style.bottom = '8px'
+        floatingControls.style.left = '50%'
+        floatingControls.style.transform = 'translateX(-50%)'
+      } else {
+        // Container not in viewport, hide controls
+        floatingControls.style.position = 'absolute'
+        floatingControls.style.bottom = '8px'
+        floatingControls.style.left = '50%'
+        floatingControls.style.transform = 'translateX(-50%)'
+      }
+    }
+
+    // Update on scroll and resize
+    updatePosition()
+    window.addEventListener('scroll', updatePosition)
+    window.addEventListener('resize', updatePosition)
+    scrollContainer.addEventListener('scroll', updatePosition)
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition)
+      window.removeEventListener('resize', updatePosition)
+      scrollContainer.removeEventListener('scroll', updatePosition)
+    }
+  }, [scrollContainerRef.current, floatingControlsRef.current])
 
   // Navigate to a specific page
   const goToPage = (pageIndex: number) => {
@@ -357,17 +403,17 @@ function SlotDrawingParticipation() {
 
         {/* Number Selection Grid (only for number-based drawings) */}
         {drawing.winnerSelection === 'number' && (
-          <>
+          <div className="relative">
             <div
               ref={scrollContainerRef}
-              className="overflow-x-auto overflow-y-auto snap-x snap-mandatory flex-1 mb-20"
+              className="overflow-x-auto overflow-y-hidden snap-x snap-mandatory flex-1"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 WebkitOverflowScrolling: 'touch',
               }}
             >
-              <div className="flex h-full" style={{ minHeight: '500px' }}>
+              <div className="flex" style={{ minHeight: '500px' }}>
                 {/* Generate pages */}
                 {Array.from({ length: totalPages }, (_, pageIndex) => {
                   const startIdx = pageIndex * NUMBERS_PER_PAGE
@@ -424,68 +470,57 @@ function SlotDrawingParticipation() {
                   )
                 })}
               </div>
+              <div className="h-[100px] border border-amber-400"></div>
             </div>
 
-            {/* Floating Footer with Arrow and Dots */}
-            {selectedNumbers.length > 0 && (
+            {/* Floating Footer with Arrow and Dots - Positioned dynamically */}
+            {totalPages > 1 && (
               <div
-                className="fixed bottom-0 left-1/2 -translate-x-1/2 mb-2 p-2 rounded-lg"
+                ref={floatingControlsRef}
+                className="p-2 rounded-lg z-10"
                 style={{
                   background: 'linear-gradient(to top, rgb(250 250 250) 0%, rgb(250 250 250 / 0.8) 50%, transparent 100%)',
                 }}
               >
-                <div
-                  className="w-[47px] h-[47px] grid justify-center items-center mx-auto bg-[#14b8a6] rounded-full cursor-pointer hover:bg-[#0d9488] transition-colors"
-                  onClick={handleReserveNumbers}
-                >
-                  <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19.4235 9.34772L25.1786 15.1057L19.4235 20.8622" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M6.47449 15.1071H25.1786" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <div className="flex justify-center items-center mt-3 z-10">
-                  <div className="flex items-center space-x-2 rounded-full p-1.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => goToPage(i)}
-                        className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${i === currentPage
-                          ? 'w-3 h-3 bg-[#14b8a6]'
-                          : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
-                          }`}
-                      />
-                    ))}
+                <div>
+                  <div
+                    className={cn("w-[47px] h-[47px] grid justify-center items-center mx-auto bg-[#14b8a6] rounded-full cursor-pointer hover:bg-[#0d9488] transition-colors", selectedNumbers.length === 0 && 'hidden')}
+                    onClick={handleReserveNumbers}
+                  >
+                    <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19.4235 9.34772L25.1786 15.1057L19.4235 20.8622" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M6.47449 15.1071H25.1786" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </div>
-                </div>
-                {selectedNumbers.length > 0 && (
-                  <div className="text-center mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    Selected: {selectedNumbers.join(', ')}
+                  <div className="flex justify-center items-center mt-3 z-10">
+                    <div className="flex items-center space-x-2 rounded-full p-1.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => goToPage(i)}
+                          className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${i === currentPage
+                            ? 'w-3 h-3 bg-[#14b8a6]'
+                            : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
+                            }`}
+                        />
+                      ))}
+                    </div>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* Pagination dots only (when no numbers selected) */}
-            {selectedNumbers.length === 0 && totalPages > 1 && (
-              <div className="fixed bottom-0 left-1/2 -translate-x-1/2 mb-4">
-                <div className="flex items-center space-x-2 rounded-full p-1.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => goToPage(i)}
-                      className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${i === currentPage
-                        ? 'w-3 h-3 bg-[#14b8a6]'
-                        : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
-                        }`}
-                    />
-                  ))}
+                  {selectedNumbers.length > 0 && (
+                    <div className="text-center mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      Selected: {selectedNumbers.join(', ')}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
 
       </div>
+      <p className='w-sm mx-auto'>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Quidem asperiores fugiat placeat minima doloremque unde mollitia illum reiciendis harum modi labore nam tempore, velit, inventore rem temporibus aliquid, exercitationem quam.
+      </p>
       {/* Registration Form - Drawer */}
       <Drawer open={showForm} onOpenChange={setShowForm} dismissible={false}>
         <DrawerContent>
