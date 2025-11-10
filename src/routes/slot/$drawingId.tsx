@@ -163,41 +163,35 @@ function SlotDrawingParticipation() {
     const updatePosition = () => {
       const rect = scrollContainer.getBoundingClientRect()
       const viewportHeight = window.innerHeight
-
-      // Calculate the bottom position of the scroll container
       const containerBottom = rect.bottom
 
-      // If container is visible, position controls at its bottom
-      if (containerBottom > 0 && containerBottom < viewportHeight) {
+      // Only update position when container bottom is about to leave viewport
+      // Keep it fixed at bottom while container is still visible in viewport
+      if (containerBottom < viewportHeight - 50) {
+        // Container bottom is getting close to leaving viewport, stick to container
         floatingControls.style.position = 'fixed'
         floatingControls.style.bottom = `${viewportHeight - containerBottom + 8}px`
         floatingControls.style.left = '50%'
         floatingControls.style.transform = 'translateX(-50%)'
-      } else if (rect.top < viewportHeight && rect.bottom > viewportHeight) {
-        // Container extends below viewport, stick to bottom of viewport
-        floatingControls.style.position = 'fixed'
-        floatingControls.style.bottom = '8px'
-        floatingControls.style.left = '50%'
-        floatingControls.style.transform = 'translateX(-50%)'
       } else {
-        // Container not in viewport, hide controls
-        floatingControls.style.position = 'absolute'
+        // Container is fully visible, keep controls at bottom of viewport
+        floatingControls.style.position = 'fixed'
         floatingControls.style.bottom = '8px'
         floatingControls.style.left = '50%'
         floatingControls.style.transform = 'translateX(-50%)'
       }
     }
 
-    // Update on scroll and resize
+    // Initial position
     updatePosition()
-    window.addEventListener('scroll', updatePosition)
+
+    // Only update on window scroll (not container scroll to avoid bounce)
+    window.addEventListener('scroll', updatePosition, { passive: true })
     window.addEventListener('resize', updatePosition)
-    scrollContainer.addEventListener('scroll', updatePosition)
 
     return () => {
       window.removeEventListener('scroll', updatePosition)
       window.removeEventListener('resize', updatePosition)
-      scrollContainer.removeEventListener('scroll', updatePosition)
     }
   }, [scrollContainerRef.current, floatingControlsRef.current])
 
