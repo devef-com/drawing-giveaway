@@ -59,6 +59,93 @@ interface NumberSlotsData {
   }>
 }
 
+interface FormProps {
+  formData: {
+    name: string
+    email: string
+    phone: string
+  }
+  setFormData: React.Dispatch<React.SetStateAction<{
+    name: string
+    email: string
+    phone: string
+  }>>
+  drawing: Drawing
+}
+
+const Form: React.FC<FormProps> = ({ formData, setFormData, drawing }) => {
+  return (
+    <>
+      <div>
+        <Label htmlFor="name" className="text-black dark:text-white mb-1">
+          Full Name *
+        </Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          required
+          placeholder="Enter your full name"
+          className="bg-white dark:bg-slate-700 text-black dark:text-white border-gray-300 dark:border-slate-600 focus:border-cyan-500"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="email" className="text-black dark:text-white mb-1">
+          Email (Optional)
+        </Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          placeholder="your@email.com"
+          className="bg-white dark:bg-slate-700 text-black dark:text-white border-gray-300 dark:border-slate-600 focus:border-cyan-500"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="phone" className="text-black dark:text-white mb-1">
+          Phone Number *
+        </Label>
+        <Input
+          id="phone"
+          type="tel"
+          value={formData.phone}
+          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          required
+          placeholder="+1 (555) 000-0000"
+          className="bg-white dark:bg-slate-700 text-black dark:text-white border-gray-300 dark:border-slate-600 focus:border-cyan-500"
+        />
+      </div>
+
+      {drawing.isPaid && (
+        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-700">
+          <div className="flex items-start gap-3">
+            <svg
+              className="w-6 h-6 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+              <p className="text-yellow-800 dark:text-yellow-200 font-medium">Payment Required</p>
+              <p className="text-yellow-700 dark:text-yellow-100 text-sm mt-1">
+                This is a paid event. Attach your payment proof to confirm your participation.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 function SlotDrawingParticipation() {
   const { drawingId } = Route.useParams()
   const navigate = useNavigate()
@@ -360,76 +447,6 @@ function SlotDrawingParticipation() {
       </div>
     )
   }
-  const Form = () => {
-    return (<>
-      <div>
-        <Label htmlFor="name" className="text-black dark:text-white mb-1">
-          Full Name *
-        </Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          required
-          placeholder="Enter your full name"
-          className="bg-white dark:bg-slate-700 text-black dark:text-white border-gray-300 dark:border-slate-600 focus:border-cyan-500"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="email" className="text-black dark:text-white mb-1">
-          Email (Optional)
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          placeholder="your@email.com"
-          className="bg-white dark:bg-slate-700 text-black dark:text-white border-gray-300 dark:border-slate-600 focus:border-cyan-500"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="phone" className="text-black dark:text-white mb-1">
-          Phone Number *
-        </Label>
-        <Input
-          id="phone"
-          type="tel"
-          value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          required
-          placeholder="+1 (555) 000-0000"
-          className="bg-white dark:bg-slate-700 text-black dark:text-white border-gray-300 dark:border-slate-600 focus:border-cyan-500"
-        />
-      </div>
-
-      {drawing.isPaid && (
-        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-700">
-          <div className="flex items-start gap-3">
-            <svg
-              className="w-6 h-6 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <div>
-              <p className="text-yellow-800 dark:text-yellow-200 font-medium">Payment Required</p>
-              <p className="text-yellow-700 dark:text-yellow-100 text-sm mt-1">
-                This is a paid event. Attach your payment proof to confirm your participation.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-    </>)
-  }
 
   return (
     <div className="relative bg-background-light dark:bg-background-dark font-display min-h-screen">
@@ -583,7 +600,7 @@ function SlotDrawingParticipation() {
 
       {drawing.winnerSelection === 'random' && <div>
         <form onSubmit={handleSubmit} className="space-y-4 sm:max-w-[600px] sm:mx-auto px-4">
-          <Form />
+          <Form formData={formData} setFormData={setFormData} drawing={drawing} />
           <div className="px-0 pb-4 flex justify-center">
             <Button
               type="submit"
@@ -619,7 +636,7 @@ function SlotDrawingParticipation() {
 
           <div className="px-4 overflow-y-auto max-h-[60vh]">
             <form onSubmit={handleSubmit} className="space-y-4">
-              <Form />
+              <Form formData={formData} setFormData={setFormData} drawing={drawing} />
               <DrawerFooter className="px-0 pb-4 grid grid-cols-2">
                 <DrawerClose asChild>
                   <Button
