@@ -27,7 +27,7 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
+  // DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -517,9 +517,9 @@ function SlotDrawingParticipation() {
             <DrawerTitle className="text-black dark:text-white">
               {drawing.winnerSelection === 'number' ? 'Confirm Your Registration' : 'Register for Drawing'}
             </DrawerTitle>
-            <DrawerDescription className="text-gray-600 dark:text-gray-400">
+            {/* <DrawerDescription className="text-gray-600 dark:text-gray-400">
               Complete the form below to register for this drawing.
-            </DrawerDescription>
+            </DrawerDescription> */}
           </DrawerHeader>
 
           <div className="px-4 overflow-y-auto max-h-[60vh]">
@@ -584,8 +584,7 @@ function SlotDrawingParticipation() {
                     <div>
                       <p className="text-yellow-800 dark:text-yellow-200 font-medium">Payment Required</p>
                       <p className="text-yellow-700 dark:text-yellow-100 text-sm mt-1">
-                        This is a paid event. After registration, you will need to complete the payment
-                        and upload proof. Your number will be reserved during this process.
+                        This is a paid event. Attach your payment proof to confirm your participation.
                       </p>
                     </div>
                   </div>
