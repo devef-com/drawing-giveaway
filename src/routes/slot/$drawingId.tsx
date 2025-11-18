@@ -33,6 +33,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
+import DrawingSlotHeader from '@/components/DrawingSlotHeader'
 
 export const Route = createFileRoute('/slot/$drawingId')({
   component: SlotDrawingParticipation,
@@ -452,36 +453,7 @@ function SlotDrawingParticipation() {
     <div className="relative bg-background-light dark:bg-background-dark font-display min-h-screen">
       <div className="flex w-full flex-col p-4 sm:max-w-[600px] sm:mx-auto">
         {/* Drawing Details Card */}
-        <Card className="p-6 dark:bg-slate-800/50 dark:border-slate-700 mb-4">
-          <div className="flex items-start justify-between flex-wrap gap-4">
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold dark:text-white mb-4">{drawing.title}</h1>
-
-              <div className="grid grid-cols-1 gap-2 dark:text-white text-sm">
-                <p className="dark:text-gray-400">
-                  <strong className="dark:text-white">Type:</strong>{' '}
-                  {drawing.isPaid ? (
-                    <span className="text-yellow-400">Paid - ${(drawing.price / 100).toFixed(2)}</span>
-                  ) : (
-                    <span className="text-green-400">Free</span>
-                  )}
-                </p>
-                <p className="dark:text-gray-400">
-                  <strong className="dark:text-white">End Date:</strong>{' '}
-                  {new Date(drawing.endAt).toLocaleString()}
-                </p>
-                {drawing.winnerSelection === 'number' && stats && (
-                  <p className="dark:text-gray-400">
-                    <strong className="dark:text-white">Availability:</strong>{' '}
-                    <span className="text-cyan-400">
-                      {stats.available} / {stats.total} available
-                    </span>
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </Card>
+        <DrawingSlotHeader drawing={drawing} stats={stats} />
 
         {/* Number Selection Grid (only for number-based drawings) */}
         {drawing.winnerSelection === 'number' && (

@@ -24,7 +24,7 @@ function DrawingsList() {
 
   if (!session.data) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
         <div className="max-w-4xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center">
@@ -40,7 +40,7 @@ function DrawingsList() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
+    <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-white">My Drawings</h1>
@@ -83,7 +83,7 @@ function DrawingsList() {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Link to={`/drawings/${drawing.id}`}>
+                    <Link to={`/drawings/$drawingId`} params={{ drawingId: drawing.id }}>
                       <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
                         View
                       </Button>
