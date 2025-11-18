@@ -1,23 +1,8 @@
-/**
- * Improved Drawing Participation Page with Number Slots System
- * 
- * This route uses a paginated number grid with horizontal scrolling,
- * efficient slot management, and real-time status updates.
- * 
- * Features:
- * - Paginated grid layout (6 columns × 14 rows = 84 numbers per page)
- * - Horizontal pagination with dots indicator
- * - Floating arrow button when numbers are selected
- * - Bulk number selection for paid giveaways
- * - Single number selection for free giveaways
- * - Real-time slot status updates (available, reserved, taken)
- * - Temporary reservations with expiration
- */
-
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { Image } from 'lucide-react'
 import type { DrawingStats } from '@/lib/number-slots'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -165,7 +150,7 @@ function SlotDrawingParticipation() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const floatingControlsRef = useRef<HTMLDivElement>(null)
 
-  const NUMBERS_PER_PAGE = 6 * 14 // 6 columns × 14 rows = 84 numbers per page
+  const NUMBERS_PER_PAGE = 6 * 17 // 6 columns × 17 rows = 102 numbers per page
 
   // Fetch drawing details
   const { data: drawing, isLoading: drawingLoading } = useQuery<Drawing>({
@@ -454,6 +439,21 @@ function SlotDrawingParticipation() {
       <div className="flex w-full flex-col p-4 sm:max-w-[600px] sm:mx-auto">
         {/* Drawing Details Card */}
         <DrawingSlotHeader drawing={drawing} stats={stats} />
+        <div className="grid grid-cols-[max-content_1fr] items-center gap-4 mb-4">
+          <Image size={120} strokeWidth={.7} />
+          {drawing.guidelines && drawing.guidelines.length > 0 && (
+            <div>
+              <h2 className="font-regular mb-2 text-text-light-primary dark:text-text-dark-primary">
+                Guidelines
+              </h2>
+              <ul className="list-disc list-inside space-y-1 text-text-light-secondary dark:text-text-dark-secondary">
+                {drawing.guidelines.map((guideline, index) => (
+                  <li key={index}>{guideline}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
 
         {/* Number Selection Grid (only for number-based drawings) */}
         {drawing.winnerSelection === 'number' && (
@@ -524,47 +524,45 @@ function SlotDrawingParticipation() {
                   )
                 })}
               </div>
-              <div className="h-[100px]"></div>
+              {(selectedNumbers.length > 0 || totalPages > 1) && (
+                <div className="h-[100px]"></div>
+              )}
             </div>
 
             {/* Floating Footer with Arrow and Dots - Positioned dynamically */}
-            {totalPages > 1 && (
+            <div
+              ref={floatingControlsRef}
+              className="p-2 rounded-lg z-10 bg-linear-to-t from-white via-white/80 to-transparent dark:from-slate-900 dark:via-slate-900/80 backdrop-blur-sm"
+            >
               <div
-                ref={floatingControlsRef}
-                className="p-2 rounded-lg z-10 bg-linear-to-t from-white via-white/80 to-transparent dark:from-slate-900 dark:via-slate-900/80 backdrop-blur-sm"
+                className={cn("w-[47px] h-[47px] grid justify-center items-center mx-auto bg-[#14b8a6] rounded-full cursor-pointer hover:bg-[#0d9488] transition-colors", selectedNumbers.length === 0 && 'hidden')}
+                onClick={handleReserveNumbers}
               >
-                <div>
-                  <div
-                    className={cn("w-[47px] h-[47px] grid justify-center items-center mx-auto bg-[#14b8a6] rounded-full cursor-pointer hover:bg-[#0d9488] transition-colors", selectedNumbers.length === 0 && 'hidden')}
-                    onClick={handleReserveNumbers}
-                  >
-                    <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M19.4235 9.34772L25.1786 15.1057L19.4235 20.8622" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M6.47449 15.1071H25.1786" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                  <div className="flex justify-center items-center mt-3 z-10">
-                    <div className="flex items-center space-x-2 rounded-full p-1.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
-                      {Array.from({ length: totalPages }, (_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => goToPage(i)}
-                          className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${i === currentPage
-                            ? 'w-3 h-3 bg-[#14b8a6]'
-                            : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
-                            }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  {selectedNumbers.length > 0 && (
-                    <div className="text-center mt-2 text-sm text-gray-600 dark:text-gray-400">
-                      Selected: {selectedNumbers.join(', ')}
-                    </div>
-                  )}
+                <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19.4235 9.34772L25.1786 15.1057L19.4235 20.8622" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M6.47449 15.1071H25.1786" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className={cn("flex justify-center items-center mt-3 z-10", totalPages <= 1 && 'hidden')}>
+                <div className="flex items-center space-x-2 rounded-full p-1.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => goToPage(i)}
+                      className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${i === currentPage
+                        ? 'w-3 h-3 bg-[#14b8a6]'
+                        : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
+                        }`}
+                    />
+                  ))}
                 </div>
               </div>
-            )}
+              {selectedNumbers.length > 0 && (
+                <div className="text-center mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  Selected: {selectedNumbers.join(', ')}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
