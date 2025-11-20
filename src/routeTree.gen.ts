@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DrawingsIndexRouteImport } from './routes/drawings/index'
 import { Route as AuthenticationIndexRouteImport } from './routes/authentication/index'
-import { Route as SlotDrawingIdRouteImport } from './routes/slot/$drawingId'
 import { Route as JoinDrawingIdRouteImport } from './routes/join/$drawingId'
 import { Route as DrawingsCreateRouteImport } from './routes/drawings/create'
 import { Route as DrawingsDrawingIdRouteImport } from './routes/drawings/$drawingId'
@@ -21,7 +20,9 @@ import { Route as DemoNeonRouteImport } from './routes/demo/neon'
 import { Route as DemoDrizzleRouteImport } from './routes/demo/drizzle'
 import { Route as AuthenticationSignupRouteImport } from './routes/authentication/signup'
 import { Route as AuthenticationLoginRouteImport } from './routes/authentication/login'
+import { Route as SlotDrawingIdIndexRouteImport } from './routes/slot/$drawingId/index'
 import { Route as ApiDrawingsIndexRouteImport } from './routes/api/drawings/index'
+import { Route as SlotDrawingIdNumberToReserveRouteImport } from './routes/slot/$drawingId/$numberToReserve'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiTqTodosRouteImport } from './routes/demo/api.tq-todos'
@@ -51,11 +52,6 @@ const DrawingsIndexRoute = DrawingsIndexRouteImport.update({
 const AuthenticationIndexRoute = AuthenticationIndexRouteImport.update({
   id: '/authentication/',
   path: '/authentication/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SlotDrawingIdRoute = SlotDrawingIdRouteImport.update({
-  id: '/slot/$drawingId',
-  path: '/slot/$drawingId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JoinDrawingIdRoute = JoinDrawingIdRouteImport.update({
@@ -98,11 +94,22 @@ const AuthenticationLoginRoute = AuthenticationLoginRouteImport.update({
   path: '/authentication/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SlotDrawingIdIndexRoute = SlotDrawingIdIndexRouteImport.update({
+  id: '/slot/$drawingId/',
+  path: '/slot/$drawingId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDrawingsIndexRoute = ApiDrawingsIndexRouteImport.update({
   id: '/api/drawings/',
   path: '/api/drawings/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SlotDrawingIdNumberToReserveRoute =
+  SlotDrawingIdNumberToReserveRouteImport.update({
+    id: '/slot/$drawingId/$numberToReserve',
+    path: '/slot/$drawingId/$numberToReserve',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
   path: '/demo/start/server-funcs',
@@ -194,7 +201,6 @@ export interface FileRoutesByFullPath {
   '/drawings/$drawingId': typeof DrawingsDrawingIdRoute
   '/drawings/create': typeof DrawingsCreateRoute
   '/join/$drawingId': typeof JoinDrawingIdRoute
-  '/slot/$drawingId': typeof SlotDrawingIdRoute
   '/authentication': typeof AuthenticationIndexRoute
   '/drawings': typeof DrawingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -203,7 +209,9 @@ export interface FileRoutesByFullPath {
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/slot/$drawingId/$numberToReserve': typeof SlotDrawingIdNumberToReserveRoute
   '/api/drawings': typeof ApiDrawingsIndexRoute
+  '/slot/$drawingId': typeof SlotDrawingIdIndexRoute
   '/api/drawings/$drawingId/participants': typeof ApiDrawingsDrawingIdParticipantsRoute
   '/api/drawings/$drawingId/participate': typeof ApiDrawingsDrawingIdParticipateRoute
   '/api/drawings/$drawingId/reserve': typeof ApiDrawingsDrawingIdReserveRoute
@@ -224,7 +232,6 @@ export interface FileRoutesByTo {
   '/drawings/$drawingId': typeof DrawingsDrawingIdRoute
   '/drawings/create': typeof DrawingsCreateRoute
   '/join/$drawingId': typeof JoinDrawingIdRoute
-  '/slot/$drawingId': typeof SlotDrawingIdRoute
   '/authentication': typeof AuthenticationIndexRoute
   '/drawings': typeof DrawingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -233,7 +240,9 @@ export interface FileRoutesByTo {
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/slot/$drawingId/$numberToReserve': typeof SlotDrawingIdNumberToReserveRoute
   '/api/drawings': typeof ApiDrawingsIndexRoute
+  '/slot/$drawingId': typeof SlotDrawingIdIndexRoute
   '/api/drawings/$drawingId/participants': typeof ApiDrawingsDrawingIdParticipantsRoute
   '/api/drawings/$drawingId/participate': typeof ApiDrawingsDrawingIdParticipateRoute
   '/api/drawings/$drawingId/reserve': typeof ApiDrawingsDrawingIdReserveRoute
@@ -255,7 +264,6 @@ export interface FileRoutesById {
   '/drawings/$drawingId': typeof DrawingsDrawingIdRoute
   '/drawings/create': typeof DrawingsCreateRoute
   '/join/$drawingId': typeof JoinDrawingIdRoute
-  '/slot/$drawingId': typeof SlotDrawingIdRoute
   '/authentication/': typeof AuthenticationIndexRoute
   '/drawings/': typeof DrawingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -264,7 +272,9 @@ export interface FileRoutesById {
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/slot/$drawingId/$numberToReserve': typeof SlotDrawingIdNumberToReserveRoute
   '/api/drawings/': typeof ApiDrawingsIndexRoute
+  '/slot/$drawingId/': typeof SlotDrawingIdIndexRoute
   '/api/drawings/$drawingId/participants': typeof ApiDrawingsDrawingIdParticipantsRoute
   '/api/drawings/$drawingId/participate': typeof ApiDrawingsDrawingIdParticipateRoute
   '/api/drawings/$drawingId/reserve': typeof ApiDrawingsDrawingIdReserveRoute
@@ -287,7 +297,6 @@ export interface FileRouteTypes {
     | '/drawings/$drawingId'
     | '/drawings/create'
     | '/join/$drawingId'
-    | '/slot/$drawingId'
     | '/authentication'
     | '/drawings'
     | '/api/auth/$'
@@ -296,7 +305,9 @@ export interface FileRouteTypes {
     | '/demo/api/tq-todos'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/slot/$drawingId/$numberToReserve'
     | '/api/drawings'
+    | '/slot/$drawingId'
     | '/api/drawings/$drawingId/participants'
     | '/api/drawings/$drawingId/participate'
     | '/api/drawings/$drawingId/reserve'
@@ -317,7 +328,6 @@ export interface FileRouteTypes {
     | '/drawings/$drawingId'
     | '/drawings/create'
     | '/join/$drawingId'
-    | '/slot/$drawingId'
     | '/authentication'
     | '/drawings'
     | '/api/auth/$'
@@ -326,7 +336,9 @@ export interface FileRouteTypes {
     | '/demo/api/tq-todos'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/slot/$drawingId/$numberToReserve'
     | '/api/drawings'
+    | '/slot/$drawingId'
     | '/api/drawings/$drawingId/participants'
     | '/api/drawings/$drawingId/participate'
     | '/api/drawings/$drawingId/reserve'
@@ -347,7 +359,6 @@ export interface FileRouteTypes {
     | '/drawings/$drawingId'
     | '/drawings/create'
     | '/join/$drawingId'
-    | '/slot/$drawingId'
     | '/authentication/'
     | '/drawings/'
     | '/api/auth/$'
@@ -356,7 +367,9 @@ export interface FileRouteTypes {
     | '/demo/api/tq-todos'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/slot/$drawingId/$numberToReserve'
     | '/api/drawings/'
+    | '/slot/$drawingId/'
     | '/api/drawings/$drawingId/participants'
     | '/api/drawings/$drawingId/participate'
     | '/api/drawings/$drawingId/reserve'
@@ -378,7 +391,6 @@ export interface RootRouteChildren {
   DrawingsDrawingIdRoute: typeof DrawingsDrawingIdRoute
   DrawingsCreateRoute: typeof DrawingsCreateRoute
   JoinDrawingIdRoute: typeof JoinDrawingIdRoute
-  SlotDrawingIdRoute: typeof SlotDrawingIdRoute
   AuthenticationIndexRoute: typeof AuthenticationIndexRoute
   DrawingsIndexRoute: typeof DrawingsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -387,7 +399,9 @@ export interface RootRouteChildren {
   DemoApiTqTodosRoute: typeof DemoApiTqTodosRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
   DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
+  SlotDrawingIdNumberToReserveRoute: typeof SlotDrawingIdNumberToReserveRoute
   ApiDrawingsIndexRoute: typeof ApiDrawingsIndexRoute
+  SlotDrawingIdIndexRoute: typeof SlotDrawingIdIndexRoute
   DemoStartSsrDataOnlyRoute: typeof DemoStartSsrDataOnlyRoute
   DemoStartSsrFullSsrRoute: typeof DemoStartSsrFullSsrRoute
   DemoStartSsrSpaModeRoute: typeof DemoStartSsrSpaModeRoute
@@ -415,13 +429,6 @@ declare module '@tanstack/react-router' {
       path: '/authentication'
       fullPath: '/authentication'
       preLoaderRoute: typeof AuthenticationIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/slot/$drawingId': {
-      id: '/slot/$drawingId'
-      path: '/slot/$drawingId'
-      fullPath: '/slot/$drawingId'
-      preLoaderRoute: typeof SlotDrawingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/join/$drawingId': {
@@ -480,11 +487,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticationLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/slot/$drawingId/': {
+      id: '/slot/$drawingId/'
+      path: '/slot/$drawingId'
+      fullPath: '/slot/$drawingId'
+      preLoaderRoute: typeof SlotDrawingIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/drawings/': {
       id: '/api/drawings/'
       path: '/api/drawings'
       fullPath: '/api/drawings'
       preLoaderRoute: typeof ApiDrawingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/slot/$drawingId/$numberToReserve': {
+      id: '/slot/$drawingId/$numberToReserve'
+      path: '/slot/$drawingId/$numberToReserve'
+      fullPath: '/slot/$drawingId/$numberToReserve'
+      preLoaderRoute: typeof SlotDrawingIdNumberToReserveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/start/server-funcs': {
@@ -624,7 +645,6 @@ const rootRouteChildren: RootRouteChildren = {
   DrawingsDrawingIdRoute: DrawingsDrawingIdRoute,
   DrawingsCreateRoute: DrawingsCreateRoute,
   JoinDrawingIdRoute: JoinDrawingIdRoute,
-  SlotDrawingIdRoute: SlotDrawingIdRoute,
   AuthenticationIndexRoute: AuthenticationIndexRoute,
   DrawingsIndexRoute: DrawingsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
@@ -633,7 +653,9 @@ const rootRouteChildren: RootRouteChildren = {
   DemoApiTqTodosRoute: DemoApiTqTodosRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
   DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,
+  SlotDrawingIdNumberToReserveRoute: SlotDrawingIdNumberToReserveRoute,
   ApiDrawingsIndexRoute: ApiDrawingsIndexRoute,
+  SlotDrawingIdIndexRoute: SlotDrawingIdIndexRoute,
   DemoStartSsrDataOnlyRoute: DemoStartSsrDataOnlyRoute,
   DemoStartSsrFullSsrRoute: DemoStartSsrFullSsrRoute,
   DemoStartSsrSpaModeRoute: DemoStartSsrSpaModeRoute,

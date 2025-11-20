@@ -2,25 +2,17 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { Image } from 'lucide-react'
+import { Image, CircleAlert } from 'lucide-react'
 import type { DrawingStats } from '@/lib/number-slots'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  // DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer'
+
 import { cn } from '@/lib/utils'
 import DrawingSlotHeader from '@/components/DrawingSlotHeader'
 
-export const Route = createFileRoute('/slot/$drawingId')({
+export const Route = createFileRoute('/slot/$drawingId/')({
   component: SlotDrawingParticipation,
 })
 
@@ -108,17 +100,7 @@ const Form: React.FC<FormProps> = ({ formData, setFormData, drawing }) => {
       {drawing.isPaid && (
         <div className="p-4 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-700">
           <div className="flex items-start gap-3">
-            <svg
-              className="w-6 h-6 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+            <CircleAlert className="w-6 h-6 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
             <div>
               <p className="text-yellow-800 dark:text-yellow-200 font-medium">Payment Required</p>
               <p className="text-yellow-700 dark:text-yellow-100 text-sm mt-1">
@@ -139,8 +121,6 @@ function SlotDrawingParticipation() {
 
   const [selectedNumbers, setSelectedNumbers] = useState<Array<number>>([])
   const [currentPage, setCurrentPage] = useState(0)
-  const [isReserving, setIsReserving] = useState(false)
-  const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -283,8 +263,6 @@ function SlotDrawingParticipation() {
 
   // Handle number selection with reservation
   const handleNumberSelect = (number: number) => {
-    if (isReserving) return
-
     // Check if drawing is paid (allow multiple) or free (allow single)
     if (!drawing?.isPaid) {
       // Free giveaway: only allow single selection
@@ -303,18 +281,17 @@ function SlotDrawingParticipation() {
     }
   }
 
-  // Reserve selected numbers when user clicks the arrow
+  // Navigate to form page with selected numbers
   const handleReserveNumbers = async () => {
-    if (isReserving || selectedNumbers.length === 0) return
+    if (selectedNumbers.length === 0) return
 
-    setIsReserving(true);
     try {
-      // Reserve all selected numbers
+      // Reserve all selected numbers before navigation
       const reservationPromises = selectedNumbers.map(number =>
         fetch(`/api/drawings/${drawingId}/reserve`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ number, expirationMinutes: 4 }),
+          body: JSON.stringify({ number, expirationMinutes: 0.34 }),
         })
       )
 
@@ -322,11 +299,42 @@ function SlotDrawingParticipation() {
       const allSuccessful = responses.every(r => r.ok)
 
       if (allSuccessful) {
-        // Show form modal
-        setShowForm(true)
+        // Store reservation in localStorage with timestamp
+        // Create a copy for sorting to avoid mutation
+        const sortedNumbers = [...selectedNumbers].sort((a, b) => a - b)
+        const reservationKey = `reservation_${drawingId}_${sortedNumbers.join('_')}`
+        const reservationData = JSON.stringify({
+          timestamp: Date.now(),
+          numbers: selectedNumbers,
+          drawingId
+        })
+
+        localStorage.setItem(reservationKey, reservationData)
+
+        // Verify it was stored
+        const verified = localStorage.getItem(reservationKey)
+        if (!verified) {
+          console.error('Failed to store reservation in localStorage')
+          toast.error('Failed to save reservation. Please try again.')
+          setSelectedNumbers([])
+          return
+        }
+
+        console.log('Reservation key:', reservationKey)
+        console.log('Reserved numbers:', selectedNumbers)
+        console.log('Stored in localStorage:', verified)
 
         // Invalidate slots cache to show updated status
         queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
+
+        // Navigate to the form page with reserved state
+        navigate({
+          to: '/slot/$drawingId/$numberToReserve',
+          params: {
+            drawingId,
+            numberToReserve: selectedNumbers.join(',')
+          }
+        })
       } else {
         toast.error('Some numbers could not be reserved. Please try again.')
         setSelectedNumbers([])
@@ -335,8 +343,6 @@ function SlotDrawingParticipation() {
       console.error('Error reserving numbers:', error)
       toast.error('An error occurred while reserving numbers')
       setSelectedNumbers([])
-    } finally {
-      setIsReserving(false)
     }
   }
 
@@ -378,27 +384,7 @@ function SlotDrawingParticipation() {
     participateMutation.mutate(registrationData)
   }
 
-  // Handle cancel and release reservations
-  const handleCancelReservation = async () => {
-    if (selectedNumbers.length > 0) {
-      try {
-        await fetch(`/api/drawings/${drawingId}/reserve`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ numbers: selectedNumbers }),
-        })
 
-        // Invalidate slots cache to show updated status
-        queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
-      } catch (error) {
-        console.error('Error releasing reservations:', error)
-      }
-    }
-
-    // Clear selected numbers and close drawer
-    setSelectedNumbers([])
-    setShowForm(false)
-  }
 
   // Loading state
   if (drawingLoading) {
@@ -568,78 +554,30 @@ function SlotDrawingParticipation() {
 
       </div>
 
-      {drawing.winnerSelection === 'random' && <div>
-        <form onSubmit={handleSubmit} className="space-y-4 sm:max-w-[600px] sm:mx-auto px-4">
-          <Form formData={formData} setFormData={setFormData} drawing={drawing} />
-          <div className="px-0 pb-4 flex justify-center">
-            <Button
-              type="submit"
-              disabled={
-                participateMutation.isPending
-              }
-              className="bg-cyan-600 hover:bg-cyan-700 text-white"
-            >
-              {participateMutation.isPending ? (
-                <span className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Registering...
-                </span>
-              ) : (
-                'Complete Registration'
-              )}
-            </Button>
-
-          </div>
-        </form>
-      </div >}
-      {/* Registration Form - Drawer */}
-      <Drawer open={showForm} onOpenChange={setShowForm} dismissible={false}>
-        <DrawerContent className="bg-white dark:bg-slate-800">
-          <DrawerHeader>
-            <DrawerTitle className="text-black dark:text-white">
-              {drawing.winnerSelection === 'number' ? 'Confirm Your Registration' : 'Register for Drawing'}
-            </DrawerTitle>
-            {/* <DrawerDescription className="text-gray-600 dark:text-gray-400">
-              Complete the form below to register for this drawing.
-            </DrawerDescription> */}
-          </DrawerHeader>
-
-          <div className="px-4 overflow-y-auto max-h-[60vh]">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Form formData={formData} setFormData={setFormData} drawing={drawing} />
-              <DrawerFooter className="px-0 pb-4 grid grid-cols-2">
-                <DrawerClose asChild>
-                  <Button
-                    variant="default"
-                    className="w-full"
-                    onClick={handleCancelReservation}
-                  >
-                    Cancel
-                  </Button>
-                </DrawerClose>
-                <Button
-                  type="submit"
-                  disabled={
-                    participateMutation.isPending ||
-                    (drawing.winnerSelection === 'number' && selectedNumbers.length === 0)
-                  }
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white"
-                >
-                  {participateMutation.isPending ? (
-                    <span className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Registering...
-                    </span>
-                  ) : (
-                    'Complete Registration'
-                  )}
-                </Button>
-
-              </DrawerFooter>
-            </form>
-          </div>
-        </DrawerContent>
-      </Drawer>
+      {/* Registration Form for Random Drawing - Drawer */}
+      {drawing.winnerSelection === 'random' && (
+        <div>
+          <form onSubmit={handleSubmit} className="space-y-4 sm:max-w-[600px] sm:mx-auto px-4">
+            <Form formData={formData} setFormData={setFormData} drawing={drawing} />
+            <div className="px-0 pb-4 flex justify-center">
+              <Button
+                type="submit"
+                disabled={participateMutation.isPending}
+                className="bg-cyan-600 hover:bg-cyan-700 text-white"
+              >
+                {participateMutation.isPending ? (
+                  <span className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Registering...
+                  </span>
+                ) : (
+                  'Complete Registration'
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
 
 
       {/* Help/Info Section */}
