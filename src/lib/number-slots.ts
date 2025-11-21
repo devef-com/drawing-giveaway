@@ -255,6 +255,10 @@ export async function reserveNumber(
     return { success: false, message: 'Number is not available' }
   }
 
+  if (slot[0].expiresAt && slot[0].expiresAt > new Date()) {
+    return { success: false, message: 'Number is reserved' }
+  }
+
   // Calculate expiration time
   const expiresAt = new Date(Date.now() + expirationMinutes * 60 * 1000)
 

@@ -36,6 +36,7 @@ function ReserveNumberForm() {
   })
   const [reservationComplete, setReservationComplete] = useState(false)
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
+  const [reservationTimestamp, setReservationTimestamp] = useState<number | null>(null)
 
   // Parse selected numbers from the route parameter
   const selectedNumbers = numberToReserve.split(',').map(n => parseInt(n, 10))
@@ -108,42 +109,56 @@ function ReserveNumberForm() {
 
   // Countdown timer effect
   useEffect(() => {
-    if (!reservationComplete || !reservationTimeData) return
+    if (!reservationComplete || !reservationTimeData || !reservationTimestamp) return
+
+    const reservationTime = reservationTimeData.reservationTimeMinutes * 60 * 1000
+
+    const updateTimer = () => {
+      const now = Date.now()
+      const elapsed = now - reservationTimestamp
+      const remaining = Math.max(0, reservationTime - elapsed)
+
+      setTimeRemaining(remaining)
+
+      if (remaining <= 0) {
+        // Time expired
+        clearInterval(interval)
+
+        fetch(`/api/drawings/${drawingId}/reserve`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: JSON.stringify({ numbers: selectedNumbers }),
+        })
+
+        //queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
+        toast.error('Reservation expired. Click "Reserve again" to continue.')
+      }
+    }
+
+    // Update immediately
+    updateTimer()
+
+    // Update every second
+    const interval = setInterval(updateTimer, 1000)
+
+    return () => clearInterval(interval)
+  }, [reservationComplete, reservationTimeData, reservationTimestamp])
+
+  // Load timestamp from localStorage when reservation is complete
+  useEffect(() => {
+    if (!reservationComplete) return
 
     const storedReservation = localStorage.getItem(reservationKey)
     if (!storedReservation) return
 
     try {
       const { timestamp } = JSON.parse(storedReservation)
-      const reservationTime = reservationTimeData.reservationTimeMinutes * 60 * 1000
-
-      const updateTimer = () => {
-        const now = Date.now()
-        const elapsed = now - timestamp
-        const remaining = Math.max(0, reservationTime - elapsed)
-
-        setTimeRemaining(remaining)
-
-        if (remaining <= 0) {
-          clearInterval(interval);
-          // Time expired, redirect back
-          // localStorage.removeItem(reservationKey)
-          toast.error('Reservation expired. Please select numbers again.')
-          // navigate({ to: '/slot/$drawingId', params: { drawingId } })
-        }
-      }
-
-      // Update immediately
-      updateTimer()
-
-      // Update every second
-      const interval = setInterval(updateTimer, 1000)
-
-      return () => clearInterval(interval)
+      setReservationTimestamp(timestamp)
     } catch (e) {
       console.error('Error parsing reservation data:', e)
     }
-  }, [reservationComplete, reservationTimeData, reservationKey, drawingId, navigate])
+  }, [reservationComplete, reservationKey])
 
   // Release reservations when navigating away from the page (including back button)
   const cleanupRef = useRef({ reservationComplete, selectedNumbers, reservationKey, drawingId })
@@ -236,6 +251,45 @@ function ReserveNumberForm() {
     }
 
     navigate({ to: '/slot/$drawingId', params: { drawingId } })
+  }
+
+  const reserveAgain = async () => {
+    try {
+      const reservationPromises = selectedNumbers.map(number =>
+        fetch(`/api/drawings/${drawingId}/reserve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ number, expirationMinutes: reservationTimeData?.reservationTimeMinutes || 4 }),
+        })
+      )
+
+      const responses = await Promise.all(reservationPromises)
+      const allSuccessful = responses.every(r => r.ok)
+
+      if (allSuccessful) {
+        // Store reservation in localStorage with timestamp
+        // Create a copy for sorting to avoid mutation
+        const sortedNumbers = [...selectedNumbers].sort((a, b) => a - b)
+        const reservationKey = `reservation_${drawingId}_${sortedNumbers.join('_')}`
+        const reservationData = JSON.stringify({
+          timestamp: Date.now(),
+          numbers: selectedNumbers,
+          drawingId
+        })
+
+        localStorage.setItem(reservationKey, reservationData)
+
+        // Reset the timer by updating the timestamp
+        setReservationTimestamp(Date.now())
+
+        toast.success('Numbers reserved successfully!')
+      } else {
+        toast.error('Some numbers could not be reserved. They may have been taken.')
+      }
+    } catch (error) {
+      console.error('Error reserving numbers again:', error)
+      toast.error('Error reserving numbers again')
+    }
   }
 
   if (drawingLoading) {
@@ -337,6 +391,9 @@ function ReserveNumberForm() {
                 </p>
               </div>
             </div>
+            {timeRemaining === 0 && (
+              <Button className="max-w-max self-end" onClick={reserveAgain}>Reserve again</Button>
+            )}
           </Card>
         )}
 
@@ -445,7 +502,7 @@ function ReserveNumberForm() {
             <div>
               <p className="text-gray-800 dark:text-gray-200 font-medium mb-1">Important:</p>
               <ul className="space-y-1">
-                <li>• Your number{selectedNumbers.length > 1 ? 's are' : ' is'} reserved for 4 minutes</li>
+                <li>• Your number{selectedNumbers.length > 1 ? 's are' : ' is'} reserved for {reservationTimeData?.reservationTimeMinutes || 4} minutes</li>
                 <li>• Complete the form before time expires</li>
                 <li>• If you leave this page, your reservation will be released</li>
               </ul>
