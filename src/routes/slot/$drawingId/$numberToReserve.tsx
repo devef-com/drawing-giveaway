@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { toast } from 'sonner'
 import { CircleAlert, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -35,6 +35,7 @@ function ReserveNumberForm() {
     phone: '',
   })
   const [reservationComplete, setReservationComplete] = useState(false)
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
 
   // Parse selected numbers from the route parameter
   const selectedNumbers = numberToReserve.split(',').map(n => parseInt(n, 10))
@@ -103,26 +104,76 @@ function ReserveNumberForm() {
     }
 
     checkAndMarkReservation()
-  }, [drawingId, drawing, reservationComplete, reservationKey, selectedNumbers, reservationTimeData?.reservationTimeMinutes, navigate])
+  }, [drawingId, drawing, reservationComplete, reservationKey, selectedNumbers, reservationTimeData, navigate])
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!reservationComplete || !reservationTimeData) return
+
+    const storedReservation = localStorage.getItem(reservationKey)
+    if (!storedReservation) return
+
+    try {
+      const { timestamp } = JSON.parse(storedReservation)
+      const reservationTime = reservationTimeData.reservationTimeMinutes * 60 * 1000
+
+      const updateTimer = () => {
+        const now = Date.now()
+        const elapsed = now - timestamp
+        const remaining = Math.max(0, reservationTime - elapsed)
+
+        setTimeRemaining(remaining)
+
+        if (remaining <= 0) {
+          clearInterval(interval);
+          // Time expired, redirect back
+          // localStorage.removeItem(reservationKey)
+          toast.error('Reservation expired. Please select numbers again.')
+          // navigate({ to: '/slot/$drawingId', params: { drawingId } })
+        }
+      }
+
+      // Update immediately
+      updateTimer()
+
+      // Update every second
+      const interval = setInterval(updateTimer, 1000)
+
+      return () => clearInterval(interval)
+    } catch (e) {
+      console.error('Error parsing reservation data:', e)
+    }
+  }, [reservationComplete, reservationTimeData, reservationKey, drawingId, navigate])
 
   // Release reservations when navigating away from the page (including back button)
+  const cleanupRef = useRef({ reservationComplete, selectedNumbers, reservationKey, drawingId })
+
+  // Update ref when values change
+  useEffect(() => {
+    cleanupRef.current = { reservationComplete, selectedNumbers, reservationKey, drawingId }
+  }, [reservationComplete, selectedNumbers, reservationKey, drawingId])
+
+  // Cleanup effect that only runs on unmount
   useEffect(() => {
     return () => {
-
       // Cleanup: release reservations if user navigates away without completing registration
       // This will fire when user clicks back, goes to another route, etc.
-      if (reservationComplete && selectedNumbers.length > 0) {
-        localStorage.removeItem(reservationKey)
+      const { reservationComplete: isComplete, selectedNumbers: numbers, reservationKey: key, drawingId: id } = cleanupRef.current
+
+      if (isComplete && numbers.length > 0) {
+        console.log('Releasing reservations due to navigation away from page');
+        localStorage.removeItem(key)
         // Use fetch with keepalive for reliable cleanup during navigation
-        fetch(`/api/drawings/${drawingId}/reserve`, {
+        fetch(`/api/drawings/${id}/reserve`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ numbers: selectedNumbers }),
+          body: JSON.stringify({ numbers }),
           keepalive: true, // Allows request to complete even during navigation
         }).catch(err => console.error('Error releasing reservations:', err))
       }
     }
-  }, [drawingId, reservationComplete, selectedNumbers, reservationKey])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Empty deps - only runs on mount/unmount
 
   // Submit registration mutation
   const participateMutation = useMutation({
@@ -257,6 +308,43 @@ function ReserveNumberForm() {
             ))}
           </div>
         </Card>
+
+        {/* Countdown Timer */}
+        {timeRemaining !== null && (
+          <Card className="p-4 mb-6 bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <svg
+                  className="w-6 h-6 text-orange-500 dark:text-orange-400"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
+                    Time Remaining
+                  </p>
+                  <p className="text-xs text-orange-700 dark:text-orange-300">
+                    Complete your registration before time runs out
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400 tabular-nums">
+                  {Math.floor(timeRemaining / 60000)}:{String(Math.floor((timeRemaining % 60000) / 1000)).padStart(2, '0')}
+                </p>
+                <p className="text-xs text-orange-600 dark:text-orange-400">
+                  minutes
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Registration Form */}
         <Card className="p-6">
