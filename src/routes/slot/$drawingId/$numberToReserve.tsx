@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState, useRef } from 'react'
 import { toast } from 'sonner'
-import { CircleAlert, ArrowLeft } from 'lucide-react'
+import { CircleAlert, ArrowLeft, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -86,13 +86,13 @@ function ReserveNumberForm() {
           } else {
             // Reservation expired, redirect back
             //TODO call to release numbers endpoint
-            localStorage.removeItem(reservationKey)
+            handleCancel();
             toast.error('Reservation expired. Please select numbers again.')
             navigate({ to: '/slot/$drawingId', params: { drawingId } })
           }
         } catch (e) {
           // Invalid data, redirect back
-          localStorage.removeItem(reservationKey)
+          handleCancel();
           toast.error('Invalid reservation. Please select numbers again.')
           navigate({ to: '/slot/$drawingId', params: { drawingId } })
         }
@@ -312,25 +312,19 @@ function ReserveNumberForm() {
         {/* Countdown Timer */}
         {timeRemaining !== null && (
           <Card className="p-4 mb-6 bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-3">
-                <svg
-                  className="w-6 h-6 text-orange-500 dark:text-orange-400"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <div>
+                  <Clock
+                    className="w-6 h-6 text-orange-500 dark:text-orange-400"
+                  />
+                </div>
                 <div>
                   <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
                     Time Remaining
                   </p>
                   <p className="text-xs text-orange-700 dark:text-orange-300">
-                    Complete your registration before time runs out
+                    Complete your registration before time runs out. If the timer reaches zero, your reserved numbers will be released.
                   </p>
                 </div>
               </div>
@@ -406,19 +400,20 @@ function ReserveNumberForm() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4 pt-4">
+            <div className="flex gap-2 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
                 disabled={participateMutation.isPending}
+                className='flex-1'
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={participateMutation.isPending}
-                className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                disabled={participateMutation.isPending || timeRemaining === 0}
+                className="bg-cyan-600 hover:bg-cyan-700 text-white flex-1"
               >
                 {participateMutation.isPending ? (
                   <span className="flex items-center gap-2">
@@ -426,7 +421,7 @@ function ReserveNumberForm() {
                     Registering...
                   </span>
                 ) : (
-                  'Complete Registration'
+                  'Register Now'
                 )}
               </Button>
             </div>
