@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
+// Hook for fetching participants with authentication
 export function useParticipants(drawingId: string, enabled = true) {
   return useQuery({
     queryKey: ['participants', drawingId],
@@ -12,6 +13,8 @@ export function useParticipants(drawingId: string, enabled = true) {
   })
 }
 
+// Hook for fetching participants without authentication (public endpoint)
+// Uses a different query key to avoid cache conflicts with authenticated queries
 export function usePublicParticipants(drawingId: string, enabled = true) {
   return useQuery({
     queryKey: ['public-participants', drawingId],

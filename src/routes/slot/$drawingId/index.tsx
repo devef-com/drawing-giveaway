@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { CircleAlert, Image, InfoIcon } from 'lucide-react'
 import type { DrawingStats } from '@/lib/number-slots'
@@ -139,16 +139,17 @@ function SlotDrawingParticipation() {
     : 0
 
   // Fetch slots for current page and adjacent pages (batched loading for optimization)
-  const pagesToFetch = drawing
-    ? [
-        Math.max(0, currentPage - 1),
-        currentPage,
-        Math.min(totalPages - 1, currentPage + 1),
-      ].filter((page, index, array) => array.indexOf(page) === index) // Remove duplicates
-    : []
+  // Memoize the numbers calculation to avoid unnecessary recalculations
+  const numbersToFetch = useMemo(() => {
+    if (!drawing) return []
 
-  const numbersToFetch: Array<number> = []
-  if (drawing) {
+    const pagesToFetch = [
+      Math.max(0, currentPage - 1),
+      currentPage,
+      Math.min(totalPages - 1, currentPage + 1),
+    ].filter((page, index, array) => array.indexOf(page) === index) // Remove duplicates
+
+    const numbers: Array<number> = []
     pagesToFetch.forEach((page) => {
       const startIdx = page * NUMBERS_PER_PAGE
       const endIdx = Math.min(
@@ -156,10 +157,12 @@ function SlotDrawingParticipation() {
         drawing.quantityOfNumbers,
       )
       for (let i = startIdx; i < endIdx; i++) {
-        numbersToFetch.push(i + 1)
+        numbers.push(i + 1)
       }
     })
-  }
+
+    return numbers
+  }, [drawing, currentPage, totalPages, NUMBERS_PER_PAGE])
 
   const { data: slotsData } = useNumberSlots(
     drawingId,
