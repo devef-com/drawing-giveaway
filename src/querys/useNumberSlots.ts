@@ -26,7 +26,7 @@ export function useNumberSlots(
     queryKey: options?.queryKey || ['number-slots', drawingId, ...sortedNumbers],
     queryFn: async () => {
       const response = await fetch(
-        `/api/drawings/${drawingId}/slots?numbers=${numbers.join(',')}`,
+        `/api/drawings/${drawingId}/slots?numbers=${sortedNumbers.join(',')}`,
       )
       if (!response.ok) throw new Error('Failed to fetch slots')
       return response.json()
