@@ -6,6 +6,7 @@ import { jsPDF } from 'jspdf'
 import 'svg2pdf.js'
 import type { Participant } from '@/db/schema'
 import { Card } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/drawings/$drawingId/p/$participateId')({
   component: RouteComponent,
@@ -115,9 +116,31 @@ function RouteComponent() {
       {participantData ? (
         <>
           <Card className="p-4">
-            <h1 className="text-2xl">
+            <h1 className="text-regular font-semibold">
               Participant for Drawing ("drawing name")
             </h1>
+            <div className="flex items-center gap-4">
+              <p className="m-0">Status:</p>
+
+              <p
+                className={cn(
+                  'border',
+                  participantData.isEligible &&
+                    'border-green-500 text-green-600 bg-green-700/20',
+                  participantData.isEligible == null
+                    ? 'border-2'
+                    : !participantData.isEligible &&
+                        'border-red-500 text-red-700 bg-red-900/20',
+                  'px-3 py-1 rounded inline-block font-medium',
+                )}
+              >
+                {participantData.isEligible
+                  ? 'Approved'
+                  : participantData.isEligible == null
+                    ? 'Pending'
+                    : 'Not Eligible'}
+              </p>
+            </div>
           </Card>
 
           <div className="max-w-[500px] h-[250px] mt-4 bg-[#000000] rounded-[2.5rem] grid grid-cols-[1fr_2px_1fr] items-center overflow-hidden relative p-2 shadow-2xl border border-white/20">
