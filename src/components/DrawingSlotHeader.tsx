@@ -1,12 +1,8 @@
+import { Drawing } from '@/db/schema'
 import { Clock, HandCoins } from 'lucide-react'
 
 interface DrawingSlotHeaderProps {
-  drawing: {
-    title: string
-    isPaid: boolean
-    price: number
-    endAt: string
-  }
+  drawing: Drawing
   stats?: {
     available: number
     total: number
@@ -43,7 +39,7 @@ function DrawingSlotHeader({ drawing, stats }: DrawingSlotHeaderProps) {
           <div className="flex items-center gap-2 px-2 py-1 md:px-4 border-2 border-teal-500 rounded-lg bg-teal-50 dark:bg-teal-950">
             <HandCoins className="w-6 h-6 text-teal-600 dark:text-teal-400" />
             <span className="text-sm font-semibold text-teal-700 dark:text-teal-300">
-              {drawing.isPaid ? `$${drawing.price.toLocaleString()}` : 'Gratis'}
+              {drawing.isPaid ? `$${drawing.price?.toLocaleString()}` : 'Gratis'}
             </span>
           </div>
 
@@ -51,7 +47,7 @@ function DrawingSlotHeader({ drawing, stats }: DrawingSlotHeaderProps) {
           <div className="flex items-center gap-2 px-2 py-1 md:px-4 border-2 border-blue-500 rounded-lg bg-blue-50 dark:bg-blue-950">
             <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             <span className="text-sm font-semibold text-blue-600 dark:text-blue-300">
-              {getTimeRemaining(drawing.endAt)}
+              {drawing.endAt && getTimeRemaining(drawing.endAt as unknown as string)}
             </span>
           </div>
         </div>

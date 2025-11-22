@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { CircleAlert, Image, InfoIcon } from 'lucide-react'
-import type { DrawingStats } from '@/lib/number-slots'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,6 +15,7 @@ import { useDrawingStats } from '@/querys/useDrawingStats'
 import { useNumberSlots } from '@/querys/useNumberSlots'
 import { useReservationTime } from '@/querys/useReservationTime'
 import { useParticipate } from '@/querys/useParticipate'
+import { Drawing } from '@/db/schema'
 
 export const Route = createFileRoute('/slot/$drawingId/')({
   component: SlotDrawingParticipation,
@@ -472,14 +472,13 @@ function SlotDrawingParticipation() {
                               className={`
                                 aspect-square w-full px-0 py-0 rounded-lg flex items-center justify-center 
                                 text-xl font-normal transition-colors duration-200 cursor-pointer
-                                border ${
-                                  isSelected
-                                    ? 'bg-[#14b8a6] border-[#14b8a6] text-white'
-                                    : isTaken
-                                      ? 'bg-red-500/20 border-red-500/50 text-red-300 cursor-not-allowed'
-                                      : isReserved
-                                        ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300 cursor-not-allowed'
-                                        : 'border-border-light dark:border-border-dark text-text-light-primary dark:text-text-dark-primary bg-background-light dark:bg-background-dark hover:bg-[#14b8a6]/10'
+                                border ${isSelected
+                                  ? 'bg-[#14b8a6] border-[#14b8a6] text-white'
+                                  : isTaken
+                                    ? 'bg-red-500/20 border-red-500/50 text-red-300 cursor-not-allowed'
+                                    : isReserved
+                                      ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300 cursor-not-allowed'
+                                      : 'border-border-light dark:border-border-dark text-text-light-primary dark:text-text-dark-primary bg-background-light dark:bg-background-dark hover:bg-[#14b8a6]/10'
                                 }
                               `}
                               style={{
@@ -550,11 +549,10 @@ function SlotDrawingParticipation() {
                     <button
                       key={i}
                       onClick={() => goToPage(i)}
-                      className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${
-                        i === currentPage
+                      className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${i === currentPage
                           ? 'w-3 h-3 bg-[#14b8a6]'
                           : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>
