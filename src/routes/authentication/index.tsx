@@ -18,9 +18,7 @@ function Authentication() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Authentication</CardTitle>
-          <CardDescription>
-            Choose an option to get started
-          </CardDescription>
+          <CardDescription>Choose an option to get started</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Link to="/authentication/login" className="block">

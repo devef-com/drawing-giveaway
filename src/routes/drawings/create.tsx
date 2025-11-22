@@ -81,7 +81,10 @@ function CreateDrawing() {
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center">
               Please log in to create a drawing.{' '}
-              <a href="/authentication/login" className="text-cyan-400 hover:text-cyan-300">
+              <a
+                href="/authentication/login"
+                className="text-cyan-400 hover:text-cyan-300"
+              >
                 Login
               </a>
             </p>
@@ -95,7 +98,9 @@ function CreateDrawing() {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-2xl mx-auto">
         <Card className="p-6 bg-slate-800/50 border-slate-700">
-          <h1 className="text-3xl font-bold text-white mb-6">Create New Drawing</h1>
+          <h1 className="text-3xl font-bold text-white mb-6">
+            Create New Drawing
+          </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -119,7 +124,9 @@ function CreateDrawing() {
                 <div key={index} className="flex gap-2 mb-2">
                   <Input
                     value={guideline}
-                    onChange={(e) => handleGuidelineChange(index, e.target.value)}
+                    onChange={(e) =>
+                      handleGuidelineChange(index, e.target.value)
+                    }
                     placeholder={`Guideline ${index + 1}`}
                     className="bg-slate-700 text-white border-slate-600"
                   />
@@ -170,7 +177,10 @@ function CreateDrawing() {
                   step="0.01"
                   value={formData.price}
                   onChange={(e) =>
-                    setFormData({ ...formData, price: parseFloat(e.target.value) })
+                    setFormData({
+                      ...formData,
+                      price: parseFloat(e.target.value),
+                    })
                   }
                   required={formData.isPaid}
                   className="bg-slate-700 text-white border-slate-600"

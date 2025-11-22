@@ -10,42 +10,47 @@ This directory contains an improved implementation of the drawing participation 
 ## Key Improvements Over `/join` Route
 
 ### 1. **Virtual Scrolling with NumberGrid Component**
+
 - Efficiently handles large number grids (100, 500, 1000+ numbers)
 - Only loads visible numbers, reducing initial load time
 - Smooth scrolling with automatic loading of more numbers
 - Responsive column layout (5-15 columns based on screen size)
 
 ### 2. **Advanced Number Slot Management**
+
 - Uses dedicated `number_slots` database table for efficient tracking
 - Three states: `available`, `reserved`, `taken`
 - Real-time status updates with React Query
 - Prevents race conditions with proper locking
 
 ### 3. **Temporary Reservations**
+
 - Numbers are temporarily reserved (15 minutes) when selected
 - Prevents multiple users from selecting the same number
 - Automatic expiration and release of unused reservations
 - Visual countdown of reservation time
 
 ### 4. **Better UX**
-- **NumberCell Component**: 
+
+- **NumberCell Component**:
   - Color-coded status (green=available, yellow=reserved, red=taken)
   - Hover effects and animations
   - Tooltips showing participant info and expiration times
   - Loading states during operations
-  
-- **Responsive Design**: 
+- **Responsive Design**:
   - Mobile-first approach
   - Adaptive grid columns
   - Touch-friendly number selection
 
 ### 5. **Performance Optimizations**
+
 - Pagination and lazy loading of number slots
 - Efficient database queries with indexes
 - React Query caching (30s stale time)
 - Optimistic updates for better perceived performance
 
 ### 6. **Real-time Statistics**
+
 - Live availability counter
 - Percentage taken indicator
 - Refreshes every 10 seconds

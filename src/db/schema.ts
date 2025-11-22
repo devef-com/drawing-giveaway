@@ -161,17 +161,20 @@ export const drawingsRelations = relations(drawings, ({ one, many }) => ({
   }),
 }))
 
-export const participantsRelations = relations(participants, ({ one, many }) => ({
-  drawing: one(drawings, {
-    fields: [participants.drawingId],
-    references: [drawings.id],
+export const participantsRelations = relations(
+  participants,
+  ({ one, many }) => ({
+    drawing: one(drawings, {
+      fields: [participants.drawingId],
+      references: [drawings.id],
+    }),
+    paymentCapture: one(assets, {
+      fields: [participants.paymentCaptureId],
+      references: [assets.id],
+    }),
+    numberSlots: many(numberSlots),
   }),
-  paymentCapture: one(assets, {
-    fields: [participants.paymentCaptureId],
-    references: [assets.id],
-  }),
-  numberSlots: many(numberSlots),
-}))
+)
 
 export const numberSlotsRelations = relations(numberSlots, ({ one }) => ({
   drawing: one(drawings, {

@@ -189,7 +189,7 @@ export async function getNumberSlots(
     {} as Record<string, number>,
   )
 
-  const totalCount = (Object.values(statusCounts) as number[]).reduce(
+  const totalCount = Object.values(statusCounts).reduce(
     (a: number, b: number) => a + b,
     0,
   )
@@ -472,10 +472,7 @@ export async function getDrawingStats(
     {} as Record<string, number>,
   )
 
-  const total = (Object.values(stats) as number[]).reduce(
-    (a: number, b: number) => a + b,
-    0,
-  )
+  const total = Object.values(stats).reduce((a: number, b: number) => a + b, 0)
   const taken = stats['taken'] || 0
 
   return {

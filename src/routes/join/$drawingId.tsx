@@ -52,7 +52,8 @@ function JoinDrawing() {
         },
         body: JSON.stringify({
           ...formData,
-          selectedNumber: drawing.winnerSelection === 'number' ? selectedNumber : undefined,
+          selectedNumber:
+            drawing.winnerSelection === 'number' ? selectedNumber : undefined,
         }),
       })
 
@@ -99,33 +100,42 @@ function JoinDrawing() {
   const takenNumbers = new Set(
     participants
       ?.filter((p: any) => p.selectedNumber !== null && p.isEligible !== false)
-      .map((p: any) => p.selectedNumber) || []
+      .map((p: any) => p.selectedNumber) || [],
   )
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-6xl mx-auto">
         <Card className="p-6 bg-slate-800/50 border-slate-700 mb-6">
-          <h1 className="text-3xl font-bold text-white mb-4">{drawing.title}</h1>
+          <h1 className="text-3xl font-bold text-white mb-4">
+            {drawing.title}
+          </h1>
 
           <div className="text-white space-y-2">
             <p className="text-gray-400">
-              <strong>Type:</strong> {drawing.isPaid ? `Paid - $${(drawing.price / 100).toFixed(2)}` : 'Free'}
+              <strong>Type:</strong>{' '}
+              {drawing.isPaid
+                ? `Paid - $${(drawing.price / 100).toFixed(2)}`
+                : 'Free'}
             </p>
             <p className="text-gray-400">
-              <strong>Selection Method:</strong> {drawing.winnerSelection === 'random' ? 'Random' : 'By Number'}
+              <strong>Selection Method:</strong>{' '}
+              {drawing.winnerSelection === 'random' ? 'Random' : 'By Number'}
             </p>
             <p className="text-gray-400">
-              <strong>End Date:</strong> {new Date(drawing.endAt).toLocaleString()}
+              <strong>End Date:</strong>{' '}
+              {new Date(drawing.endAt).toLocaleString()}
             </p>
 
             {drawing.guidelines && drawing.guidelines.length > 0 && (
               <div className="mt-4">
                 <strong className="text-white">Guidelines:</strong>
                 <ul className="list-disc list-inside text-gray-400 mt-2">
-                  {drawing.guidelines.map((guideline: string, index: number) => (
-                    <li key={index}>{guideline}</li>
-                  ))}
+                  {drawing.guidelines.map(
+                    (guideline: string, index: number) => (
+                      <li key={index}>{guideline}</li>
+                    ),
+                  )}
                 </ul>
               </div>
             )}
@@ -134,40 +144,46 @@ function JoinDrawing() {
 
         {drawing.winnerSelection === 'number' && (
           <Card className="p-6 bg-slate-800/50 border-slate-700 mb-6">
-            <h2 className="text-2xl font-bold text-white mb-4">Select Your Number</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Select Your Number
+            </h2>
             <p className="text-gray-400 mb-4">
-              Available: {drawing.quantityOfNumbers - takenNumbers.size} / {drawing.quantityOfNumbers}
+              Available: {drawing.quantityOfNumbers - takenNumbers.size} /{' '}
+              {drawing.quantityOfNumbers}
             </p>
 
             <div className="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-12 gap-2 max-h-96 overflow-y-auto">
-              {Array.from({ length: drawing.quantityOfNumbers }, (_, i) => i + 1).map(
-                (number) => {
-                  const isTaken = takenNumbers.has(number)
-                  const isSelected = selectedNumber === number
-                  return (
-                    <button
-                      key={number}
-                      onClick={() => !isTaken && setSelectedNumber(number)}
-                      disabled={isTaken}
-                      className={`
+              {Array.from(
+                { length: drawing.quantityOfNumbers },
+                (_, i) => i + 1,
+              ).map((number) => {
+                const isTaken = takenNumbers.has(number)
+                const isSelected = selectedNumber === number
+                return (
+                  <button
+                    key={number}
+                    onClick={() => !isTaken && setSelectedNumber(number)}
+                    disabled={isTaken}
+                    className={`
                         p-3 rounded text-sm font-medium transition-colors
                         ${isTaken ? 'bg-red-900/50 text-gray-500 cursor-not-allowed' : ''}
                         ${isSelected ? 'bg-cyan-600 text-white' : ''}
                         ${!isTaken && !isSelected ? 'bg-slate-700 text-white hover:bg-slate-600' : ''}
                       `}
-                    >
-                      {number}
-                    </button>
-                  )
-                }
-              )}
+                  >
+                    {number}
+                  </button>
+                )
+              })}
             </div>
           </Card>
         )}
 
         <Card className="p-6 bg-slate-800/50 border-slate-700">
           <h2 className="text-2xl font-bold text-white mb-4">
-            {drawing.winnerSelection === 'number' ? 'Confirm Your Registration' : 'Register for Drawing'}
+            {drawing.winnerSelection === 'number'
+              ? 'Confirm Your Registration'
+              : 'Register for Drawing'}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -178,7 +194,9 @@ function JoinDrawing() {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
                 className="bg-slate-700 text-white border-slate-600"
               />
@@ -192,7 +210,9 @@ function JoinDrawing() {
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 className="bg-slate-700 text-white border-slate-600"
               />
             </div>
@@ -205,7 +225,9 @@ function JoinDrawing() {
                 id="phone"
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 required
                 className="bg-slate-700 text-white border-slate-600"
               />
@@ -214,7 +236,10 @@ function JoinDrawing() {
             {drawing.winnerSelection === 'number' && selectedNumber && (
               <div className="p-4 bg-cyan-900/30 rounded border border-cyan-700">
                 <p className="text-white font-medium">
-                  Selected Number: <span className="text-cyan-400 text-xl">{selectedNumber}</span>
+                  Selected Number:{' '}
+                  <span className="text-cyan-400 text-xl">
+                    {selectedNumber}
+                  </span>
                 </p>
               </div>
             )}
@@ -222,8 +247,9 @@ function JoinDrawing() {
             {drawing.isPaid && (
               <div className="p-4 bg-yellow-900/30 rounded border border-yellow-700">
                 <p className="text-yellow-200">
-                  <strong>Payment Required:</strong> This is a paid event. After registration, 
-                  you will need to complete the payment and upload proof.
+                  <strong>Payment Required:</strong> This is a paid event. After
+                  registration, you will need to complete the payment and upload
+                  proof.
                 </p>
               </div>
             )}

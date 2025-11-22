@@ -31,18 +31,17 @@ export default function Header() {
             <Menu size={24} />
           </button>
           <h1 className="ml-4 text-xl text-primary dark:text-white font-black">
-            <Link to="/">
-              Giway
-            </Link>
+            <Link to="/">Giway</Link>
           </h1>
         </div>
         <ThemeSwitcher />
       </header>
 
       <aside
-        className={cn("fixed top-0 left-0 h-full w-80 bg-white dark:bg-gray-900 dark:text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col border-r border-gray-200",
+        className={cn(
+          'fixed top-0 left-0 h-full w-80 bg-white dark:bg-gray-900 dark:text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col border-r border-gray-200',
           isOpen ? 'translate-x-0' : '-translate-x-full',
-          isOpen ? 'shadow-background-light dark:shadow-background-dark ' : ''
+          isOpen ? 'shadow-background-light dark:shadow-background-dark ' : '',
         )}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
@@ -155,14 +154,12 @@ export default function Header() {
             </div>
           )}
 
-
           {/* Demo Links End */}
         </nav>
         {/* <div className='grow'></div> */}
-        <div className='flex justify-center mb-2'>
+        <div className="flex justify-center mb-2">
           <ThemeSwitcher />
         </div>
-
       </aside>
     </>
   )

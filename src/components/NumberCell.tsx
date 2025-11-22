@@ -1,6 +1,6 @@
 /**
  * NumberCell Component
- * 
+ *
  * Displays a single number slot with its status (available, reserved, or taken)
  * Provides visual feedback and allows selection when available
  */
@@ -72,7 +72,7 @@ export function NumberCell({
           'hover:scale-105 hover:shadow-md active:scale-95 cursor-pointer',
         isLoading && 'animate-pulse',
         statusStyles[status],
-        className
+        className,
       )}
       title={getTooltipText()}
       aria-label={`Number ${number} - ${status}`}

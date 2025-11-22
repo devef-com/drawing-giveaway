@@ -1,14 +1,14 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { CircleAlert, ArrowLeft, Clock } from 'lucide-react'
+import { ArrowLeft, CircleAlert, Clock } from 'lucide-react'
+import type { Participant } from '@/db/schema'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { Participant } from '@/db/schema'
 
 export const Route = createFileRoute('/slot/$drawingId/$numberToReserve')({
   component: ReserveNumberForm,
@@ -38,11 +38,13 @@ function ReserveNumberForm() {
   })
   const [reservationComplete, setReservationComplete] = useState(false)
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
-  const [reservationTimestamp, setReservationTimestamp] = useState<number | null>(null)
+  const [reservationTimestamp, setReservationTimestamp] = useState<
+    number | null
+  >(null)
   const [isTitleExpanded, setIsTitleExpanded] = useState(false)
 
   // Parse selected numbers from the route parameter
-  const selectedNumbers = numberToReserve.split(',').map(n => parseInt(n, 10))
+  const selectedNumbers = numberToReserve.split(',').map((n) => parseInt(n, 10))
 
   // Create a unique key for this reservation in localStorage
   // Use sorted copy to match the key created on the previous page
@@ -57,9 +59,11 @@ function ReserveNumberForm() {
       if (!response.ok) throw new Error('Failed to fetch drawing')
       return response.json()
     },
-  });
+  })
 
-  const { data: reservationTimeData } = useQuery<{ reservationTimeMinutes: number }>({
+  const { data: reservationTimeData } = useQuery<{
+    reservationTimeMinutes: number
+  }>({
     queryKey: ['reservation-time'],
     queryFn: async () => {
       const response = await fetch(`/api/drawings/reservation-time`)
@@ -79,24 +83,28 @@ function ReserveNumberForm() {
         try {
           const { timestamp, numbers } = JSON.parse(storedReservation)
           const now = Date.now()
-          const reservationTime = (reservationTimeData?.reservationTimeMinutes || 4) * 60 * 1000
+          const reservationTime =
+            (reservationTimeData?.reservationTimeMinutes || 4) * 60 * 1000
 
           // Check if reservation is still valid (within 4 minutes)
-          if (now - timestamp < reservationTime &&
-            JSON.stringify(numbers.sort()) === JSON.stringify(selectedNumbers.sort())) {
+          if (
+            now - timestamp < reservationTime &&
+            JSON.stringify(numbers.sort()) ===
+              JSON.stringify(selectedNumbers.sort())
+          ) {
             // Reservation is still valid, mark as complete
             setReservationComplete(true)
             return
           } else {
             // Reservation expired, redirect back
-            //TODO call to release numbers endpoint
-            handleCancel();
+            // TODO call to release numbers endpoint
+            handleCancel()
             toast.error('Reservation expired. Please select numbers again.')
             navigate({ to: '/slot/$drawingId', params: { drawingId } })
           }
         } catch (e) {
           // Invalid data, redirect back
-          handleCancel();
+          handleCancel()
           toast.error('Invalid reservation. Please select numbers again.')
           navigate({ to: '/slot/$drawingId', params: { drawingId } })
         }
@@ -108,13 +116,23 @@ function ReserveNumberForm() {
     }
 
     checkAndMarkReservation()
-  }, [drawingId, drawing, reservationComplete, reservationKey, selectedNumbers, reservationTimeData, navigate])
+  }, [
+    drawingId,
+    drawing,
+    reservationComplete,
+    reservationKey,
+    selectedNumbers,
+    reservationTimeData,
+    navigate,
+  ])
 
   // Countdown timer effect
   useEffect(() => {
-    if (!reservationComplete || !reservationTimeData || !reservationTimestamp) return
+    if (!reservationComplete || !reservationTimeData || !reservationTimestamp)
+      return
 
-    const reservationTime = reservationTimeData.reservationTimeMinutes * 60 * 1000
+    const reservationTime =
+      reservationTimeData.reservationTimeMinutes * 60 * 1000
 
     const updateTimer = () => {
       const now = Date.now()
@@ -134,7 +152,7 @@ function ReserveNumberForm() {
           body: JSON.stringify({ numbers: selectedNumbers }),
         })
 
-        //queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
+        // queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
         toast.error('Reservation expired. Click "Reserve again" to continue.')
       }
     }
@@ -164,11 +182,21 @@ function ReserveNumberForm() {
   }, [reservationComplete, reservationKey])
 
   // Release reservations when navigating away from the page (including back button)
-  const cleanupRef = useRef({ reservationComplete, selectedNumbers, reservationKey, drawingId })
+  const cleanupRef = useRef({
+    reservationComplete,
+    selectedNumbers,
+    reservationKey,
+    drawingId,
+  })
 
   // Update ref when values change
   useEffect(() => {
-    cleanupRef.current = { reservationComplete, selectedNumbers, reservationKey, drawingId }
+    cleanupRef.current = {
+      reservationComplete,
+      selectedNumbers,
+      reservationKey,
+      drawingId,
+    }
   }, [reservationComplete, selectedNumbers, reservationKey, drawingId])
 
   // Cleanup effect that only runs on unmount
@@ -176,10 +204,15 @@ function ReserveNumberForm() {
     return () => {
       // Cleanup: release reservations if user navigates away without completing registration
       // This will fire when user clicks back, goes to another route, etc.
-      const { reservationComplete: isComplete, selectedNumbers: numbers, reservationKey: key, drawingId: id } = cleanupRef.current
+      const {
+        reservationComplete: isComplete,
+        selectedNumbers: numbers,
+        reservationKey: key,
+        drawingId: id,
+      } = cleanupRef.current
 
       if (isComplete && numbers.length > 0) {
-        console.log('Releasing reservations due to navigation away from page');
+        console.log('Releasing reservations due to navigation away from page')
         localStorage.removeItem(key)
         // Use fetch with keepalive for reliable cleanup during navigation
         fetch(`/api/drawings/${id}/reserve`, {
@@ -187,7 +220,7 @@ function ReserveNumberForm() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ numbers }),
           keepalive: true, // Allows request to complete even during navigation
-        }).catch(err => console.error('Error releasing reservations:', err))
+        }).catch((err) => console.error('Error releasing reservations:', err))
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -195,7 +228,9 @@ function ReserveNumberForm() {
 
   // Submit registration mutation
   const participateMutation = useMutation({
-    mutationFn: async (data: typeof formData & { selectedNumbers?: Array<number> }) => {
+    mutationFn: async (
+      data: typeof formData & { selectedNumbers?: Array<number> },
+    ) => {
       const response = await fetch(`/api/drawings/${drawingId}/participate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -258,16 +293,19 @@ function ReserveNumberForm() {
 
   const reserveAgain = async () => {
     try {
-      const reservationPromises = selectedNumbers.map(number =>
+      const reservationPromises = selectedNumbers.map((number) =>
         fetch(`/api/drawings/${drawingId}/reserve`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ number, expirationMinutes: reservationTimeData?.reservationTimeMinutes || 4 }),
-        })
+          body: JSON.stringify({
+            number,
+            expirationMinutes: reservationTimeData?.reservationTimeMinutes || 4,
+          }),
+        }),
       )
 
       const responses = await Promise.all(reservationPromises)
-      const allSuccessful = responses.every(r => r.ok)
+      const allSuccessful = responses.every((r) => r.ok)
 
       if (allSuccessful) {
         // Store reservation in localStorage with timestamp
@@ -277,7 +315,7 @@ function ReserveNumberForm() {
         const reservationData = JSON.stringify({
           timestamp: Date.now(),
           numbers: selectedNumbers,
-          drawingId
+          drawingId,
         })
 
         localStorage.setItem(reservationKey, reservationData)
@@ -287,7 +325,9 @@ function ReserveNumberForm() {
 
         toast.success('Numbers reserved successfully!')
       } else {
-        toast.error('Some numbers could not be reserved. They may have been taken.')
+        toast.error(
+          'Some numbers could not be reserved. They may have been taken.',
+        )
       }
     } catch (error) {
       console.error('Error reserving numbers again:', error)
@@ -317,7 +357,10 @@ function ReserveNumberForm() {
           <Card className="p-6">
             <p className="text-center text-xl">Drawing not found</p>
             <div className="text-center mt-4">
-              <Button onClick={() => navigate({ to: '/' })} className="bg-cyan-600 hover:bg-cyan-700">
+              <Button
+                onClick={() => navigate({ to: '/' })}
+                className="bg-cyan-600 hover:bg-cyan-700"
+              >
                 Go Home
               </Button>
             </div>
@@ -343,7 +386,14 @@ function ReserveNumberForm() {
             Confirm Your Registration
           </h1>
           <div>
-            <p className={cn("text-text-light-secondary dark:text-text-dark-secondary", !isTitleExpanded && drawing.title.length > 158 ? 'line-clamp-2' : '')}>
+            <p
+              className={cn(
+                'text-text-light-secondary dark:text-text-dark-secondary',
+                !isTitleExpanded && drawing.title.length > 158
+                  ? 'line-clamp-2'
+                  : '',
+              )}
+            >
               {drawing.title}
             </p>
             {drawing.title.length > 158 && (
@@ -382,22 +432,25 @@ function ReserveNumberForm() {
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <div>
-                  <Clock
-                    className="w-6 h-6 text-orange-500 dark:text-orange-400"
-                  />
+                  <Clock className="w-6 h-6 text-orange-500 dark:text-orange-400" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
                     Time Remaining
                   </p>
                   <p className="text-xs text-orange-700 dark:text-orange-300">
-                    Complete your registration before time runs out. If the timer reaches zero, your reserved numbers will be released.
+                    Complete your registration before time runs out. If the
+                    timer reaches zero, your reserved numbers will be released.
                   </p>
                 </div>
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold text-orange-600 dark:text-orange-400 tabular-nums">
-                  {Math.floor(timeRemaining / 60000)}:{String(Math.floor((timeRemaining % 60000) / 1000)).padStart(2, '0')}
+                  {Math.floor(timeRemaining / 60000)}:
+                  {String(Math.floor((timeRemaining % 60000) / 1000)).padStart(
+                    2,
+                    '0',
+                  )}
                 </p>
                 <p className="text-xs text-orange-600 dark:text-orange-400">
                   minutes
@@ -405,7 +458,9 @@ function ReserveNumberForm() {
               </div>
             </div>
             {timeRemaining === 0 && (
-              <Button className="max-w-max self-end" onClick={reserveAgain}>Reserve again</Button>
+              <Button className="max-w-max self-end" onClick={reserveAgain}>
+                Reserve again
+              </Button>
             )}
           </Card>
         )}
@@ -414,13 +469,18 @@ function ReserveNumberForm() {
         <Card className="p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="name" className="text-text-light-primary dark:text-text-dark-primary mb-1">
+              <Label
+                htmlFor="name"
+                className="text-text-light-primary dark:text-text-dark-primary mb-1"
+              >
                 Full Name *
               </Label>
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
                 placeholder="Enter your full name"
                 className="bg-white dark:bg-slate-700 text-text-light-primary dark:text-text-dark-primary border-gray-300 dark:border-slate-600 focus:border-cyan-500"
@@ -428,28 +488,38 @@ function ReserveNumberForm() {
             </div>
 
             <div>
-              <Label htmlFor="email" className="text-text-light-primary dark:text-text-dark-primary mb-1">
+              <Label
+                htmlFor="email"
+                className="text-text-light-primary dark:text-text-dark-primary mb-1"
+              >
                 Email (Optional)
               </Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 placeholder="your@email.com"
                 className="bg-white dark:bg-slate-700 text-text-light-primary dark:text-text-dark-primary border-gray-300 dark:border-slate-600 focus:border-cyan-500"
               />
             </div>
 
             <div>
-              <Label htmlFor="phone" className="text-text-light-primary dark:text-text-dark-primary mb-1">
+              <Label
+                htmlFor="phone"
+                className="text-text-light-primary dark:text-text-dark-primary mb-1"
+              >
                 Phone Number *
               </Label>
               <Input
                 id="phone"
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 required
                 placeholder="+1 (555) 000-0000"
                 className="bg-white dark:bg-slate-700 text-text-light-primary dark:text-text-dark-primary border-gray-300 dark:border-slate-600 focus:border-cyan-500"
@@ -461,9 +531,12 @@ function ReserveNumberForm() {
                 <div className="flex items-start gap-3">
                   <CircleAlert className="w-6 h-6 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-yellow-800 dark:text-yellow-200 font-medium">Payment Required</p>
+                    <p className="text-yellow-800 dark:text-yellow-200 font-medium">
+                      Payment Required
+                    </p>
                     <p className="text-yellow-700 dark:text-yellow-100 text-sm mt-1">
-                      This is a paid event. Attach your payment proof to confirm your participation.
+                      This is a paid event. Attach your payment proof to confirm
+                      your participation.
                     </p>
                   </div>
                 </div>
@@ -476,7 +549,7 @@ function ReserveNumberForm() {
                 variant="outline"
                 onClick={handleCancel}
                 disabled={participateMutation.isPending}
-                className='flex-1'
+                className="flex-1"
               >
                 Cancel
               </Button>
@@ -513,11 +586,19 @@ function ReserveNumberForm() {
               <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <p className="text-gray-800 dark:text-gray-200 font-medium mb-1">Important:</p>
+              <p className="text-gray-800 dark:text-gray-200 font-medium mb-1">
+                Important:
+              </p>
               <ul className="space-y-1">
-                <li>• Your number{selectedNumbers.length > 1 ? 's are' : ' is'} reserved for {reservationTimeData?.reservationTimeMinutes || 4} minutes</li>
+                <li>
+                  • Your number{selectedNumbers.length > 1 ? 's are' : ' is'}{' '}
+                  reserved for{' '}
+                  {reservationTimeData?.reservationTimeMinutes || 4} minutes
+                </li>
                 <li>• Complete the form before time expires</li>
-                <li>• If you leave this page, your reservation will be released</li>
+                <li>
+                  • If you leave this page, your reservation will be released
+                </li>
               </ul>
             </div>
           </div>

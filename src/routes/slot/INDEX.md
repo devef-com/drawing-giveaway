@@ -5,6 +5,7 @@ Welcome! This directory contains the improved drawing participation system with 
 ## 📁 Files in This Directory
 
 ### 🎨 Main Route
+
 - **`$drawingId.tsx`** - The main route component implementing the improved participation flow
   - Uses virtual scrolling for large number grids
   - Implements reservation system
@@ -12,6 +13,7 @@ Welcome! This directory contains the improved drawing participation system with 
   - Mobile-optimized responsive design
 
 ### 📖 Documentation
+
 1. **`README.md`** - Overview of features and improvements
    - Architecture overview
    - Key features list
@@ -40,17 +42,20 @@ Welcome! This directory contains the improved drawing participation system with 
 ## 🚀 Quick Start
 
 ### For Developers New to This System:
+
 1. Read `README.md` → Understand what this is
 2. Read `COMPARISON.md` → Understand why it's better
 3. Read `IMPLEMENTATION_GUIDE.md` → Learn what to do
 4. Reference `API_EXAMPLES.ts` → Implement the API
 
 ### For Users Wanting to Test:
+
 1. Ensure API endpoints are created (see `API_EXAMPLES.ts`)
 2. Navigate to `/slot/{drawing-id}` in your browser
 3. Try selecting numbers and registering
 
 ### For Maintainers:
+
 - Main component: `$drawingId.tsx`
 - Supporting components: `../../components/NumberGrid.tsx` and `NumberCell.tsx`
 - Business logic: `../../lib/number-slots.ts`
@@ -59,6 +64,7 @@ Welcome! This directory contains the improved drawing participation system with 
 ## 🔗 Related Files
 
 ### Components Used
+
 ```
 src/components/
 ├── NumberGrid.tsx      # Virtual scrolling grid
@@ -66,12 +72,14 @@ src/components/
 ```
 
 ### Business Logic
+
 ```
 src/lib/
 └── number-slots.ts     # All slot management functions
 ```
 
 ### Database
+
 ```
 src/db/
 └── schema.ts           # Contains number_slots table definition
@@ -106,6 +114,7 @@ Database (number_slots table)
 ## 📦 Dependencies
 
 This route uses:
+
 - `@tanstack/react-router` - Routing
 - `@tanstack/react-query` - Data fetching & caching
 - `drizzle-orm` - Database queries
@@ -115,6 +124,7 @@ This route uses:
 ## 🔧 Configuration
 
 All configurable values are documented in the code with comments:
+
 - Reservation expiration time (default: 15 minutes)
 - Stats refresh interval (default: 10 seconds)
 - Grid column counts for different screen sizes

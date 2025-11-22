@@ -22,11 +22,10 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   const { useSession } = authClient
-  const session = useSession();
-
+  const session = useSession()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,7 +59,7 @@ function Login() {
     if (session.data) {
       navigate({ to: '/' })
     }
-  }, [session, navigate]);
+  }, [session, navigate])
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">

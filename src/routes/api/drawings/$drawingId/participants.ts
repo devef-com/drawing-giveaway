@@ -22,7 +22,7 @@ export const Route = createFileRoute('/api/drawings/$drawingId/participants')({
           console.error('Error fetching participants:', error)
           return new Response(
             JSON.stringify({ error: 'Failed to fetch participants' }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
           )
         }
       },

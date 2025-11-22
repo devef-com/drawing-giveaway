@@ -21,15 +21,15 @@
  */
 
 // @ts-nocheck - This is documentation, not actual working codeimport { createFileRoute } from '@tanstack/react-router'
+import { eq } from 'drizzle-orm'
 import { db } from '@/db/index'
 import { drawings, participants } from '@/db/schema'
-import { eq } from 'drizzle-orm'
 import {
+  confirmNumberReservation,
   getDrawingStats,
   getNumberSlots,
-  reserveNumber,
-  confirmNumberReservation,
   releaseExpiredReservations,
+  reserveNumber,
 } from '@/lib/number-slots'
 
 // ============================================================================

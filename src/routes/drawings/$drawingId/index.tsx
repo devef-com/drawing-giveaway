@@ -45,7 +45,10 @@ function DrawingDetail() {
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center">
               Please log in to view this drawing.{' '}
-              <a href="/authentication/login" className="text-cyan-400 hover:text-cyan-300">
+              <a
+                href="/authentication/login"
+                className="text-cyan-400 hover:text-cyan-300"
+              >
                 Login
               </a>
             </p>
@@ -83,15 +86,21 @@ function DrawingDetail() {
     <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-6xl mx-auto">
         <Card className="p-6 bg-slate-800/50 border-slate-700 mb-6">
-          <h1 className="text-3xl font-bold text-white mb-4">{drawing.title}</h1>
+          <h1 className="text-3xl font-bold text-white mb-4">
+            {drawing.title}
+          </h1>
 
           <div className="grid md:grid-cols-2 gap-4 text-white">
             <div>
               <p className="text-gray-400 mb-2">
-                <strong>Type:</strong> {drawing.isPaid ? `Paid ($${(drawing.price / 100).toFixed(2)})` : 'Free'}
+                <strong>Type:</strong>{' '}
+                {drawing.isPaid
+                  ? `Paid ($${(drawing.price / 100).toFixed(2)})`
+                  : 'Free'}
               </p>
               <p className="text-gray-400 mb-2">
-                <strong>Selection Method:</strong> {drawing.winnerSelection === 'random' ? 'Random' : 'By Number'}
+                <strong>Selection Method:</strong>{' '}
+                {drawing.winnerSelection === 'random' ? 'Random' : 'By Number'}
               </p>
               {drawing.winnerSelection === 'number' && (
                 <p className="text-gray-400 mb-2">
@@ -99,7 +108,8 @@ function DrawingDetail() {
                 </p>
               )}
               <p className="text-gray-400 mb-2">
-                <strong>End Date:</strong> {new Date(drawing.endAt).toLocaleString()}
+                <strong>End Date:</strong>{' '}
+                {new Date(drawing.endAt).toLocaleString()}
               </p>
             </div>
             <div>
@@ -107,9 +117,11 @@ function DrawingDetail() {
                 <div>
                   <strong className="text-white">Guidelines:</strong>
                   <ul className="list-disc list-inside text-gray-400 mt-2">
-                    {drawing.guidelines.map((guideline: string, index: number) => (
-                      <li key={index}>{guideline}</li>
-                    ))}
+                    {drawing.guidelines.map(
+                      (guideline: string, index: number) => (
+                        <li key={index}>{guideline}</li>
+                      ),
+                    )}
                   </ul>
                 </div>
               )}
@@ -138,11 +150,16 @@ function DrawingDetail() {
                 </thead>
                 <tbody>
                   {participants.map((participant: any) => (
-                    <tr key={participant.id} className="border-b border-slate-700">
+                    <tr
+                      key={participant.id}
+                      className="border-b border-slate-700"
+                    >
                       <td className="p-2">{participant.name}</td>
                       <td className="p-2">{participant.phone}</td>
                       {drawing.winnerSelection === 'number' && (
-                        <td className="p-2">{participant.selectedNumber || '-'}</td>
+                        <td className="p-2">
+                          {participant.selectedNumber || '-'}
+                        </td>
                       )}
                       <td className="p-2">
                         {participant.isEligible === null ? (

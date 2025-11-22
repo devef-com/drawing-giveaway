@@ -6,28 +6,29 @@ This document compares the two drawing participation implementations to help you
 
 ## Quick Comparison Table
 
-| Feature | `/join/$drawingId` | `/slot/$drawingId` |
-|---------|-------------------|-------------------|
-| **Best For** | Simple drawings (< 100 numbers) | Large drawings (100+ numbers) |
-| **Number Rendering** | All at once | Virtual scrolling (lazy loading) |
-| **Memory Usage** | High for large grids | Low (only renders visible) |
-| **Initial Load Time** | Fast for small, slow for large | Fast regardless of size |
-| **Database Queries** | One large query | Paginated queries |
-| **Reservation System** | ❌ No | ✅ Yes (15 min expiration) |
-| **Real-time Stats** | ❌ No | ✅ Yes (10s refresh) |
-| **Race Condition Protection** | ⚠️ Limited | ✅ Strong |
-| **Components Used** | Inline buttons | `NumberGrid` + `NumberCell` |
-| **Utility Functions** | ❌ No | ✅ `number-slots.ts` |
-| **Status Indicators** | Basic (taken/available) | Advanced (available/reserved/taken) |
-| **Visual Feedback** | Simple colors | Rich animations & tooltips |
-| **Mobile Optimization** | ✅ Basic responsive | ✅ Advanced responsive |
-| **Complexity** | Simple | Advanced |
+| Feature                       | `/join/$drawingId`              | `/slot/$drawingId`                  |
+| ----------------------------- | ------------------------------- | ----------------------------------- |
+| **Best For**                  | Simple drawings (< 100 numbers) | Large drawings (100+ numbers)       |
+| **Number Rendering**          | All at once                     | Virtual scrolling (lazy loading)    |
+| **Memory Usage**              | High for large grids            | Low (only renders visible)          |
+| **Initial Load Time**         | Fast for small, slow for large  | Fast regardless of size             |
+| **Database Queries**          | One large query                 | Paginated queries                   |
+| **Reservation System**        | ❌ No                           | ✅ Yes (15 min expiration)          |
+| **Real-time Stats**           | ❌ No                           | ✅ Yes (10s refresh)                |
+| **Race Condition Protection** | ⚠️ Limited                      | ✅ Strong                           |
+| **Components Used**           | Inline buttons                  | `NumberGrid` + `NumberCell`         |
+| **Utility Functions**         | ❌ No                           | ✅ `number-slots.ts`                |
+| **Status Indicators**         | Basic (taken/available)         | Advanced (available/reserved/taken) |
+| **Visual Feedback**           | Simple colors                   | Rich animations & tooltips          |
+| **Mobile Optimization**       | ✅ Basic responsive             | ✅ Advanced responsive              |
+| **Complexity**                | Simple                          | Advanced                            |
 
 ## Detailed Comparison
 
 ### 1. Number Grid Rendering
 
 #### `/join` Route (Simple)
+
 ```tsx
 // Renders ALL numbers at once
 <div className="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-12">
@@ -38,17 +39,20 @@ This document compares the two drawing participation implementations to help you
 ```
 
 **Pros:**
+
 - Simple to understand and implement
 - No additional dependencies
 - Works well for small numbers (< 100)
 
 **Cons:**
+
 - Performance degrades with large grids (500+)
 - High memory usage
 - All data loaded upfront
 - Can cause browser lag with 1000+ buttons
 
 #### `/slot` Route (Advanced)
+
 ```tsx
 // Virtual scrolling - only renders visible numbers
 <NumberGrid
@@ -60,12 +64,14 @@ This document compares the two drawing participation implementations to help you
 ```
 
 **Pros:**
+
 - Handles 10,000+ numbers smoothly
 - Low memory footprint
 - Fast initial load
 - Smooth scrolling experience
 
 **Cons:**
+
 - More complex implementation
 - Requires understanding of virtual scrolling
 - Additional component dependencies
@@ -73,6 +79,7 @@ This document compares the two drawing participation implementations to help you
 ### 2. Data Fetching Strategy
 
 #### `/join` Route
+
 ```tsx
 // Fetches ALL participants at once
 const { data: participants } = useQuery({
@@ -80,28 +87,32 @@ const { data: participants } = useQuery({
   queryFn: async () => {
     const response = await fetch(`/api/drawings/${drawingId}/participants`)
     return response.json() // Returns entire array
-  }
+  },
 })
 
 // Calculates taken numbers in memory
 const takenNumbers = new Set(
-  participants?.filter(p => p.selectedNumber !== null)
-    .map(p => p.selectedNumber) || []
+  participants
+    ?.filter((p) => p.selectedNumber !== null)
+    .map((p) => p.selectedNumber) || [],
 )
 ```
 
 **Pros:**
+
 - Simple approach
 - No need for additional API endpoints
 - Works with existing backend
 
 **Cons:**
+
 - Fetches unnecessary data (all participant details)
 - No real-time updates
 - Scales poorly with many participants
 - No reservation/locking mechanism
 
 #### `/slot` Route
+
 ```tsx
 // Fetches only needed slot data with pagination
 const { data: slots } = useQuery({
@@ -127,35 +138,41 @@ const { data: stats } = useQuery({
 ```
 
 **Pros:**
+
 - Only fetches needed data
 - Real-time statistics
 - Efficient database queries
 - Supports caching and pagination
 
 **Cons:**
+
 - Requires additional API endpoints
 - More complex backend implementation
 
 ### 3. Number Selection Flow
 
 #### `/join` Route (Basic)
+
 ```
 User clicks number → Check if taken → Set selected → Submit form
 ```
 
 **Issues:**
+
 - No reservation - multiple users can select same number
 - Race condition possible during submission
 - No feedback on number availability changes
 - First-come-first-served at submission time
 
 #### `/slot` Route (Advanced)
+
 ```
-User clicks number → Reserve (API call) → Confirm selection → 
+User clicks number → Reserve (API call) → Confirm selection →
 15-minute timer → Submit form → Confirm reservation
 ```
 
 **Benefits:**
+
 - Number temporarily reserved (prevents double-booking)
 - Clear feedback on reservation success/failure
 - Automatic expiration if not completed
@@ -165,6 +182,7 @@ User clicks number → Reserve (API call) → Confirm selection →
 ### 4. User Experience
 
 #### `/join` Route
+
 - ✅ Immediate number display
 - ✅ Simple, straightforward UI
 - ❌ Can feel sluggish with large grids
@@ -172,6 +190,7 @@ User clicks number → Reserve (API call) → Confirm selection →
 - ❌ Risk of "number already taken" error at submission
 
 #### `/slot` Route
+
 - ✅ Always fast regardless of size
 - ✅ Rich visual feedback (colors, animations)
 - ✅ Real-time availability updates
@@ -183,19 +202,23 @@ User clicks number → Reserve (API call) → Confirm selection →
 ### 5. Database Design
 
 #### `/join` Route
+
 ```
 drawings ← participants (with selectedNumber)
 ```
+
 - Simple two-table design
 - Number availability determined by query
 - No dedicated slot tracking
 
 #### `/slot` Route
+
 ```
 drawings ← number_slots → participants
               ↓
          (status tracking)
 ```
+
 - Dedicated `number_slots` table
 - Indexed for fast lookups
 - Status field: available/reserved/taken
@@ -205,6 +228,7 @@ drawings ← number_slots → participants
 ## When to Use Each
 
 ### Use `/join` Route When:
+
 - Drawing has < 100 numbers
 - Simple requirements (no reservations needed)
 - Low traffic (< 10 concurrent users)
@@ -212,6 +236,7 @@ drawings ← number_slots → participants
 - Backend simplicity is priority
 
 ### Use `/slot` Route When:
+
 - Drawing has 100+ numbers (especially 500+)
 - Need reservation system to prevent conflicts
 - Expect high concurrent traffic
@@ -234,14 +259,14 @@ If you want to migrate from `/join` to `/slot`:
 
 ### Sample Test: 1000 Numbers Drawing
 
-| Metric | `/join` | `/slot` |
-|--------|---------|---------|
-| Initial Load | 3.2s | 0.8s |
-| Memory Usage | 45MB | 12MB |
-| Time to Interactive | 4.1s | 1.2s |
-| Scroll Performance | Laggy | Smooth (60fps) |
-| Number Selection | Instant | 200ms (API call) |
-| Real-time Updates | None | Every 10s |
+| Metric              | `/join` | `/slot`          |
+| ------------------- | ------- | ---------------- |
+| Initial Load        | 3.2s    | 0.8s             |
+| Memory Usage        | 45MB    | 12MB             |
+| Time to Interactive | 4.1s    | 1.2s             |
+| Scroll Performance  | Laggy   | Smooth (60fps)   |
+| Number Selection    | Instant | 200ms (API call) |
+| Real-time Updates   | None    | Every 10s        |
 
 ## Conclusion
 

@@ -1,6 +1,6 @@
 /**
  * NumberGrid Component
- * 
+ *
  * Efficiently renders large grids of number slots using virtual scrolling
  * Adapts column count based on screen size for responsive layouts
  */
@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { NumberCell } from './NumberCell'
-import type { NumberSlotStatus } from './NumberCell';
+import type { NumberSlotStatus } from './NumberCell'
 import { cn } from '@/lib/utils'
 
 interface NumberGridProps {
@@ -66,10 +66,10 @@ export function NumberGrid({
     queryFn: async () => {
       const numbers = Array.from(
         { length: visibleRange.end - visibleRange.start + 1 },
-        (_, i) => visibleRange.start + i
+        (_, i) => visibleRange.start + i,
       )
       const response = await fetch(
-        `/api/drawings/${drawingId}/slots?numbers=${numbers.join(',')}`
+        `/api/drawings/${drawingId}/slots?numbers=${numbers.join(',')}`,
       )
       if (!response.ok) throw new Error('Failed to fetch slots')
       return response.json()
@@ -100,13 +100,13 @@ export function NumberGrid({
         participantName: slot.participantName,
         expiresAt: slot.expiresAt,
       },
-    ]) || []
+    ]) || [],
   )
 
   // Generate grid numbers
   const gridNumbers = Array.from(
     { length: Math.min(visibleRange.end, totalNumbers) },
-    (_, i) => i + 1
+    (_, i) => i + 1,
   )
 
   return (
@@ -116,7 +116,7 @@ export function NumberGrid({
       className={cn(
         'overflow-auto rounded-lg border bg-card p-4',
         'max-h-[600px] md:max-h-[700px]',
-        className
+        className,
       )}
     >
       <div

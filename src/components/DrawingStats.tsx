@@ -1,6 +1,6 @@
 /**
  * DrawingStats Component
- * 
+ *
  * Displays aggregated statistics about number slot availability
  * Shows visual progress and key metrics at a glance
  */
@@ -35,10 +35,7 @@ export function DrawingStats({ drawingId, className }: DrawingStatsProps) {
   if (isLoading) {
     return (
       <div
-        className={cn(
-          'rounded-lg border bg-card p-6 animate-pulse',
-          className
-        )}
+        className={cn('rounded-lg border bg-card p-6 animate-pulse', className)}
       >
         <div className="h-4 bg-muted rounded w-32 mb-4" />
         <div className="h-8 bg-muted rounded w-full mb-2" />
@@ -97,10 +94,7 @@ export function DrawingStats({ drawingId, className }: DrawingStatsProps) {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className={cn(
-              'rounded-lg p-3 text-center space-y-1',
-              stat.bgColor
-            )}
+            className={cn('rounded-lg p-3 text-center space-y-1', stat.bgColor)}
           >
             <div className={cn('text-2xl font-bold', stat.color)}>
               {stat.value}

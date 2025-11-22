@@ -30,7 +30,10 @@ function DrawingsList() {
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center">
               Please log in to view your drawings.{' '}
-              <a href="/authentication/login" className="text-cyan-400 hover:text-cyan-300">
+              <a
+                href="/authentication/login"
+                className="text-cyan-400 hover:text-cyan-300"
+              >
                 Login
               </a>
             </p>
@@ -69,7 +72,10 @@ function DrawingsList() {
                       {drawing.title}
                     </h2>
                     <p className="text-text-light-secondary dark:text-text-dark-secondary mb-2">
-                      Selection: {drawing.winnerSelection === 'random' ? 'Random' : 'By Number'}
+                      Selection:{' '}
+                      {drawing.winnerSelection === 'random'
+                        ? 'Random'
+                        : 'By Number'}
                     </p>
                     {drawing.winnerSelection === 'number' && (
                       <p className="text-text-light-secondary dark:text-text-dark-secondary mb-2">
@@ -77,14 +83,20 @@ function DrawingsList() {
                       </p>
                     )}
                     <p className="text-text-light-secondary dark:text-text-dark-secondary mb-2">
-                      Type: {drawing.isPaid ? `Paid ($${(drawing.price / 100).toFixed(2)})` : 'Free'}
+                      Type:{' '}
+                      {drawing.isPaid
+                        ? `Paid ($${(drawing.price / 100).toFixed(2)})`
+                        : 'Free'}
                     </p>
                     <p className="text-text-light-secondary dark:text-text-dark-secondary">
                       End Date: {new Date(drawing.endAt).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Link to={`/drawings/$drawingId`} params={{ drawingId: drawing.id }}>
+                    <Link
+                      to={`/drawings/$drawingId`}
+                      params={{ drawingId: drawing.id }}
+                    >
                       <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
                         View
                       </Button>
@@ -108,7 +120,10 @@ function DrawingsList() {
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center">
               No drawings yet.{' '}
-              <Link to="/drawings/create" className="text-cyan-400 hover:text-cyan-300">
+              <Link
+                to="/drawings/create"
+                className="text-cyan-400 hover:text-cyan-300"
+              >
                 Create your first drawing
               </Link>
             </p>

@@ -16,10 +16,13 @@ export const Route = createFileRoute('/api/drawings/$drawingId')({
             .limit(1)
 
           if (drawing.length === 0) {
-            return new Response(JSON.stringify({ error: 'Drawing not found' }), {
-              status: 404,
-              headers: { 'Content-Type': 'application/json' },
-            })
+            return new Response(
+              JSON.stringify({ error: 'Drawing not found' }),
+              {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
           }
 
           return new Response(JSON.stringify(drawing[0]), {
@@ -30,7 +33,7 @@ export const Route = createFileRoute('/api/drawings/$drawingId')({
           console.error('Error fetching drawing:', error)
           return new Response(
             JSON.stringify({ error: 'Failed to fetch drawing' }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
           )
         }
       },

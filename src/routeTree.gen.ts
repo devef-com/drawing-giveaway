@@ -40,6 +40,7 @@ import { Route as ApiDrawingsDrawingIdSlotsRouteImport } from './routes/api/draw
 import { Route as ApiDrawingsDrawingIdReserveRouteImport } from './routes/api/drawings/$drawingId.reserve'
 import { Route as ApiDrawingsDrawingIdParticipateRouteImport } from './routes/api/drawings/$drawingId/participate'
 import { Route as ApiDrawingsDrawingIdParticipantsRouteImport } from './routes/api/drawings/$drawingId/participants'
+import { Route as ApiDrawingsDrawingIdParticipantIdRouteImport } from './routes/api/drawings/$drawingId/$participantId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -204,6 +205,12 @@ const ApiDrawingsDrawingIdParticipantsRoute =
     path: '/participants',
     getParentRoute: () => ApiDrawingsDrawingIdRoute,
   } as any)
+const ApiDrawingsDrawingIdParticipantIdRoute =
+  ApiDrawingsDrawingIdParticipantIdRouteImport.update({
+    id: '/$participantId',
+    path: '/$participantId',
+    getParentRoute: () => ApiDrawingsDrawingIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/api/drawings': typeof ApiDrawingsIndexRoute
   '/drawings/$drawingId': typeof DrawingsDrawingIdIndexRoute
   '/slot/$drawingId': typeof SlotDrawingIdIndexRoute
+  '/api/drawings/$drawingId/$participantId': typeof ApiDrawingsDrawingIdParticipantIdRoute
   '/api/drawings/$drawingId/participants': typeof ApiDrawingsDrawingIdParticipantsRoute
   '/api/drawings/$drawingId/participate': typeof ApiDrawingsDrawingIdParticipateRoute
   '/api/drawings/$drawingId/reserve': typeof ApiDrawingsDrawingIdReserveRoute
@@ -260,6 +268,7 @@ export interface FileRoutesByTo {
   '/api/drawings': typeof ApiDrawingsIndexRoute
   '/drawings/$drawingId': typeof DrawingsDrawingIdIndexRoute
   '/slot/$drawingId': typeof SlotDrawingIdIndexRoute
+  '/api/drawings/$drawingId/$participantId': typeof ApiDrawingsDrawingIdParticipantIdRoute
   '/api/drawings/$drawingId/participants': typeof ApiDrawingsDrawingIdParticipantsRoute
   '/api/drawings/$drawingId/participate': typeof ApiDrawingsDrawingIdParticipateRoute
   '/api/drawings/$drawingId/reserve': typeof ApiDrawingsDrawingIdReserveRoute
@@ -294,6 +303,7 @@ export interface FileRoutesById {
   '/api/drawings/': typeof ApiDrawingsIndexRoute
   '/drawings/$drawingId/': typeof DrawingsDrawingIdIndexRoute
   '/slot/$drawingId/': typeof SlotDrawingIdIndexRoute
+  '/api/drawings/$drawingId/$participantId': typeof ApiDrawingsDrawingIdParticipantIdRoute
   '/api/drawings/$drawingId/participants': typeof ApiDrawingsDrawingIdParticipantsRoute
   '/api/drawings/$drawingId/participate': typeof ApiDrawingsDrawingIdParticipateRoute
   '/api/drawings/$drawingId/reserve': typeof ApiDrawingsDrawingIdReserveRoute
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/api/drawings'
     | '/drawings/$drawingId'
     | '/slot/$drawingId'
+    | '/api/drawings/$drawingId/$participantId'
     | '/api/drawings/$drawingId/participants'
     | '/api/drawings/$drawingId/participate'
     | '/api/drawings/$drawingId/reserve'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/api/drawings'
     | '/drawings/$drawingId'
     | '/slot/$drawingId'
+    | '/api/drawings/$drawingId/$participantId'
     | '/api/drawings/$drawingId/participants'
     | '/api/drawings/$drawingId/participate'
     | '/api/drawings/$drawingId/reserve'
@@ -395,6 +407,7 @@ export interface FileRouteTypes {
     | '/api/drawings/'
     | '/drawings/$drawingId/'
     | '/slot/$drawingId/'
+    | '/api/drawings/$drawingId/$participantId'
     | '/api/drawings/$drawingId/participants'
     | '/api/drawings/$drawingId/participate'
     | '/api/drawings/$drawingId/reserve'
@@ -655,10 +668,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDrawingsDrawingIdParticipantsRouteImport
       parentRoute: typeof ApiDrawingsDrawingIdRoute
     }
+    '/api/drawings/$drawingId/$participantId': {
+      id: '/api/drawings/$drawingId/$participantId'
+      path: '/$participantId'
+      fullPath: '/api/drawings/$drawingId/$participantId'
+      preLoaderRoute: typeof ApiDrawingsDrawingIdParticipantIdRouteImport
+      parentRoute: typeof ApiDrawingsDrawingIdRoute
+    }
   }
 }
 
 interface ApiDrawingsDrawingIdRouteChildren {
+  ApiDrawingsDrawingIdParticipantIdRoute: typeof ApiDrawingsDrawingIdParticipantIdRoute
   ApiDrawingsDrawingIdParticipantsRoute: typeof ApiDrawingsDrawingIdParticipantsRoute
   ApiDrawingsDrawingIdParticipateRoute: typeof ApiDrawingsDrawingIdParticipateRoute
   ApiDrawingsDrawingIdReserveRoute: typeof ApiDrawingsDrawingIdReserveRoute
@@ -667,6 +688,8 @@ interface ApiDrawingsDrawingIdRouteChildren {
 }
 
 const ApiDrawingsDrawingIdRouteChildren: ApiDrawingsDrawingIdRouteChildren = {
+  ApiDrawingsDrawingIdParticipantIdRoute:
+    ApiDrawingsDrawingIdParticipantIdRoute,
   ApiDrawingsDrawingIdParticipantsRoute: ApiDrawingsDrawingIdParticipantsRoute,
   ApiDrawingsDrawingIdParticipateRoute: ApiDrawingsDrawingIdParticipateRoute,
   ApiDrawingsDrawingIdReserveRoute: ApiDrawingsDrawingIdReserveRoute,

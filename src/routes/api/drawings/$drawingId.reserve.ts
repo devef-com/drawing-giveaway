@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import {
-  reserveNumber,
-  releaseExpiredReservations,
   bulkReleaseReservations,
+  releaseExpiredReservations,
+  reserveNumber,
 } from '@/lib/number-slots'
 
 /**

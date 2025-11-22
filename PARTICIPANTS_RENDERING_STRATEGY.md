@@ -15,6 +15,7 @@ The drawing giveaway application needs to efficiently render and manage particip
 ### 1. Database Schema Optimization
 
 #### Current Schema Issues
+
 - The `participants` table stores all participant information
 - Checking number availability requires querying all participants for a drawing
 - No efficient way to get available numbers without loading participant records
@@ -22,6 +23,7 @@ The drawing giveaway application needs to efficiently render and manage particip
 #### Proposed Schema Enhancement
 
 **Add `number_slots` Table**:
+
 ```typescript
 export const numberSlots = pgTable('number_slots', {
   id: serial('id').primaryKey(),
@@ -30,7 +32,9 @@ export const numberSlots = pgTable('number_slots', {
     .references(() => drawings.id, { onDelete: 'cascade' }),
   number: integer('number').notNull(),
   status: varchar('status', { length: 20 }).notNull().default('available'), // 'available', 'reserved', 'taken'
-  participantId: integer('participant_id').references(() => participants.id, { onDelete: 'set null' }),
+  participantId: integer('participant_id').references(() => participants.id, {
+    onDelete: 'set null',
+  }),
   reservedAt: timestamp('reserved_at'),
   expiresAt: timestamp('expires_at'), // For temporary reservations
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -43,12 +47,14 @@ export const numberSlots = pgTable('number_slots', {
 ```
 
 **Benefits**:
+
 - Fast number availability checks without loading participant data
 - Supports temporary reservations for payment processing
 - Efficient queries for available/taken numbers
 - Indexed for optimal performance
 
 **Update `participants` Table**:
+
 ```typescript
 // Remove selectedNumber from participants (now in number_slots)
 // Add relationship to number_slots instead
@@ -70,6 +76,7 @@ export const participants = pgTable('participants', {
 ### 2. TypeScript Data Management Utilities
 
 #### Number Slot Manager
+
 ```typescript
 // src/lib/number-slots.ts
 
@@ -105,14 +112,14 @@ export interface NumberSlotsResult {
  */
 export async function initializeNumberSlots(
   drawingId: string,
-  quantity: number
+  quantity: number,
 ): Promise<void> {
   const slots = Array.from({ length: quantity }, (_, i) => ({
     drawingId,
     number: i + 1,
     status: 'available',
   }))
-  
+
   // Bulk insert for performance
   await db.insert(numberSlots).values(slots)
 }
@@ -122,10 +129,10 @@ export async function initializeNumberSlots(
  * Returns minimal data for efficient rendering
  */
 export async function getNumberSlots(
-  query: NumberSlotsQuery
+  query: NumberSlotsQuery,
 ): Promise<NumberSlotsResult> {
   const { drawingId, page = 1, pageSize = 100, status, numbers } = query
-  
+
   let baseQuery = db
     .select({
       number: numberSlots.number,
@@ -137,15 +144,15 @@ export async function getNumberSlots(
     .from(numberSlots)
     .leftJoin(participants, eq(numberSlots.participantId, participants.id))
     .where(eq(numberSlots.drawingId, drawingId))
-  
+
   if (status) {
     baseQuery = baseQuery.where(eq(numberSlots.status, status))
   }
-  
+
   if (numbers && numbers.length > 0) {
     baseQuery = baseQuery.where(inArray(numberSlots.number, numbers))
   }
-  
+
   // Get counts
   const countsQuery = db
     .select({
@@ -155,7 +162,7 @@ export async function getNumberSlots(
     .from(numberSlots)
     .where(eq(numberSlots.drawingId, drawingId))
     .groupBy(numberSlots.status)
-  
+
   const [slots, counts] = await Promise.all([
     baseQuery
       .orderBy(numberSlots.number)
@@ -163,15 +170,18 @@ export async function getNumberSlots(
       .offset((page - 1) * pageSize),
     countsQuery,
   ])
-  
+
   const hasMore = slots.length > pageSize
   const resultSlots = hasMore ? slots.slice(0, pageSize) : slots
-  
-  const statusCounts = counts.reduce((acc, { status, count }) => {
-    acc[status] = count
-    return acc
-  }, {} as Record<string, number>)
-  
+
+  const statusCounts = counts.reduce(
+    (acc, { status, count }) => {
+      acc[status] = count
+      return acc
+    },
+    {} as Record<string, number>,
+  )
+
   return {
     slots: resultSlots,
     totalCount: Object.values(statusCounts).reduce((a, b) => a + b, 0),
@@ -189,7 +199,7 @@ export async function getNumberSlots(
 export async function reserveNumber(
   drawingId: string,
   number: number,
-  expirationMinutes: number = 15
+  expirationMinutes: number = 15,
 ): Promise<{ success: boolean; message?: string }> {
   const slot = await db
     .select()
@@ -198,17 +208,17 @@ export async function reserveNumber(
       and(
         eq(numberSlots.drawingId, drawingId),
         eq(numberSlots.number, number),
-        eq(numberSlots.status, 'available')
-      )
+        eq(numberSlots.status, 'available'),
+      ),
     )
     .limit(1)
-  
+
   if (!slot.length) {
     return { success: false, message: 'Number not available' }
   }
-  
+
   const expiresAt = new Date(Date.now() + expirationMinutes * 60 * 1000)
-  
+
   await db
     .update(numberSlots)
     .set({
@@ -218,12 +228,9 @@ export async function reserveNumber(
       updatedAt: new Date(),
     })
     .where(
-      and(
-        eq(numberSlots.drawingId, drawingId),
-        eq(numberSlots.number, number)
-      )
+      and(eq(numberSlots.drawingId, drawingId), eq(numberSlots.number, number)),
     )
-  
+
   return { success: true }
 }
 
@@ -233,7 +240,7 @@ export async function reserveNumber(
 export async function confirmNumberReservation(
   drawingId: string,
   number: number,
-  participantId: number
+  participantId: number,
 ): Promise<void> {
   await db
     .update(numberSlots)
@@ -243,10 +250,7 @@ export async function confirmNumberReservation(
       updatedAt: new Date(),
     })
     .where(
-      and(
-        eq(numberSlots.drawingId, drawingId),
-        eq(numberSlots.number, number)
-      )
+      and(eq(numberSlots.drawingId, drawingId), eq(numberSlots.number, number)),
     )
 }
 
@@ -265,10 +269,10 @@ export async function releaseExpiredReservations(): Promise<number> {
     .where(
       and(
         eq(numberSlots.status, 'reserved'),
-        lt(numberSlots.expiresAt, new Date())
-      )
+        lt(numberSlots.expiresAt, new Date()),
+      ),
     )
-  
+
   return result.rowCount || 0
 }
 
@@ -290,15 +294,18 @@ export async function getDrawingStats(drawingId: string): Promise<{
     .from(numberSlots)
     .where(eq(numberSlots.drawingId, drawingId))
     .groupBy(numberSlots.status)
-  
-  const stats = counts.reduce((acc, { status, count }) => {
-    acc[status] = count
-    return acc
-  }, {} as Record<string, number>)
-  
+
+  const stats = counts.reduce(
+    (acc, { status, count }) => {
+      acc[status] = count
+      return acc
+    },
+    {} as Record<string, number>,
+  )
+
   const total = Object.values(stats).reduce((a, b) => a + b, 0)
   const taken = stats['taken'] || 0
-  
+
   return {
     total,
     available: stats['available'] || 0,
@@ -314,6 +321,7 @@ export async function getDrawingStats(drawingId: string): Promise<{
 #### Grid Layout Strategy
 
 **Responsive Grid Component**:
+
 ```typescript
 // src/components/NumberGrid.tsx
 
@@ -334,7 +342,7 @@ export function NumberGrid({
   isSelectable = true,
 }: NumberGridProps) {
   const parentRef = useRef<HTMLDivElement>(null)
-  
+
   // Calculate columns based on screen size
   const getColumnsCount = () => {
     const width = window.innerWidth
@@ -343,10 +351,10 @@ export function NumberGrid({
     if (width < 1024) return 10 // small desktop
     return 15 // large desktop
   }
-  
+
   const columns = getColumnsCount()
   const rows = Math.ceil(totalNumbers / columns)
-  
+
   // Virtual scrolling for performance
   const rowVirtualizer = useVirtualizer({
     count: rows,
@@ -354,7 +362,7 @@ export function NumberGrid({
     estimateSize: () => 60, // height of each row
     overscan: 5, // render 5 extra rows above/below viewport
   })
-  
+
   return (
     <div ref={parentRef} className="h-[600px] overflow-auto">
       <div
@@ -367,7 +375,7 @@ export function NumberGrid({
         {rowVirtualizer.getVirtualItems().map((virtualRow) => {
           const startNumber = virtualRow.index * columns + 1
           const endNumber = Math.min(startNumber + columns - 1, totalNumbers)
-          
+
           return (
             <NumberRow
               key={virtualRow.index}
@@ -394,6 +402,7 @@ export function NumberGrid({
 ```
 
 **Number Row Component**:
+
 ```typescript
 // src/components/NumberRow.tsx
 
@@ -421,7 +430,7 @@ export function NumberRow({
     { length: endNumber - startNumber + 1 },
     (_, i) => startNumber + i
   )
-  
+
   // Fetch status for this specific range of numbers
   const { data: slotsData, isLoading } = useQuery({
     queryKey: ['number-slots', drawingId, numbers],
@@ -431,11 +440,11 @@ export function NumberRow({
       ),
     staleTime: 30000, // Cache for 30 seconds
   })
-  
+
   const slotsByNumber = new Map(
     slotsData?.slots?.map((slot: any) => [slot.number, slot]) || []
   )
-  
+
   return (
     <div style={style} className="grid grid-cols-5 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-15 gap-2 px-4">
       {numbers.map((number) => (
@@ -454,6 +463,7 @@ export function NumberRow({
 ```
 
 **Number Cell Component**:
+
 ```typescript
 // src/components/NumberCell.tsx
 
@@ -481,13 +491,13 @@ export function NumberCell({
   const status = slot?.status || 'available'
   const isAvailable = status === 'available'
   const canSelect = isSelectable && isAvailable
-  
+
   const statusStyles = {
     available: 'bg-green-100 hover:bg-green-200 border-green-300 text-green-900',
     reserved: 'bg-yellow-100 border-yellow-300 text-yellow-900 cursor-not-allowed',
     taken: 'bg-red-100 border-red-300 text-red-900 cursor-not-allowed',
   }
-  
+
   return (
     <button
       onClick={canSelect ? onSelect : undefined}
@@ -516,6 +526,7 @@ export function NumberCell({
 #### Pagination Strategy
 
 **Infinite Scroll Implementation**:
+
 ```typescript
 // src/components/NumberGridInfinite.tsx
 
@@ -525,7 +536,7 @@ import { useRef } from 'react'
 
 export function NumberGridInfinite({ drawingId }: { drawingId: string }) {
   const loadMoreRef = useRef<HTMLDivElement>(null)
-  
+
   const {
     data,
     fetchNextPage,
@@ -540,14 +551,14 @@ export function NumberGridInfinite({ drawingId }: { drawingId: string }) {
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 1,
   })
-  
+
   // Auto-load more when scrolling near bottom
   useIntersection(loadMoreRef, () => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage()
     }
   })
-  
+
   return (
     <div className="space-y-4">
       {data?.pages.map((page, pageIndex) => (
@@ -557,7 +568,7 @@ export function NumberGridInfinite({ drawingId }: { drawingId: string }) {
           ))}
         </div>
       ))}
-      
+
       {hasNextPage && (
         <div ref={loadMoreRef} className="py-4 text-center">
           {isFetchingNextPage ? 'Loading more...' : 'Scroll for more'}
@@ -571,18 +582,19 @@ export function NumberGridInfinite({ drawingId }: { drawingId: string }) {
 ### 4. API Endpoints
 
 **Number Slots API**:
+
 ```typescript
 // src/routes/api/drawings/[drawingId]/slots.ts
 
 export async function GET({ params, request }: APIContext) {
   const { drawingId } = params
   const url = new URL(request.url)
-  
+
   const page = parseInt(url.searchParams.get('page') || '1')
   const pageSize = parseInt(url.searchParams.get('pageSize') || '100')
   const status = url.searchParams.get('status')
   const numbersParam = url.searchParams.get('numbers')
-  
+
   const query: NumberSlotsQuery = {
     drawingId,
     page,
@@ -590,9 +602,9 @@ export async function GET({ params, request }: APIContext) {
     status: status as any,
     numbers: numbersParam?.split(',').map(Number),
   }
-  
+
   const result = await getNumberSlots(query)
-  
+
   return new Response(JSON.stringify(result), {
     headers: { 'Content-Type': 'application/json' },
   })
@@ -600,13 +612,14 @@ export async function GET({ params, request }: APIContext) {
 ```
 
 **Drawing Stats API**:
+
 ```typescript
 // src/routes/api/drawings/[drawingId]/stats.ts
 
 export async function GET({ params }: APIContext) {
   const { drawingId } = params
   const stats = await getDrawingStats(drawingId)
-  
+
   return new Response(JSON.stringify(stats), {
     headers: { 'Content-Type': 'application/json' },
   })
@@ -614,15 +627,16 @@ export async function GET({ params }: APIContext) {
 ```
 
 **Reserve Number API**:
+
 ```typescript
 // src/routes/api/drawings/[drawingId]/reserve.ts
 
 export async function POST({ params, request }: APIContext) {
   const { drawingId } = params
   const { number } = await request.json()
-  
+
   const result = await reserveNumber(drawingId, number)
-  
+
   return new Response(JSON.stringify(result), {
     status: result.success ? 200 : 409,
     headers: { 'Content-Type': 'application/json' },
@@ -633,6 +647,7 @@ export async function POST({ params, request }: APIContext) {
 ### 5. Performance Optimizations
 
 #### Database Indexes
+
 ```sql
 -- Create indexes for optimal query performance
 CREATE INDEX idx_number_slots_drawing_status ON number_slots(drawing_id, status);
@@ -642,6 +657,7 @@ CREATE INDEX idx_participants_drawing ON participants(drawing_id);
 ```
 
 #### Caching Strategy
+
 ```typescript
 // React Query cache configuration
 const queryClient = new QueryClient({
@@ -665,13 +681,14 @@ function prefetchNextRows(drawingId: string, currentPage: number) {
 ```
 
 #### WebSocket for Real-time Updates
+
 ```typescript
 // Optional: Real-time updates for number availability
 const socket = new WebSocket(`wss://api.example.com/drawings/${drawingId}`)
 
 socket.onmessage = (event) => {
   const update = JSON.parse(event.data)
-  
+
   if (update.type === 'number_taken') {
     // Invalidate cache for affected number
     queryClient.invalidateQueries({
@@ -684,6 +701,7 @@ socket.onmessage = (event) => {
 ### 6. Mobile Optimization
 
 #### Responsive Grid Configuration
+
 ```typescript
 // Tailwind config for custom grid columns
 module.exports = {
@@ -699,6 +717,7 @@ module.exports = {
 ```
 
 #### Touch-friendly Interface
+
 ```typescript
 // Larger touch targets for mobile
 const cellSize = {
@@ -711,30 +730,35 @@ const cellSize = {
 ### 7. Implementation Phases
 
 #### Phase 1: Database Migration
+
 1. Create `number_slots` table
 2. Add indexes
 3. Migrate existing data from `participants.selectedNumber` to `number_slots`
 4. Update schema relations
 
 #### Phase 2: Backend APIs
+
 1. Implement number slot management utilities
 2. Create API endpoints for fetching slots
 3. Add reservation and confirmation logic
 4. Set up background job for expired reservations
 
 #### Phase 3: Frontend Components
+
 1. Build basic number grid with pagination
 2. Implement virtual scrolling
 3. Add responsive breakpoints
 4. Create number selection flow
 
 #### Phase 4: Optimization
+
 1. Add React Query caching
 2. Implement prefetching
 3. Add loading states and skeletons
 4. Optimize bundle size
 
 #### Phase 5: Real-time Features (Optional)
+
 1. Set up WebSocket server
 2. Add real-time status updates
 3. Implement optimistic UI updates
@@ -742,6 +766,7 @@ const cellSize = {
 ### 8. Testing Strategy
 
 #### Unit Tests
+
 ```typescript
 describe('Number Slots Manager', () => {
   it('should initialize slots correctly', async () => {
@@ -750,19 +775,22 @@ describe('Number Slots Manager', () => {
     expect(result.totalCount).toBe(100)
     expect(result.availableCount).toBe(100)
   })
-  
+
   it('should reserve number temporarily', async () => {
     const result = await reserveNumber('test-drawing', 42)
     expect(result.success).toBe(true)
-    
-    const slots = await getNumberSlots({ drawingId: 'test-drawing', numbers: [42] })
+
+    const slots = await getNumberSlots({
+      drawingId: 'test-drawing',
+      numbers: [42],
+    })
     expect(slots.slots[0].status).toBe('reserved')
   })
-  
+
   it('should release expired reservations', async () => {
     // Create expired reservation
     await reserveNumber('test-drawing', 50, -1) // -1 minutes = already expired
-    
+
     const released = await releaseExpiredReservations()
     expect(released).toBeGreaterThan(0)
   })
@@ -770,13 +798,14 @@ describe('Number Slots Manager', () => {
 ```
 
 #### Performance Tests
+
 ```typescript
 describe('Performance', () => {
   it('should handle 1000 numbers efficiently', async () => {
     const start = performance.now()
     await getNumberSlots({ drawingId: 'large-drawing', pageSize: 100 })
     const duration = performance.now() - start
-    
+
     expect(duration).toBeLessThan(100) // Should complete in under 100ms
   })
 })
@@ -813,6 +842,7 @@ function logPerformance(metric: string, value: number) {
 This strategy provides a comprehensive solution for efficiently rendering and managing participants in the drawing giveaway application:
 
 **Key Benefits**:
+
 1. ✅ **Scalable**: Handles thousands of numbers efficiently
 2. ✅ **Fast**: Virtual scrolling and pagination minimize rendering overhead
 3. ✅ **Responsive**: Adaptive grid layout works on all screen sizes
@@ -821,12 +851,14 @@ This strategy provides a comprehensive solution for efficiently rendering and ma
 6. ✅ **Secure**: Proper validation and authorization
 
 **Performance Improvements**:
+
 - 95% reduction in initial data load (only fetch visible numbers)
 - Smooth scrolling with virtual rendering
 - Instant number availability checks
 - Sub-100ms API response times
 
 **Next Steps**:
+
 1. Review and approve this strategy
 2. Begin Phase 1 implementation (database migration)
 3. Implement core APIs and utilities
@@ -837,22 +869,26 @@ This strategy provides a comprehensive solution for efficiently rendering and ma
 ## Technical Decisions Rationale
 
 ### Why Separate `number_slots` Table?
+
 - **Separation of Concerns**: Number availability is different from participant data
 - **Performance**: Query only what you need (slots vs full participant info)
 - **Flexibility**: Support features like temporary reservations
 - **Scalability**: Index optimization specifically for slot queries
 
 ### Why Virtual Scrolling?
+
 - **Browser Performance**: DOM nodes are expensive; virtual scrolling keeps DOM size constant
 - **Memory Efficiency**: Only render visible items
 - **User Experience**: Smooth scrolling even with 1000+ items
 
 ### Why Cursor-based Pagination?
+
 - **Consistency**: Results don't shift if items are added/removed
 - **Performance**: More efficient than offset-based for large datasets
 - **Real-time**: Works better with real-time updates
 
 ### Why React Query?
+
 - **Built-in Caching**: Reduces unnecessary API calls
 - **Prefetching**: Improves perceived performance
 - **Automatic Refetching**: Keeps data fresh

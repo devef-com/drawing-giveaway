@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { Image, CircleAlert, InfoIcon } from 'lucide-react'
+import { CircleAlert, Image, InfoIcon } from 'lucide-react'
 import type { DrawingStats } from '@/lib/number-slots'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,11 +43,13 @@ interface FormProps {
     email: string
     phone: string
   }
-  setFormData: React.Dispatch<React.SetStateAction<{
-    name: string
-    email: string
-    phone: string
-  }>>
+  setFormData: React.Dispatch<
+    React.SetStateAction<{
+      name: string
+      email: string
+      phone: string
+    }>
+  >
   drawing: Drawing
 }
 
@@ -102,9 +104,12 @@ const Form: React.FC<FormProps> = ({ formData, setFormData, drawing }) => {
           <div className="flex items-start gap-3">
             <CircleAlert className="w-6 h-6 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-yellow-800 dark:text-yellow-200 font-medium">Payment Required</p>
+              <p className="text-yellow-800 dark:text-yellow-200 font-medium">
+                Payment Required
+              </p>
               <p className="text-yellow-700 dark:text-yellow-100 text-sm mt-1">
-                This is a paid event. Attach your payment proof to confirm your participation.
+                This is a paid event. Attach your payment proof to confirm your
+                participation.
               </p>
             </div>
           </div>
@@ -132,7 +137,9 @@ function SlotDrawingParticipation() {
 
   const NUMBERS_PER_PAGE = 6 * 17 // 6 columns × 17 rows = 102 numbers per page
 
-  const { data: reservationTimeData } = useQuery<{ reservationTimeMinutes: number }>({
+  const { data: reservationTimeData } = useQuery<{
+    reservationTimeMinutes: number
+  }>({
     queryKey: ['reservation-time'],
     queryFn: async () => {
       const response = await fetch(`/api/drawings/reservation-time`)
@@ -164,7 +171,9 @@ function SlotDrawingParticipation() {
   })
 
   // Calculate total pages
-  const totalPages = drawing ? Math.ceil(drawing.quantityOfNumbers / NUMBERS_PER_PAGE) : 0
+  const totalPages = drawing
+    ? Math.ceil(drawing.quantityOfNumbers / NUMBERS_PER_PAGE)
+    : 0
 
   // Fetch slots for current page and adjacent pages (batched loading for optimization)
   const { data: slotsData } = useQuery<NumberSlotsData>({
@@ -179,17 +188,20 @@ function SlotDrawingParticipation() {
         Math.min(totalPages - 1, currentPage + 1),
       ].filter((page, index, array) => array.indexOf(page) === index) // Remove duplicates
 
-      const numbersToFetch: number[] = []
-      pagesToFetch.forEach(page => {
+      const numbersToFetch: Array<number> = []
+      pagesToFetch.forEach((page) => {
         const startIdx = page * NUMBERS_PER_PAGE
-        const endIdx = Math.min(startIdx + NUMBERS_PER_PAGE, drawing.quantityOfNumbers)
+        const endIdx = Math.min(
+          startIdx + NUMBERS_PER_PAGE,
+          drawing.quantityOfNumbers,
+        )
         for (let i = startIdx; i < endIdx; i++) {
           numbersToFetch.push(i + 1)
         }
       })
 
       const response = await fetch(
-        `/api/drawings/${drawingId}/slots?numbers=${numbersToFetch.join(',')}`
+        `/api/drawings/${drawingId}/slots?numbers=${numbersToFetch.join(',')}`,
       )
       if (!response.ok) throw new Error('Failed to fetch slots')
       return response.json()
@@ -207,7 +219,6 @@ function SlotDrawingParticipation() {
     // Invalidate slots query to refresh the grid and show any released numbers
     queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
   }, [drawingId, queryClient])
-
 
   // Handle scroll to update active page
   useEffect(() => {
@@ -293,7 +304,7 @@ function SlotDrawingParticipation() {
     } else {
       // Paid giveaway: allow multiple selections
       if (selectedNumbers.includes(number)) {
-        setSelectedNumbers(selectedNumbers.filter(n => n !== number))
+        setSelectedNumbers(selectedNumbers.filter((n) => n !== number))
         return
       }
       setSelectedNumbers([...selectedNumbers, number])
@@ -306,16 +317,19 @@ function SlotDrawingParticipation() {
 
     try {
       // Reserve all selected numbers before navigation
-      const reservationPromises = selectedNumbers.map(number =>
+      const reservationPromises = selectedNumbers.map((number) =>
         fetch(`/api/drawings/${drawingId}/reserve`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ number, expirationMinutes: reservationTimeData?.reservationTimeMinutes || 4 }),
-        })
+          body: JSON.stringify({
+            number,
+            expirationMinutes: reservationTimeData?.reservationTimeMinutes || 4,
+          }),
+        }),
       )
 
       const responses = await Promise.all(reservationPromises)
-      const allSuccessful = responses.every(r => r.ok)
+      const allSuccessful = responses.every((r) => r.ok)
 
       if (allSuccessful) {
         // Store reservation in localStorage with timestamp
@@ -325,7 +339,7 @@ function SlotDrawingParticipation() {
         const reservationData = JSON.stringify({
           timestamp: Date.now(),
           numbers: selectedNumbers,
-          drawingId
+          drawingId,
         })
 
         localStorage.setItem(reservationKey, reservationData)
@@ -351,8 +365,8 @@ function SlotDrawingParticipation() {
           to: '/slot/$drawingId/$numberToReserve',
           params: {
             drawingId,
-            numberToReserve: selectedNumbers.join(',')
-          }
+            numberToReserve: selectedNumbers.join(','),
+          },
         })
       } else {
         toast.error('Some numbers could not be reserved. Please try again.')
@@ -367,7 +381,9 @@ function SlotDrawingParticipation() {
 
   // Submit registration mutation
   const participateMutation = useMutation({
-    mutationFn: async (data: typeof formData & { selectedNumbers?: Array<number> }) => {
+    mutationFn: async (
+      data: typeof formData & { selectedNumbers?: Array<number> },
+    ) => {
       const response = await fetch(`/api/drawings/${drawingId}/participate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -397,13 +413,12 @@ function SlotDrawingParticipation() {
 
     const registrationData = {
       ...formData,
-      selectedNumbers: drawing?.winnerSelection === 'number' ? selectedNumbers : undefined,
+      selectedNumbers:
+        drawing?.winnerSelection === 'number' ? selectedNumbers : undefined,
     }
 
     participateMutation.mutate(registrationData)
   }
-
-
 
   // Loading state
   if (drawingLoading) {
@@ -429,7 +444,10 @@ function SlotDrawingParticipation() {
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center text-xl">Drawing not found</p>
             <div className="text-center mt-4">
-              <Button onClick={() => navigate({ to: '/' })} className="bg-cyan-600 hover:bg-cyan-700">
+              <Button
+                onClick={() => navigate({ to: '/' })}
+                className="bg-cyan-600 hover:bg-cyan-700"
+              >
                 Go Home
               </Button>
             </div>
@@ -445,7 +463,7 @@ function SlotDrawingParticipation() {
         {/* Drawing Details Card */}
         <DrawingSlotHeader drawing={drawing} stats={stats} />
         <div className="grid grid-cols-[max-content_1fr] items-center gap-4 mb-4">
-          <Image size={120} strokeWidth={.7} />
+          <Image size={120} strokeWidth={0.7} />
           {drawing.guidelines && drawing.guidelines.length > 0 && (
             <div>
               <h2 className="font-regular mb-2 text-text-light-primary dark:text-text-dark-primary">
@@ -476,10 +494,13 @@ function SlotDrawingParticipation() {
                 {/* Generate pages */}
                 {Array.from({ length: totalPages }, (_, pageIndex) => {
                   const startIdx = pageIndex * NUMBERS_PER_PAGE
-                  const endIdx = Math.min(startIdx + NUMBERS_PER_PAGE, drawing.quantityOfNumbers)
+                  const endIdx = Math.min(
+                    startIdx + NUMBERS_PER_PAGE,
+                    drawing.quantityOfNumbers,
+                  )
                   const pageNumbers = Array.from(
                     { length: endIdx - startIdx },
-                    (_unused, i) => startIdx + i + 1
+                    (_unused, i) => startIdx + i + 1,
                   )
 
                   return (
@@ -493,31 +514,38 @@ function SlotDrawingParticipation() {
                     >
                       <div className="grid grid-cols-6 gap-2 pb-4">
                         {pageNumbers.map((number) => {
-                          const slot = slotsData?.slots.find(s => s.number === number)
+                          const slot = slotsData?.slots.find(
+                            (s) => s.number === number,
+                          )
                           const isSelected = selectedNumbers.includes(number)
-                          const isAvailable = !slot || slot.status === 'available'
+                          const isAvailable =
+                            !slot || slot.status === 'available'
                           const isTaken = slot?.status === 'taken'
                           const isReserved = slot?.status === 'reserved'
 
                           return (
                             <button
                               key={number}
-                              onClick={() => isAvailable && handleNumberSelect(number)}
+                              onClick={() =>
+                                isAvailable && handleNumberSelect(number)
+                              }
                               disabled={!isAvailable}
                               className={`
                                 aspect-square w-full px-0 py-0 rounded-lg flex items-center justify-center 
                                 text-xl font-normal transition-colors duration-200 cursor-pointer
-                                border ${isSelected
-                                  ? 'bg-[#14b8a6] border-[#14b8a6] text-white'
-                                  : isTaken
-                                    ? 'bg-red-500/20 border-red-500/50 text-red-300 cursor-not-allowed'
-                                    : isReserved
-                                      ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300 cursor-not-allowed'
-                                      : 'border-border-light dark:border-border-dark text-text-light-primary dark:text-text-dark-primary bg-background-light dark:bg-background-dark hover:bg-[#14b8a6]/10'
+                                border ${
+                                  isSelected
+                                    ? 'bg-[#14b8a6] border-[#14b8a6] text-white'
+                                    : isTaken
+                                      ? 'bg-red-500/20 border-red-500/50 text-red-300 cursor-not-allowed'
+                                      : isReserved
+                                        ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300 cursor-not-allowed'
+                                        : 'border-border-light dark:border-border-dark text-text-light-primary dark:text-text-dark-primary bg-background-light dark:bg-background-dark hover:bg-[#14b8a6]/10'
                                 }
                               `}
                               style={{
-                                boxShadow: '0px 2px 0px 0px rgba(216,216,216,0.25)',
+                                boxShadow:
+                                  '0px 2px 0px 0px rgba(216,216,216,0.25)',
                               }}
                             >
                               {number}
@@ -537,27 +565,57 @@ function SlotDrawingParticipation() {
             {/* Floating Footer with Arrow and Dots - Positioned dynamically */}
             <div
               ref={floatingControlsRef}
-              className={cn("p-2 rounded-lg z-10 bg-linear-to-t from-white via-white/80 to-transparent dark:from-slate-900 dark:via-slate-900/80 backdrop-blur-sm", selectedNumbers.length === 0 && totalPages <= 1 && 'hidden')}
+              className={cn(
+                'p-2 rounded-lg z-10 bg-linear-to-t from-white via-white/80 to-transparent dark:from-slate-900 dark:via-slate-900/80 backdrop-blur-sm',
+                selectedNumbers.length === 0 && totalPages <= 1 && 'hidden',
+              )}
             >
               <div
-                className={cn("w-[47px] h-[47px] grid justify-center items-center mx-auto bg-[#14b8a6] rounded-full cursor-pointer hover:bg-[#0d9488] transition-colors", selectedNumbers.length === 0 && 'hidden')}
+                className={cn(
+                  'w-[47px] h-[47px] grid justify-center items-center mx-auto bg-[#14b8a6] rounded-full cursor-pointer hover:bg-[#0d9488] transition-colors',
+                  selectedNumbers.length === 0 && 'hidden',
+                )}
                 onClick={handleReserveNumbers}
               >
-                <svg width="31" height="31" viewBox="0 0 31 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19.4235 9.34772L25.1786 15.1057L19.4235 20.8622" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M6.47449 15.1071H25.1786" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <svg
+                  width="31"
+                  height="31"
+                  viewBox="0 0 31 31"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M19.4235 9.34772L25.1786 15.1057L19.4235 20.8622"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M6.47449 15.1071H25.1786"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
-              <div className={cn("flex justify-center items-center mt-3 z-10", totalPages <= 1 && 'hidden')}>
+              <div
+                className={cn(
+                  'flex justify-center items-center mt-3 z-10',
+                  totalPages <= 1 && 'hidden',
+                )}
+              >
                 <div className="flex items-center space-x-2 rounded-full p-1.5 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark">
                   {Array.from({ length: totalPages }, (_, i) => (
                     <button
                       key={i}
                       onClick={() => goToPage(i)}
-                      className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${i === currentPage
-                        ? 'w-3 h-3 bg-[#14b8a6]'
-                        : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
-                        }`}
+                      className={`rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 ${
+                        i === currentPage
+                          ? 'w-3 h-3 bg-[#14b8a6]'
+                          : 'w-2.5 h-2.5 bg-border-light dark:bg-border-dark'
+                      }`}
                     />
                   ))}
                 </div>
@@ -570,14 +628,20 @@ function SlotDrawingParticipation() {
             </div>
           </div>
         )}
-
       </div>
 
       {/* Registration Form for Random Drawing - Drawer */}
       {drawing.winnerSelection === 'random' && (
         <div>
-          <form onSubmit={handleSubmit} className="space-y-4 sm:max-w-[600px] sm:mx-auto px-4">
-            <Form formData={formData} setFormData={setFormData} drawing={drawing} />
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4 sm:max-w-[600px] sm:mx-auto px-4"
+          >
+            <Form
+              formData={formData}
+              setFormData={setFormData}
+              drawing={drawing}
+            />
             <div className="px-0 pb-4 flex justify-center">
               <Button
                 type="submit"
@@ -598,31 +662,41 @@ function SlotDrawingParticipation() {
         </div>
       )}
 
-
       {/* Help/Info Section */}
       <Card className="p-4 gap-2 bg-white dark:bg-slate-800/30 dark:border-slate-700 sm:max-w-[600px] mx-2 md:mx-auto mt-2 mb-4">
         <div className="flex items-center gap-2 text-sm text-gray-400">
-          <InfoIcon
-            className="w-5 h-5 text-cyan-400"
-          />
-          <p className="text-text-light-primary dark:text-text-dark-primary font-medium ">How it works:</p>
-
+          <InfoIcon className="w-5 h-5 text-cyan-400" />
+          <p className="text-text-light-primary dark:text-text-dark-primary font-medium ">
+            How it works:
+          </p>
         </div>
         <ul className="space-y-1 ml-4 text-sm text-gray-600 dark:text-gray-400">
           {drawing.winnerSelection === 'number' ? (
             <>
-              <li>• Select {drawing.isPaid ? 'one or more numbers' : 'a number'} from the grid</li>
+              <li>
+                • Select {drawing.isPaid ? 'one or more numbers' : 'a number'}{' '}
+                from the grid
+              </li>
               <li>• Click the arrow button to proceed</li>
-              <li>• Your {drawing.isPaid ? 'numbers' : 'number'} will be reserved for {reservationTimeData?.reservationTimeMinutes || 4} minutes</li>
+              <li>
+                • Your {drawing.isPaid ? 'numbers' : 'number'} will be reserved
+                for {reservationTimeData?.reservationTimeMinutes || 4} minutes
+              </li>
               <li>• Complete the registration form with your details</li>
-              {drawing.isPaid && <li>• Upload payment proof to confirm your participation</li>}
+              {drawing.isPaid && (
+                <li>• Upload payment proof to confirm your participation</li>
+              )}
               <li>• Wait for the drawing date to see if you win!</li>
             </>
           ) : (
             <>
               <li>• Fill out the registration form with your details</li>
-              {drawing.isPaid && <li>• Upload payment proof to confirm your participation</li>}
-              <li>• The winner will be selected randomly on the drawing date</li>
+              {drawing.isPaid && (
+                <li>• Upload payment proof to confirm your participation</li>
+              )}
+              <li>
+                • The winner will be selected randomly on the drawing date
+              </li>
             </>
           )}
         </ul>
@@ -634,7 +708,6 @@ function SlotDrawingParticipation() {
           display: none;
         }
       `}</style>
-    </div >
-
+    </div>
   )
 }
