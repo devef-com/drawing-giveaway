@@ -1,0 +1,35 @@
+import { useQuery } from '@tanstack/react-query'
+
+interface NumberSlotsData {
+  slots: Array<{
+    number: number
+    status: 'available' | 'reserved' | 'taken'
+    participantName?: string
+    expiresAt?: string
+  }>
+}
+
+export function useNumberSlots(
+  drawingId: string,
+  numbers: Array<number>,
+  enabled = true,
+  options?: {
+    staleTime?: number
+    refetchOnWindowFocus?: boolean
+    queryKey?: Array<string | number>
+  },
+) {
+  return useQuery<NumberSlotsData>({
+    queryKey: options?.queryKey || ['number-slots', drawingId, ...numbers],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/drawings/${drawingId}/slots?numbers=${numbers.join(',')}`,
+      )
+      if (!response.ok) throw new Error('Failed to fetch slots')
+      return response.json()
+    },
+    enabled,
+    staleTime: options?.staleTime,
+    refetchOnWindowFocus: options?.refetchOnWindowFocus,
+  })
+}
