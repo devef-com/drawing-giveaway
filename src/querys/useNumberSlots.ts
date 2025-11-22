@@ -19,7 +19,7 @@ export function useNumberSlots(
     queryKey?: Array<string | number>
   },
 ) {
-  // Sort numbers to ensure consistent query keys regardless of input order
+  // Sort numbers to ensure consistent query keys and API calls
   const sortedNumbers = [...numbers].sort((a, b) => a - b)
   
   return useQuery<NumberSlotsData>({

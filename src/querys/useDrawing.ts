@@ -1,16 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-
-interface Drawing {
-  id: string
-  title: string
-  guidelines: Array<string> | null
-  isPaid: boolean
-  price: number
-  winnerSelection: 'random' | 'number'
-  quantityOfNumbers: number
-  endAt: string
-  createdAt: string
-}
+import type { Drawing } from '@/db/schema'
 
 export function useDrawing(drawingId: string, enabled = true) {
   return useQuery<Drawing>({

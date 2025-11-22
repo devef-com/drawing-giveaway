@@ -162,7 +162,7 @@ function SlotDrawingParticipation() {
     })
 
     return numbers
-  }, [drawing, currentPage, totalPages, NUMBERS_PER_PAGE])
+  }, [drawing, currentPage, totalPages])
 
   const { data: slotsData } = useNumberSlots(
     drawingId,

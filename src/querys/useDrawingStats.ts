@@ -1,12 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-
-interface DrawingStats {
-  total: number
-  available: number
-  taken: number
-  reserved: number
-  percentageTaken: number
-}
+import type { DrawingStats } from '@/lib/number-slots'
 
 export function useDrawingStats(
   drawingId: string,
