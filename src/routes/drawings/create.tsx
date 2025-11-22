@@ -4,6 +4,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Send, EraserIcon, Pencil, Trash2 } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 
 export const Route = createFileRoute('/drawings/create')({
@@ -15,7 +23,7 @@ function CreateDrawing() {
   const session = authClient.useSession()
   const [formData, setFormData] = useState({
     title: '',
-    guidelines: [''],
+    guidelines: [] as string[],
     isPaid: false,
     price: 0,
     winnerSelection: 'random' as 'random' | 'number',
@@ -26,20 +34,36 @@ function CreateDrawing() {
     endAt: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const handleGuidelineChange = (index: number, value: string) => {
-    const newGuidelines = [...formData.guidelines]
-    newGuidelines[index] = value
-    setFormData({ ...formData, guidelines: newGuidelines })
-  }
+  const [currentGuideline, setCurrentGuideline] = useState('')
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
   const addGuideline = () => {
-    setFormData({ ...formData, guidelines: [...formData.guidelines, ''] })
+    if (!currentGuideline.trim()) return
+
+    if (editingIndex !== null) {
+      const newGuidelines = [...formData.guidelines]
+      newGuidelines[editingIndex] = currentGuideline
+      setFormData({ ...formData, guidelines: newGuidelines })
+      setEditingIndex(null)
+    } else {
+      setFormData({ ...formData, guidelines: [...formData.guidelines, currentGuideline] })
+    }
+    setCurrentGuideline('')
   }
 
   const removeGuideline = (index: number) => {
     const newGuidelines = formData.guidelines.filter((_, i) => i !== index)
     setFormData({ ...formData, guidelines: newGuidelines })
+  }
+
+  const editGuideline = (index: number) => {
+    setCurrentGuideline(formData.guidelines[index])
+    setEditingIndex(index)
+  }
+
+  const clearGuideline = () => {
+    setCurrentGuideline('')
+    setEditingIndex(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -100,7 +124,7 @@ function CreateDrawing() {
     <div className="min-h-screen p-6">
       <div className="max-w-2xl mx-auto">
         <Card className="p-6">
-          <h1 className="text-3xl font-bold mb-3">
+          <h1 className="text-xl font-bold mb-2">
             Create New Drawing
           </h1>
 
@@ -120,34 +144,80 @@ function CreateDrawing() {
             </div>
 
             <div>
-              <Label className='mb-1'>Guidelines (Optional)</Label>
-              {formData.guidelines.map((guideline, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <Input
-                    value={guideline}
-                    onChange={(e) =>
-                      handleGuidelineChange(index, e.target.value)
+              <Label className='mb-2'>Guidelines (Optional)</Label>
+              <div className="relative">
+                <textarea
+                  value={currentGuideline}
+                  onChange={(e) => setCurrentGuideline(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault()
+                      addGuideline();
+                      (e.target as HTMLTextAreaElement).style.height = 'auto'
                     }
-                    placeholder={`Guideline ${index + 1}`}
-                  />
-                  {formData.guidelines.length > 1 && (
-                    <Button
-                      type="button"
-                      onClick={() => removeGuideline(index)}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      Remove
-                    </Button>
-                  )}
+                  }}
+                  placeholder="Enter guideline text..."
+                  className="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 pr-24 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none overflow-hidden"
+                  style={{
+                    height: 'auto',
+                    minHeight: '80px',
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement
+                    target.style.height = 'auto'
+                    target.style.height = target.scrollHeight + 'px'
+                  }}
+                />
+                <div className="absolute bottom-4 right-2 flex gap-1">
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={clearGuideline}
+                    disabled={!currentGuideline}
+                  >
+                    <EraserIcon className="size-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    onClick={addGuideline}
+                    disabled={!currentGuideline.trim()}
+                    className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90"
+                  >
+                    <Send className="size-4" />
+                  </Button>
                 </div>
-              ))}
-              <Button
-                type="button"
-                onClick={addGuideline}
-                className="bg-slate-600 hover:bg-slate-700 mt-2"
-              >
-                Add Guideline
-              </Button>
+              </div>
+
+              {formData.guidelines.length > 0 && (
+                <ul className="mt-3 space-y-2">
+                  {formData.guidelines.map((guideline, index) => (
+                    <li key={index} className="flex items-start gap-2 group ml-2">
+                      <span className="flex-1 inline-flex items-center gap-2 text-sm py-1.5"><div className='bg-primary w-2 h-2 rounded-full' /> {guideline}</span>
+                      <div className="flex gap-1">
+                        <Button
+                          type="button"
+                          size="icon-sm"
+                          variant="outline"
+                          onClick={() => editGuideline(index)}
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          size="icon-sm"
+                          variant="outline"
+                          onClick={() => removeGuideline(index)}
+                          className="text-destructive hover:text-destructive border-red-200 dark:border-red-800/20"
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -191,21 +261,23 @@ function CreateDrawing() {
               <Label htmlFor="winnerSelection" className='mb-1'>
                 Winner Selection Method
               </Label>
-              <select
-                id="winnerSelection"
+              <Select
                 value={formData.winnerSelection}
-                onChange={(e) =>
+                onValueChange={(value) =>
                   setFormData({
                     ...formData,
-                    winnerSelection: e.target.value as 'random' | 'number',
+                    winnerSelection: value as 'random' | 'number',
                   })
                 }
-                className="w-full p-2 border rounded"
-                required
               >
-                <option value="random">Random Selection</option>
-                <option value="number">Number Selection</option>
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select winner selection method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="random">Random Selection</SelectItem>
+                  <SelectItem value="number">Number Selection</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -233,22 +305,24 @@ function CreateDrawing() {
                   <Label htmlFor="quantityOfNumbers" className='mb-1'>
                     Quantity of Numbers
                   </Label>
-                  <select
-                    id="quantityOfNumbers"
-                    value={formData.quantityOfNumbers}
-                    onChange={(e) =>
+                  <Select
+                    value={formData.quantityOfNumbers.toString()}
+                    onValueChange={(value) =>
                       setFormData({
                         ...formData,
-                        quantityOfNumbers: parseInt(e.target.value),
+                        quantityOfNumbers: parseInt(value),
                       })
                     }
-                    className="w-full p-2 border rounded"
-                    required
                   >
-                    <option value="100">100</option>
-                    <option value="500">500</option>
-                    <option value="1000">1000</option>
-                  </select>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select quantity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="100">100</SelectItem>
+                      <SelectItem value="500">500</SelectItem>
+                      <SelectItem value="1000">1000</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="flex items-center gap-2">
