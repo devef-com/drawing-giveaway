@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { Download } from 'lucide-react'
 // import html2pdf from "html2pdf.js";
 import QRCodeSVG from 'qrcode-svg'
 import { jsPDF } from 'jspdf'
@@ -7,6 +8,7 @@ import 'svg2pdf.js'
 import type { Participant } from '@/db/schema'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/drawings/$drawingId/p/$participateId')({
   component: RouteComponent,
@@ -181,13 +183,11 @@ function RouteComponent() {
             </div>
           </div>
 
-          <div>
-            <button
-              onClick={handleDownloadPdf}
-              className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Download PDF
-            </button>
+          <div className="mt-6 flex justify-center">
+            <Button variant="outline" onClick={handleDownloadPdf}>
+              <Download className="mr-2 h-4 w-4" />
+              Download ticket
+            </Button>
           </div>
         </>
       ) : isLoading ? (
