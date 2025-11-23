@@ -48,7 +48,8 @@ export const Route = createFileRoute('/api/participant/$participantId')({
           if (!hasOwnership) {
             return new Response(
               JSON.stringify({
-                error: 'Forbidden: You do not have permission to update this participant',
+                error:
+                  'Forbidden: You do not have permission to update this participant',
               }),
               {
                 status: 403,
@@ -75,7 +76,9 @@ export const Route = createFileRoute('/api/participant/$participantId')({
 
           if (!body.status || typeof body.status !== 'string') {
             return new Response(
-              JSON.stringify({ error: 'Status is required and must be a string' }),
+              JSON.stringify({
+                error: 'Status is required and must be a string',
+              }),
               {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },
@@ -84,11 +87,16 @@ export const Route = createFileRoute('/api/participant/$participantId')({
           }
 
           // Validate status value
-          const validStatuses: ParticipantStatus[] = ['pending', 'approved', 'rejected']
+          const validStatuses: ParticipantStatus[] = [
+            'pending',
+            'approved',
+            'rejected',
+          ]
           if (!validStatuses.includes(body.status)) {
             return new Response(
               JSON.stringify({
-                error: 'Invalid status. Must be one of: pending, approved, rejected',
+                error:
+                  'Invalid status. Must be one of: pending, approved, rejected',
               }),
               {
                 status: 400,
@@ -105,7 +113,9 @@ export const Route = createFileRoute('/api/participant/$participantId')({
 
           if (!result.success) {
             return new Response(
-              JSON.stringify({ error: result.message || 'Failed to update participant status' }),
+              JSON.stringify({
+                error: result.message || 'Failed to update participant status',
+              }),
               {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },

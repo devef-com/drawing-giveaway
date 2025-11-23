@@ -31,10 +31,10 @@ export interface UpdateParticipantStatusResult {
 
 /**
  * Convert ParticipantStatus to is_eligible boolean value
- * 
+ *
  * @param status - The participant status
  * @returns The corresponding is_eligible value (null, true, or false)
- * 
+ *
  * @example
  * statusToIsEligible('pending') // returns null
  * statusToIsEligible('approved') // returns true
@@ -55,16 +55,18 @@ export function statusToIsEligible(status: ParticipantStatus): boolean | null {
 
 /**
  * Convert is_eligible boolean value to ParticipantStatus
- * 
+ *
  * @param isEligible - The is_eligible value
  * @returns The corresponding participant status
- * 
+ *
  * @example
  * isEligibleToStatus(null) // returns 'pending'
  * isEligibleToStatus(true) // returns 'approved'
  * isEligibleToStatus(false) // returns 'rejected'
  */
-export function isEligibleToStatus(isEligible: boolean | null): ParticipantStatus {
+export function isEligibleToStatus(
+  isEligible: boolean | null,
+): ParticipantStatus {
   if (isEligible === null) return 'pending'
   return isEligible ? 'approved' : 'rejected'
 }
@@ -72,11 +74,11 @@ export function isEligibleToStatus(isEligible: boolean | null): ParticipantStatu
 /**
  * Update participant status
  * Changes the is_eligible field based on the provided status
- * 
+ *
  * @param participantId - The participant identifier
  * @param status - The new status ('pending', 'approved', or 'rejected')
  * @returns Result object with success status and optional message
- * 
+ *
  * @example
  * const result = await updateParticipantStatus(123, 'approved')
  * if (result.success) {
@@ -111,7 +113,10 @@ export async function updateParticipantStatus(
     console.error('Failed to update participant status:', error)
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Failed to update participant status',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Failed to update participant status',
     }
   }
 }
@@ -119,11 +124,11 @@ export async function updateParticipantStatus(
 /**
  * Verify that a participant belongs to a drawing owned by a specific user
  * This is important for authorization checks
- * 
+ *
  * @param participantId - The participant identifier
  * @param userId - The user identifier (drawing owner)
  * @returns True if the participant's drawing is owned by the user, false otherwise
- * 
+ *
  * @example
  * const canUpdate = await verifyParticipantOwnership(123, 'user-456')
  * if (canUpdate) {
@@ -142,10 +147,7 @@ export async function verifyParticipantOwnership(
       .from(participants)
       .innerJoin(drawings, eq(participants.drawingId, drawings.id))
       .where(
-        and(
-          eq(participants.id, participantId),
-          eq(drawings.userId, userId)
-        )
+        and(eq(participants.id, participantId), eq(drawings.userId, userId)),
       )
       .limit(1)
 
