@@ -21,9 +21,13 @@ export function useNumberSlots(
 ) {
   // Sort numbers to ensure consistent query keys and API calls
   const sortedNumbers = [...numbers].sort((a, b) => a - b)
-  
+
   return useQuery<NumberSlotsData>({
-    queryKey: options?.queryKey || ['number-slots', drawingId, ...sortedNumbers],
+    queryKey: options?.queryKey || [
+      'number-slots',
+      drawingId,
+      ...sortedNumbers,
+    ],
     queryFn: async () => {
       const response = await fetch(
         `/api/drawings/${drawingId}/slots?numbers=${sortedNumbers.join(',')}`,

@@ -202,17 +202,14 @@ function ReserveNumberForm() {
   }, []) // Empty deps - only runs on mount/unmount
 
   // Submit registration mutation
-  const participateMutation = useParticipate(
-    drawingId,
-    (data: Participant) => {
-      // Clean up localStorage on successful registration
-      localStorage.removeItem(reservationKey)
+  const participateMutation = useParticipate(drawingId, (data: Participant) => {
+    // Clean up localStorage on successful registration
+    localStorage.removeItem(reservationKey)
 
-      queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
-      queryClient.invalidateQueries({ queryKey: ['drawing-stats', drawingId] })
-      navigate({ to: `/drawings/${drawingId}/p/${data.id}`, replace: true })
-    },
-  )
+    queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
+    queryClient.invalidateQueries({ queryKey: ['drawing-stats', drawingId] })
+    navigate({ to: `/drawings/${drawingId}/p/${data.id}`, replace: true })
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { EraserIcon, Pencil, Trash2, CalendarIcon, PlusIcon } from 'lucide-react'
+import {
+  EraserIcon,
+  Pencil,
+  Trash2,
+  CalendarIcon,
+  PlusIcon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -53,7 +59,10 @@ function CreateDrawing() {
   const [currentGuideline, setCurrentGuideline] = useState('')
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date>()
-  const [selectedTime, setSelectedTime] = useState({ hours: '12', minutes: '00' })
+  const [selectedTime, setSelectedTime] = useState({
+    hours: '12',
+    minutes: '00',
+  })
   const [isOpen, setIsOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [endAtError, setEndAtError] = useState('')
@@ -76,7 +85,10 @@ function CreateDrawing() {
       setFormData({ ...formData, guidelines: newGuidelines })
       setEditingIndex(null)
     } else {
-      setFormData({ ...formData, guidelines: [...formData.guidelines, currentGuideline] })
+      setFormData({
+        ...formData,
+        guidelines: [...formData.guidelines, currentGuideline],
+      })
     }
     setCurrentGuideline('')
   }
@@ -204,13 +216,11 @@ function CreateDrawing() {
     <div className="min-h-screen p-6">
       <div className="max-w-2xl mx-auto">
         <Card className="p-6">
-          <h1 className="text-xl font-bold mb-2">
-            Create New Drawing
-          </h1>
+          <h1 className="text-xl font-bold mb-2">Create New Drawing</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <Label htmlFor="title" className='mb-1'>
+              <Label htmlFor="title" className="mb-1">
                 Title
               </Label>
               <Input
@@ -224,7 +234,7 @@ function CreateDrawing() {
             </div>
 
             <div>
-              <Label className='mb-2'>Guidelines (Optional)</Label>
+              <Label className="mb-2">Guidelines (Optional)</Label>
               <div className="relative">
                 <textarea
                   value={currentGuideline}
@@ -232,8 +242,8 @@ function CreateDrawing() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                       e.preventDefault()
-                      addGuideline();
-                      (e.target as HTMLTextAreaElement).style.height = 'auto'
+                      addGuideline()
+                      ;(e.target as HTMLTextAreaElement).style.height = 'auto'
                     }
                   }}
                   placeholder="Enter guideline text..."
@@ -273,8 +283,14 @@ function CreateDrawing() {
               {formData.guidelines.length > 0 && (
                 <ul className="mt-3 space-y-2">
                   {formData.guidelines.map((guideline, index) => (
-                    <li key={index} className="flex items-start gap-2 group ml-1">
-                      <span className="flex-1 inline-flex gap-2 text-sm py-1.5"><div className='bg-primary w-1 h-1 rounded-full aspect-square mt-2' /> {guideline}</span>
+                    <li
+                      key={index}
+                      className="flex items-start gap-2 group ml-1"
+                    >
+                      <span className="flex-1 inline-flex gap-2 text-sm py-1.5">
+                        <div className="bg-primary w-1 h-1 rounded-full aspect-square mt-2" />{' '}
+                        {guideline}
+                      </span>
                       <div className="flex gap-1">
                         <Button
                           type="button"
@@ -310,14 +326,12 @@ function CreateDrawing() {
                 }
                 className="w-4 h-4"
               />
-              <Label htmlFor="isPaid">
-                Paid Event
-              </Label>
+              <Label htmlFor="isPaid">Paid Event</Label>
             </div>
 
             {formData.isPaid && (
               <div>
-                <Label htmlFor="price" className='mb-1'>
+                <Label htmlFor="price" className="mb-1">
                   Price (in dollars)
                 </Label>
                 <Input
@@ -338,7 +352,7 @@ function CreateDrawing() {
             )}
 
             <div>
-              <Label htmlFor="winnerSelection" className='mb-1'>
+              <Label htmlFor="winnerSelection" className="mb-1">
                 Winner Selection Method
               </Label>
               <Select
@@ -361,7 +375,7 @@ function CreateDrawing() {
             </div>
 
             <div>
-              <Label htmlFor="winnersAmount" className='mb-1'>
+              <Label htmlFor="winnersAmount" className="mb-1">
                 Number of Winners
               </Label>
               <Input
@@ -377,12 +391,12 @@ function CreateDrawing() {
                   })
                 }}
                 onInvalid={(e) => {
-                  (e.target as HTMLInputElement).setCustomValidity(
-                    'Please enter a number greater than 0'
+                  ;(e.target as HTMLInputElement).setCustomValidity(
+                    'Please enter a number greater than 0',
                   )
                 }}
                 onInput={(e) => {
-                  (e.target as HTMLInputElement).setCustomValidity('')
+                  ;(e.target as HTMLInputElement).setCustomValidity('')
                 }}
                 required
               />
@@ -391,7 +405,7 @@ function CreateDrawing() {
             {formData.winnerSelection === 'number' && (
               <>
                 <div>
-                  <Label htmlFor="quantityOfNumbers" className='mb-1'>
+                  <Label htmlFor="quantityOfNumbers" className="mb-1">
                     Quantity of Numbers
                   </Label>
                   <Select
@@ -423,7 +437,9 @@ function CreateDrawing() {
                       setFormData({
                         ...formData,
                         isWinnerNumberRandom: e.target.checked,
-                        winnerNumbers: e.target.checked ? [] : formData.winnerNumbers,
+                        winnerNumbers: e.target.checked
+                          ? []
+                          : formData.winnerNumbers,
                       })
                     }
                     className="w-4 h-4"
@@ -432,23 +448,22 @@ function CreateDrawing() {
                     Random Winner Numbers (system generated)
                   </Label>
                 </div>
-
               </>
             )}
 
             <div id="endAt-section">
-              <Label className='mb-1'>
-                End Date & Time
-              </Label>
+              <Label className="mb-1">End Date & Time</Label>
               {endAtError && (
-                <p className="text-sm text-destructive mt-1 mb-2">{endAtError}</p>
+                <p className="text-sm text-destructive mt-1 mb-2">
+                  {endAtError}
+                </p>
               )}
               <div className="flex gap-2 mb-2 flex-wrap">
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
-                  className='text-xs font-thin'
+                  className="text-xs font-thin"
                   onClick={() => handleQuickPreset(168)}
                 >
                   Next week
@@ -457,7 +472,7 @@ function CreateDrawing() {
                   type="button"
                   size="sm"
                   variant="outline"
-                  className='text-xs font-thin'
+                  className="text-xs font-thin"
                   onClick={() => handleQuickPreset(360)}
                 >
                   15 days
@@ -466,7 +481,7 @@ function CreateDrawing() {
                   type="button"
                   size="sm"
                   variant="outline"
-                  className='text-xs font-thin'
+                  className="text-xs font-thin"
                   onClick={() => handleQuickPreset(720)}
                 >
                   Next Month
@@ -497,19 +512,24 @@ function CreateDrawing() {
                       </DrawerDescription> */}
                     </DrawerHeader>
 
-                    <div className="px-4 space-y-4 overflow-y-scroll scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    <div
+                      className="px-4 space-y-4 overflow-y-scroll scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent"
+                      style={{ WebkitOverflowScrolling: 'touch' }}
+                    >
                       <div className="flex justify-center">
                         <Calendar
                           mode="single"
                           selected={selectedDate}
                           onSelect={setSelectedDate}
-                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                          disabled={(date) =>
+                            date < new Date(new Date().setHours(0, 0, 0, 0))
+                          }
                           autoFocus
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label className='justify-center text-md'>Time</Label>
+                        <Label className="justify-center text-md">Time</Label>
                         <div className="flex gap-2 items-center justify-center">
                           <Select
                             value={selectedTime.hours}
@@ -535,7 +555,10 @@ function CreateDrawing() {
                           <Select
                             value={selectedTime.minutes}
                             onValueChange={(value) =>
-                              setSelectedTime({ ...selectedTime, minutes: value })
+                              setSelectedTime({
+                                ...selectedTime,
+                                minutes: value,
+                              })
                             }
                           >
                             <SelectTrigger className="w-20">
@@ -560,26 +583,27 @@ function CreateDrawing() {
                               selectedDate.getMonth(),
                               selectedDate.getDate(),
                               parseInt(selectedTime.hours),
-                              parseInt(selectedTime.minutes)
+                              parseInt(selectedTime.minutes),
                             ),
-                            'PPP p'
+                            'PPP p',
                           )}
                         </div>
                       )}
-                      <DrawerFooter className='flex-row'>
+                      <DrawerFooter className="flex-row">
                         <Button
-                          className='w-1/2'
+                          className="w-1/2"
                           onClick={handleDateTimeConfirm}
                           disabled={!selectedDate}
                         >
                           Confirm
                         </Button>
                         <DrawerClose asChild>
-                          <Button variant="outline" className='w-1/2'>Cancel</Button>
+                          <Button variant="outline" className="w-1/2">
+                            Cancel
+                          </Button>
                         </DrawerClose>
                       </DrawerFooter>
                     </div>
-
                   </DrawerContent>
                 </Drawer>
               ) : (
@@ -604,7 +628,9 @@ function CreateDrawing() {
                         mode="single"
                         selected={selectedDate}
                         onSelect={setSelectedDate}
-                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        disabled={(date) =>
+                          date < new Date(new Date().setHours(0, 0, 0, 0))
+                        }
                         autoFocus
                       />
 
@@ -635,7 +661,10 @@ function CreateDrawing() {
                           <Select
                             value={selectedTime.minutes}
                             onValueChange={(value) =>
-                              setSelectedTime({ ...selectedTime, minutes: value })
+                              setSelectedTime({
+                                ...selectedTime,
+                                minutes: value,
+                              })
                             }
                           >
                             <SelectTrigger className="w-20">
@@ -660,9 +689,9 @@ function CreateDrawing() {
                               selectedDate.getMonth(),
                               selectedDate.getDate(),
                               parseInt(selectedTime.hours),
-                              parseInt(selectedTime.minutes)
+                              parseInt(selectedTime.minutes),
                             ),
-                            'PPP p'
+                            'PPP p',
                           )}
                         </div>
                       )}
@@ -702,7 +731,7 @@ function CreateDrawing() {
                 disabled={isSubmitting}
                 variant="primary"
 
-              // className="bg-cyan-600 hover:bg-cyan-700"
+                // className="bg-cyan-600 hover:bg-cyan-700"
               >
                 {isSubmitting ? 'Creating...' : 'Create Drawing'}
               </Button>

@@ -20,7 +20,7 @@ export const Route = createFileRoute('/drawings/$drawingId/p/$participateId')({
 function RouteComponent() {
   const { drawingId, participateId } = Route.useParams()
 
-  const { data: drawingData } = useDrawing(drawingId);
+  const { data: drawingData } = useDrawing(drawingId)
 
   const {
     data: participantData,
@@ -84,9 +84,9 @@ function RouteComponent() {
               <line x1="280" y1="25" x2="280" y2="225" stroke="#ffffff" stroke-width="2" />
               <g transform="translate(305, 35)">
                 ${qrSvgString.replace(
-      '<?xml version="1.0" standalone="yes"?>',
-      '',
-    )}
+                  '<?xml version="1.0" standalone="yes"?>',
+                  '',
+                )}
               </g>
             </svg>
           `
@@ -133,11 +133,11 @@ function RouteComponent() {
                 className={cn(
                   'border',
                   participantData.isEligible &&
-                  'border-green-500 text-green-600 bg-green-700/20',
+                    'border-green-500 text-green-600 bg-green-700/20',
                   participantData.isEligible == null
                     ? 'border-2'
                     : !participantData.isEligible &&
-                    'border-red-500 text-red-700 bg-red-900/20',
+                        'border-red-500 text-red-700 bg-red-900/20',
                   'px-3 py-1 rounded inline-block font-medium',
                 )}
               >
@@ -149,10 +149,11 @@ function RouteComponent() {
               </p>
             </div>
 
-            <span className='text-sm inline-flex items-center gap-2 text-text-light-secondary dark:text-text-dark-secondary'>
+            <span className="text-sm inline-flex items-center gap-2 text-text-light-secondary dark:text-text-dark-secondary">
               <InfoIcon size={18} />
-              {participantData.isEligible == null ? 'Your participation is pending approval.' :
-                ''}
+              {participantData.isEligible == null
+                ? 'Your participation is pending approval.'
+                : ''}
             </span>
           </Card>
 
