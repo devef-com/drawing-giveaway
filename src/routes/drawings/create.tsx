@@ -424,25 +424,25 @@ function CreateDrawing() {
                   type="button"
                   size="sm"
                   variant="outline"
-                  onClick={() => handleQuickPreset(1)}
-                >
-                  +1 hour
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleQuickPreset(24)}
-                >
-                  Tomorrow
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
                   onClick={() => handleQuickPreset(168)}
                 >
                   Next week
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleQuickPreset(360)}
+                >
+                  15 days
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleQuickPreset(720)}
+                >
+                  Next Month
                 </Button>
               </div>
 
@@ -462,15 +462,15 @@ function CreateDrawing() {
                       )}
                     </Button>
                   </DrawerTrigger>
-                  <DrawerContent className=''>
+                  <DrawerContent className="max-h-full">
                     <DrawerHeader>
                       <DrawerTitle>Select End Date & Time</DrawerTitle>
-                      <DrawerDescription>
+                      {/* <DrawerDescription>
                         Choose when the drawing should end
-                      </DrawerDescription>
+                      </DrawerDescription> */}
                     </DrawerHeader>
 
-                    <div className="p-4 space-y-4">
+                    <div className="px-4 space-y-4 overflow-y-scroll scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent" style={{ WebkitOverflowScrolling: 'touch' }}>
                       <div className="flex justify-center">
                         <Calendar
                           mode="single"
@@ -539,19 +539,20 @@ function CreateDrawing() {
                           )}
                         </div>
                       )}
+                      <DrawerFooter className='flex-row'>
+                        <Button
+                          className='w-1/2'
+                          onClick={handleDateTimeConfirm}
+                          disabled={!selectedDate}
+                        >
+                          Confirm
+                        </Button>
+                        <DrawerClose asChild>
+                          <Button variant="outline" className='w-1/2'>Cancel</Button>
+                        </DrawerClose>
+                      </DrawerFooter>
                     </div>
 
-                    <DrawerFooter>
-                      <Button
-                        onClick={handleDateTimeConfirm}
-                        disabled={!selectedDate}
-                      >
-                        Confirm
-                      </Button>
-                      <DrawerClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                      </DrawerClose>
-                    </DrawerFooter>
                   </DrawerContent>
                 </Drawer>
               ) : (
