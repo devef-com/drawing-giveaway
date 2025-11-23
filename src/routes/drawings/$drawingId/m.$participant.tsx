@@ -6,14 +6,8 @@ import {
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import type { ParticipantStatus } from '@/lib/participants'
+import { Card } from '@/components/ui/card'
 
 // type ParticipantStatus = 'pending' | 'approved' | 'rejected'
 
@@ -110,7 +104,7 @@ function RouteComponent() {
   return (
     <div className="container mx-auto p-4">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <Card className="rounded-lg p-6">
           <h2 className="text-2xl font-bold mb-4">Participant Information</h2>
           <div className="space-y-3">
             <div>
@@ -139,7 +133,7 @@ function RouteComponent() {
               </span>
             </div>
           </div>
-        </div>
+        </Card>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mt-4">
           <h3 className="text-xl font-semibold mb-4">
@@ -150,21 +144,38 @@ function RouteComponent() {
               <label className="block text-sm font-medium mb-2">
                 Select New Status
               </label>
-              <Select
-                value={selectedStatus}
-                onValueChange={(value) =>
-                  setSelectedStatus(value as ParticipantStatus)
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden w-full">
+                <button
+                  type="button"
+                  onClick={() => setSelectedStatus('pending')}
+                  className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${selectedStatus === 'pending'
+                    ? 'bg-neutral-200 text-gray-900 dark:bg-gray-700 dark:text-white'
+                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                    }`}
+                >
+                  Pending
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStatus('rejected')}
+                  className={`flex-1 px-4 py-3 text-sm font-medium transition-colors border-x border-gray-300 dark:border-gray-600 ${selectedStatus === 'rejected'
+                    ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                    : 'bg-gray-50 text-gray-700 hover:bg-red-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-red-900/20'
+                    }`}
+                >
+                  Reject
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStatus('approved')}
+                  className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${selectedStatus === 'approved'
+                    ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                    : 'bg-gray-50 text-gray-700 hover:bg-green-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-green-900/20'
+                    }`}
+                >
+                  Approved
+                </button>
+              </div>
             </div>
             <Button
               onClick={handleStatusChange}
