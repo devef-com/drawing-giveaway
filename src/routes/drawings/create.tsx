@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { EraserIcon, Pencil, Trash2, CalendarIcon, PlusIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,8 +12,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Send, EraserIcon, Pencil, Trash2 } from 'lucide-react'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
 import { authClient } from '@/lib/auth-client'
+import { format } from 'date-fns'
 
 export const Route = createFileRoute('/drawings/create')({
   component: CreateDrawing,
@@ -36,6 +53,19 @@ function CreateDrawing() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentGuideline, setCurrentGuideline] = useState('')
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [selectedDate, setSelectedDate] = useState<Date>()
+  const [selectedTime, setSelectedTime] = useState({ hours: '12', minutes: '00' })
+  const [isOpen, setIsOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const addGuideline = () => {
     if (!currentGuideline.trim()) return
@@ -64,6 +94,43 @@ function CreateDrawing() {
   const clearGuideline = () => {
     setCurrentGuideline('')
     setEditingIndex(null)
+  }
+
+  const handleDateTimeConfirm = () => {
+    if (selectedDate) {
+      const dateTime = new Date(selectedDate)
+      dateTime.setHours(parseInt(selectedTime.hours))
+      dateTime.setMinutes(parseInt(selectedTime.minutes))
+
+      const year = dateTime.getFullYear()
+      const month = String(dateTime.getMonth() + 1).padStart(2, '0')
+      const day = String(dateTime.getDate()).padStart(2, '0')
+      const hours = String(dateTime.getHours()).padStart(2, '0')
+      const minutes = String(dateTime.getMinutes()).padStart(2, '0')
+      const isoString = `${year}-${month}-${day}T${hours}:${minutes}`
+
+      setFormData({ ...formData, endAt: isoString })
+      setIsOpen(false)
+    }
+  }
+
+  const handleQuickPreset = (hours: number) => {
+    const now = new Date()
+    now.setHours(now.getHours() + hours)
+    setSelectedDate(now)
+    setSelectedTime({
+      hours: now.getHours().toString().padStart(2, '0'),
+      minutes: now.getMinutes().toString().padStart(2, '0'),
+    })
+
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const hrs = String(now.getHours()).padStart(2, '0')
+    const mins = String(now.getMinutes()).padStart(2, '0')
+    const isoString = `${year}-${month}-${day}T${hrs}:${mins}`
+
+    setFormData({ ...formData, endAt: isoString })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -185,7 +252,7 @@ function CreateDrawing() {
                     disabled={!currentGuideline.trim()}
                     className="bg-black dark:bg-white text-white dark:text-black hover:bg-black/90 dark:hover:bg-white/90"
                   >
-                    <Send className="size-4" />
+                    <PlusIcon className="size-4" />
                   </Button>
                 </div>
               </div>
@@ -348,18 +415,250 @@ function CreateDrawing() {
             )}
 
             <div>
-              <Label htmlFor="endAt" className='mb-1'>
+              <Label className='mb-1'>
                 End Date & Time
               </Label>
-              <Input
-                id="endAt"
-                type="datetime-local"
-                value={formData.endAt}
-                onChange={(e) =>
-                  setFormData({ ...formData, endAt: e.target.value })
-                }
-                required
-              />
+
+              <div className="flex gap-2 mb-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleQuickPreset(1)}
+                >
+                  +1 hour
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleQuickPreset(24)}
+                >
+                  Tomorrow
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleQuickPreset(168)}
+                >
+                  Next week
+                </Button>
+              </div>
+
+              {isMobile ? (
+                <Drawer open={isOpen} onOpenChange={setIsOpen}>
+                  <DrawerTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.endAt ? (
+                        format(new Date(formData.endAt), 'PPP p')
+                      ) : (
+                        <span>Pick a date and time</span>
+                      )}
+                    </Button>
+                  </DrawerTrigger>
+                  <DrawerContent className=''>
+                    <DrawerHeader>
+                      <DrawerTitle>Select End Date & Time</DrawerTitle>
+                      <DrawerDescription>
+                        Choose when the drawing should end
+                      </DrawerDescription>
+                    </DrawerHeader>
+
+                    <div className="p-4 space-y-4">
+                      <div className="flex justify-center">
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={setSelectedDate}
+                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                          autoFocus
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className='justify-center text-md'>Time</Label>
+                        <div className="flex gap-2 items-center justify-center">
+                          <Select
+                            value={selectedTime.hours}
+                            onValueChange={(value) =>
+                              setSelectedTime({ ...selectedTime, hours: value })
+                            }
+                          >
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 24 }, (_, i) => (
+                                <SelectItem
+                                  key={i}
+                                  value={i.toString().padStart(2, '0')}
+                                >
+                                  {i.toString().padStart(2, '0')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <span className="text-2xl">:</span>
+                          <Select
+                            value={selectedTime.minutes}
+                            onValueChange={(value) =>
+                              setSelectedTime({ ...selectedTime, minutes: value })
+                            }
+                          >
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {['00', '15', '30', '45'].map((min) => (
+                                <SelectItem key={min} value={min}>
+                                  {min}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      {selectedDate && (
+                        <div className="text-center text-sm text-muted-foreground">
+                          {format(
+                            new Date(
+                              selectedDate.getFullYear(),
+                              selectedDate.getMonth(),
+                              selectedDate.getDate(),
+                              parseInt(selectedTime.hours),
+                              parseInt(selectedTime.minutes)
+                            ),
+                            'PPP p'
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <DrawerFooter>
+                      <Button
+                        onClick={handleDateTimeConfirm}
+                        disabled={!selectedDate}
+                      >
+                        Confirm
+                      </Button>
+                      <DrawerClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DrawerClose>
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
+              ) : (
+                <Popover open={isOpen} onOpenChange={setIsOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.endAt ? (
+                        format(new Date(formData.endAt), 'PPP p')
+                      ) : (
+                        <span>Pick a date and time</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <div className="p-4 space-y-4">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        autoFocus
+                      />
+
+                      <div className="space-y-2 px-4">
+                        <Label>Time</Label>
+                        <div className="flex gap-2 items-center">
+                          <Select
+                            value={selectedTime.hours}
+                            onValueChange={(value) =>
+                              setSelectedTime({ ...selectedTime, hours: value })
+                            }
+                          >
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 24 }, (_, i) => (
+                                <SelectItem
+                                  key={i}
+                                  value={i.toString().padStart(2, '0')}
+                                >
+                                  {i.toString().padStart(2, '0')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <span className="text-xl">:</span>
+                          <Select
+                            value={selectedTime.minutes}
+                            onValueChange={(value) =>
+                              setSelectedTime({ ...selectedTime, minutes: value })
+                            }
+                          >
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {['00', '15', '30', '45'].map((min) => (
+                                <SelectItem key={min} value={min}>
+                                  {min}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      {selectedDate && (
+                        <div className="text-center text-sm text-muted-foreground px-4">
+                          {format(
+                            new Date(
+                              selectedDate.getFullYear(),
+                              selectedDate.getMonth(),
+                              selectedDate.getDate(),
+                              parseInt(selectedTime.hours),
+                              parseInt(selectedTime.minutes)
+                            ),
+                            'PPP p'
+                          )}
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 p-4 pt-0">
+                        <Button
+                          className="flex-1"
+                          onClick={handleDateTimeConfirm}
+                          disabled={!selectedDate}
+                        >
+                          Confirm
+                        </Button>
+                        <Button
+                          className="flex-1"
+                          variant="outline"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
 
             <div className="flex gap-4">
