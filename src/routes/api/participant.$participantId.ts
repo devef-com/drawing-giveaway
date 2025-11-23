@@ -5,10 +5,89 @@ import {
   verifyParticipantOwnership,
   type ParticipantStatus,
 } from '@/lib/participants'
+import { db } from '@/db/index'
+import { participants } from '@/db/schema'
+import { eq } from 'drizzle-orm'
 
 export const Route = createFileRoute('/api/participant/$participantId')({
   server: {
     handlers: {
+      GET: async ({
+        request,
+        params,
+      }: {
+        request: Request
+        params: { participantId: string }
+      }) => {
+        // Check authentication
+        const session = await auth.api.getSession({ headers: request.headers })
+
+        if (!session) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+          })
+        }
+
+        try {
+          const participantId = parseInt(params.participantId, 10)
+
+          if (isNaN(participantId)) {
+            return new Response(
+              JSON.stringify({ error: 'Invalid participant ID' }),
+              {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
+          }
+
+          // Verify ownership
+          const hasOwnership = await verifyParticipantOwnership(
+            participantId,
+            session.user.id,
+          )
+
+          if (!hasOwnership) {
+            return new Response(
+              JSON.stringify({
+                error:
+                  'Forbidden: You do not have permission to view this participant',
+              }),
+              {
+                status: 403,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
+          }
+
+          // Fetch participant
+          const participant = await db.query.participants.findFirst({
+            where: eq(participants.id, participantId),
+          })
+
+          if (!participant) {
+            return new Response(
+              JSON.stringify({ error: 'Participant not found' }),
+              {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
+          }
+
+          return new Response(JSON.stringify(participant), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          })
+        } catch (error) {
+          console.error('Error fetching participant:', error)
+          return new Response(
+            JSON.stringify({ error: 'Failed to fetch participant' }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
+          )
+        }
+      },
       POST: async ({
         request,
         params,

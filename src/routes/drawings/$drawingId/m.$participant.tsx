@@ -1,10 +1,9 @@
 import { Participant } from '@/db/schema'
 import {
   createFileRoute,
-  useLocation,
   useNavigate,
 } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,27 +13,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { isEligibleToStatus } from '@/lib/participants'
 import type { ParticipantStatus } from '@/lib/participants'
+
+// type ParticipantStatus = 'pending' | 'approved' | 'rejected'
 
 export const Route = createFileRoute('/drawings/$drawingId/m/$participant')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { participant: participantId } = Route.useParams()
-  const location = useLocation()
+  const { participant: participantId, drawingId } = Route.useParams()
   const navigate = useNavigate()
-  const participant = (location.state as unknown as Participant) || null
-
-  const [selectedStatus, setSelectedStatus] = useState<ParticipantStatus>(
-    participant ? isEligibleToStatus(participant.isEligible) : 'pending',
-  )
+  const [participant, setParticipant] = useState<Participant | null>(null)
+  const [selectedStatus, setSelectedStatus] = useState<ParticipantStatus>('pending')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  useEffect(() => {
+    // Get participant from navigation state (client-only)
+    const state = window.history.state
+    if (state) {
+      setParticipant(state as Participant)
+    }
+  }, [])
+
   if (!participant) {
-    return <div>Participant not found</div>
+    return <div>Loading participant...</div>
   }
+
+  const currentStatus: ParticipantStatus =
+    participant.isEligible === true ? 'approved' :
+      participant.isEligible === false ? 'rejected' : 'pending'
 
   const handleStatusChange = async () => {
     setIsSubmitting(true)
@@ -55,10 +63,9 @@ function RouteComponent() {
 
       toast.success(data.message || 'Participant status updated successfully')
 
-      // Navigate back after successful update
       navigate({
         to: '/drawings/$drawingId',
-        params: { drawingId: participant.drawingId },
+        params: { drawingId },
       })
     } catch (error) {
       toast.error(
@@ -70,8 +77,6 @@ function RouteComponent() {
       setIsSubmitting(false)
     }
   }
-
-  const currentStatus = isEligibleToStatus(participant.isEligible)
 
   return (
     <div className="container mx-auto p-4">
@@ -94,13 +99,12 @@ function RouteComponent() {
             <div>
               <span className="font-semibold">Current Status:</span>{' '}
               <span
-                className={`inline-block px-2 py-1 rounded text-sm ${
-                  currentStatus === 'approved'
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
-                    : currentStatus === 'rejected'
-                      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
-                      : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
-                }`}
+                className={`inline-block px-2 py-1 rounded text-sm ${currentStatus === 'approved'
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+                  : currentStatus === 'rejected'
+                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
+                  }`}
               >
                 {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
               </span>
