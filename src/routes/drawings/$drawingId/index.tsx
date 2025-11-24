@@ -156,9 +156,20 @@ function DrawingDetail() {
                       {/* <td className="p-2">{participant.phone}</td> */}
                       {drawing.winnerSelection === 'number' && (
                         <td className="p-2 text-sm">
-                          {participant.numbers.length > 0
-                            ? participant.numbers.join('-')
-                            : '-'}
+                          {participant.numbers?.length > 0 ? (
+                            isMobile && participant.numbers.length > 2 ? (
+                              <>
+                                {participant.numbers.slice(0, 2).join('-')}{' '}
+                                <span className="text-blue-400">
+                                  +{participant.numbers.length - 2}
+                                </span>
+                              </>
+                            ) : (
+                              participant.numbers.join('-')
+                            )
+                          ) : (
+                            '-'
+                          )}
                         </td>
                       )}
                       <td className="p-2 text-sm">

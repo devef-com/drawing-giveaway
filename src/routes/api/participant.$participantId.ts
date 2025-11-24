@@ -211,6 +211,13 @@ export const Route = createFileRoute('/api/participant/$participantId')({
             participantId,
             body.status,
           )
+          if (body.status === 'rejected') {
+            // release number slots
+            await db
+              .update(numberSlots)
+              .set({ participantId: null, status: 'available' })
+              .where(eq(numberSlots.participantId, participantId))
+          }
 
           if (!result.success) {
             return new Response(

@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button'
 import type { ParticipantStatus } from '@/lib/participants'
 import { Card } from '@/components/ui/card'
 
-// type ParticipantStatus = 'pending' | 'approved' | 'rejected'
-
 export const Route = createFileRoute('/drawings/$drawingId/m/$participant')({
   component: RouteComponent,
 })
@@ -139,7 +137,7 @@ function RouteComponent() {
             <div className="flex flex-wrap gap-2 items-center">
               <span className="font-semibold">Selected Numbers:</span>{' '}
               <section className="flex gap-2">
-                {participant.numbers.length > 0
+                {participant.numbers?.length > 0
                   ? participant.numbers.map((num) => (
                       <div
                         key={num}
