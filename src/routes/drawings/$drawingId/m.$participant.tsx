@@ -1,4 +1,4 @@
-import { Participant } from '@/db/schema'
+import { Participant as BaseParticipant } from '@/db/schema'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
@@ -11,6 +11,8 @@ import { Card } from '@/components/ui/card'
 export const Route = createFileRoute('/drawings/$drawingId/m/$participant')({
   component: RouteComponent,
 })
+
+type Participant = BaseParticipant & { numbers: number[] }
 
 function RouteComponent() {
   const { participant: participantId, drawingId } = Route.useParams()
@@ -134,10 +136,25 @@ function RouteComponent() {
                 {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
               </span>
             </div>
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="font-semibold">Selected Numbers:</span>{' '}
+              <section className="flex gap-2">
+                {participant.numbers.length > 0
+                  ? participant.numbers.map((num) => (
+                      <div
+                        key={num}
+                        className="py-0.5 px-1 rounded-sm border border-neutral-300 dark:border-neutral-600"
+                      >
+                        {num}
+                      </div>
+                    ))
+                  : 'No numbers selected'}
+              </section>
+            </div>
           </div>
         </Card>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mt-4">
+        <div className="bg-white border border-neutral-300 dark:bg-gray-900 dark:border-none rounded-lg shadow-md p-6 mt-4">
           <h3 className="text-xl font-semibold mb-4">
             Change Participant Status
           </h3>

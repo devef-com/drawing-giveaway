@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 
 // Hook for fetching participants with authentication
 export function useParticipants(drawingId: string, enabled = true) {
-  return useQuery<Participant[]>({
+  return useQuery<(Participant & { numbers: number[] })[]>({
     queryKey: ['participants', drawingId],
     queryFn: async () => {
       const response = await fetch(`/api/drawings/${drawingId}/participants`)

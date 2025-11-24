@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 
 import { db } from '@/db/index'
-import { participants } from '@/db/schema'
+import { participants, numberSlots } from '@/db/schema'
 
 export const Route = createFileRoute('/api/drawings/$drawingId/participants')({
   server: {
@@ -10,9 +10,29 @@ export const Route = createFileRoute('/api/drawings/$drawingId/participants')({
       GET: async ({ params }: { params: { drawingId: string } }) => {
         try {
           const drawingParticipants = await db
-            .select()
+            .select({
+              id: participants.id,
+              drawingId: participants.drawingId,
+              name: participants.name,
+              email: participants.email,
+              phone: participants.phone,
+              selectedNumber: participants.selectedNumber,
+              isEligible: participants.isEligible,
+              paymentCaptureId: participants.paymentCaptureId,
+              createdAt: participants.createdAt,
+              numbers: sql<
+                number[]
+              >`array_agg(${numberSlots.number}) filter (where ${numberSlots.number} is not null)`.as(
+                'numbers',
+              ),
+            })
             .from(participants)
+            .leftJoin(
+              numberSlots,
+              eq(numberSlots.participantId, participants.id),
+            )
             .where(eq(participants.drawingId, params.drawingId))
+            .groupBy(participants.id)
 
           return new Response(JSON.stringify(drawingParticipants), {
             status: 200,

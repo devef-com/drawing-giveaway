@@ -156,7 +156,9 @@ function DrawingDetail() {
                       {/* <td className="p-2">{participant.phone}</td> */}
                       {drawing.winnerSelection === 'number' && (
                         <td className="p-2 text-sm">
-                          {participant.selectedNumber || '-'}
+                          {participant.numbers.length > 0
+                            ? participant.numbers.join('-')
+                            : '-'}
                         </td>
                       )}
                       <td className="p-2 text-sm">

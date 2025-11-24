@@ -6,8 +6,8 @@ import {
   type ParticipantStatus,
 } from '@/lib/participants'
 import { db } from '@/db/index'
-import { participants } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { participants, numberSlots } from '@/db/schema'
+import { eq, sql } from 'drizzle-orm'
 
 export const Route = createFileRoute('/api/participant/$participantId')({
   server: {
@@ -61,10 +61,32 @@ export const Route = createFileRoute('/api/participant/$participantId')({
             )
           }
 
-          // Fetch participant
-          const participant = await db.query.participants.findFirst({
-            where: eq(participants.id, participantId),
-          })
+          // Fetch participant with numbers
+          const participant = await db
+            .select({
+              id: participants.id,
+              drawingId: participants.drawingId,
+              name: participants.name,
+              email: participants.email,
+              phone: participants.phone,
+              selectedNumber: participants.selectedNumber,
+              isEligible: participants.isEligible,
+              paymentCaptureId: participants.paymentCaptureId,
+              createdAt: participants.createdAt,
+              numbers: sql<
+                number[]
+              >`array_agg(${numberSlots.number}) filter (where ${numberSlots.number} is not null)`.as(
+                'numbers',
+              ),
+            })
+            .from(participants)
+            .leftJoin(
+              numberSlots,
+              eq(numberSlots.participantId, participants.id),
+            )
+            .where(eq(participants.id, participantId))
+            .groupBy(participants.id)
+            .then((results) => results[0])
 
           if (!participant) {
             return new Response(
