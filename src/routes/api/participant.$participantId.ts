@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { eq, sql } from 'drizzle-orm'
 import { auth } from '@/lib/auth'
+import type { ParticipantStatus } from '@/lib/participants'
 import {
   updateParticipantStatus,
   verifyParticipantOwnership,
-  type ParticipantStatus,
 } from '@/lib/participants'
 import { db } from '@/db/index'
-import { participants, numberSlots } from '@/db/schema'
-import { eq, sql } from 'drizzle-orm'
+import { numberSlots, participants } from '@/db/schema'
 
 export const Route = createFileRoute('/api/participant/$participantId')({
   server: {
@@ -70,11 +70,12 @@ export const Route = createFileRoute('/api/participant/$participantId')({
               email: participants.email,
               phone: participants.phone,
               selectedNumber: participants.selectedNumber,
+              logNumbers: participants.logNumbers,
               isEligible: participants.isEligible,
               paymentCaptureId: participants.paymentCaptureId,
               createdAt: participants.createdAt,
               numbers: sql<
-                number[]
+                Array<number>
               >`array_agg(${numberSlots.number}) filter (where ${numberSlots.number} is not null)`.as(
                 'numbers',
               ),
@@ -206,18 +207,37 @@ export const Route = createFileRoute('/api/participant/$participantId')({
             )
           }
 
-          // Update participant status
-          const result = await updateParticipantStatus(
-            participantId,
-            body.status,
-          )
+          // Handle rejection: store numbers before releasing slots
           if (body.status === 'rejected') {
-            // release number slots
+            // Get all numbers assigned to this participant
+            const participantSlots = await db
+              .select({ number: numberSlots.number })
+              .from(numberSlots)
+              .where(eq(numberSlots.participantId, participantId))
+              .orderBy(numberSlots.number)
+
+            const numbers = participantSlots.map((slot) => slot.number)
+
+            // Store the numbers in logNumbers before releasing
+            if (numbers.length > 0) {
+              await db
+                .update(participants)
+                .set({ logNumbers: numbers })
+                .where(eq(participants.id, participantId))
+            }
+
+            // Release number slots
             await db
               .update(numberSlots)
               .set({ participantId: null, status: 'available' })
               .where(eq(numberSlots.participantId, participantId))
           }
+
+          // Update participant status
+          const result = await updateParticipantStatus(
+            participantId,
+            body.status,
+          )
 
           if (!result.success) {
             return new Response(
