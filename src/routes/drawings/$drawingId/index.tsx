@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { EllipsisVerticalIcon, TrophyIcon } from 'lucide-react'
+import { EllipsisVerticalIcon, TrophyIcon, GripIcon, CopyIcon, Share2Icon } from 'lucide-react'
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { authClient } from '@/lib/auth-client'
@@ -76,6 +76,53 @@ function DrawingDetail() {
     }
   }
 
+  const ACTIONS = [
+    {
+      label: 'More Options',
+      icon: TrophyIcon,
+      onClick: () => {
+        setIsPopoverOpen(false)
+      },
+    },
+    {
+      label: 'Numbers',
+      icon: GripIcon,
+      onClick: () => {
+        navigate({ to: `/slot/${drawingId}` })
+        setIsPopoverOpen(false)
+      },
+    },
+    {
+      label: 'Copy Link',
+      icon: CopyIcon,
+      onClick: () => {
+        const url = `${window.location.origin}/slot/${drawing?.id}`
+        navigator.clipboard.writeText(url).then(() => {
+          toast.success('Link copied to clipboard!')
+        })
+        setIsPopoverOpen(false)
+      },
+    },
+    {
+      label: 'Share',
+      icon: Share2Icon,
+      onClick: () => {
+        const url = `${window.location.origin}/slot/${drawing?.id}`
+        navigator
+          .share({
+            title: 'Join my drawing!',
+            text: drawing?.title,
+            url: url,
+          })
+          .catch(() => {
+            // Handle share failure or cancellation
+            console.log('Share failed or was cancelled')
+          })
+        setIsPopoverOpen(false)
+      },
+    },
+  ]
+
   if (!session.data) {
     return (
       <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
@@ -134,15 +181,19 @@ function DrawingDetail() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-48 p-2" align="end">
-                  <button
-                    onClick={() => {
-                      setIsPopoverOpen(false)
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-sm"
-                  >
-                    <TrophyIcon className="w-4 h-4" />
-                    More Options
-                  </button>
+                  {ACTIONS.map((action, index) => {
+                    const Icon = action.icon
+                    return (
+                      <button
+                        key={index}
+                        onClick={action.onClick}
+                        className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-sm"
+                      >
+                        <Icon className="w-4 h-4" />
+                        {action.label}
+                      </button>
+                    )
+                  })}
                 </PopoverContent>
               </Popover>
             </div>
@@ -173,20 +224,18 @@ function DrawingDetail() {
                     {new Date(drawing.endAt).toLocaleString()}
                   </p>
                 </div>
-                <div>
-                  {drawing.guidelines && drawing.guidelines.length > 0 && (
-                    <div>
-                      <strong className="">Guidelines:</strong>
-                      <ul className="list-disc list-inside text-sm mt-2">
-                        {drawing.guidelines.map(
-                          (guideline: string, index: number) => (
-                            <li key={index}>{guideline}</li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                {drawing.guidelines && drawing.guidelines.length > 0 && (
+                  <div>
+                    <strong className="">Guidelines:</strong>
+                    <ul className="list-disc list-inside text-sm mt-2">
+                      {drawing.guidelines.map(
+                        (guideline: string, index: number) => (
+                          <li key={index}>{guideline}</li>
+                        ),
+                      )}
+                    </ul>
+                  </div>
+                )}
               </div>
             </ExpandableContent>
           </Expandable>
@@ -224,13 +273,16 @@ function DrawingDetail() {
                   </p>
                 </div>
 
-                <Button
-                  onClick={handleSelectWinners}
-                  disabled={isSelectingWinners}
-                  className="w-full"
-                >
-                  {isSelectingWinners ? 'Selecting Winners...' : 'Select Winners'}
-                </Button>
+                <div className='flex justify-center md:justify-end w-full '>
+                  <Button
+                    onClick={handleSelectWinners}
+                    disabled={isSelectingWinners}
+                    className="md:max-w-max"
+                  >
+                    {isSelectingWinners ? 'Selecting Winners...' : 'Select Winners'}
+                  </Button>
+
+                </div>
               </div>
             </ExpandableContent>
           </Expandable>
