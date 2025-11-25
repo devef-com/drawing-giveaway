@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouter, useCanGoBack } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { ArrowLeft, CircleAlert, Clock } from 'lucide-react'
 import type { Participant } from '@/db/schema'
@@ -21,6 +21,8 @@ function ReserveNumberForm() {
   const { drawingId, numberToReserve } = Route.useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const router = useRouter();
+  const canGoBack = useCanGoBack()
 
   const [formData, setFormData] = useState({
     name: '',
@@ -47,6 +49,25 @@ function ReserveNumberForm() {
 
   const { data: reservationTimeData } = useReservationTime()
 
+  const releaseReservation = useCallback(async () => {
+    localStorage.removeItem(reservationKey)
+
+    if (selectedNumbers.length === 0) return
+
+    try {
+      await fetch(`/api/drawings/${drawingId}/reserve`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({ numbers: selectedNumbers }),
+      })
+
+      queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
+    } catch (error) {
+      console.error('Error releasing reservations:', error)
+    }
+  }, [drawingId, queryClient, reservationKey, selectedNumbers])
+
   // Reserve numbers on mount (only if not already reserved from previous page)
   useEffect(() => {
     const checkAndMarkReservation = () => {
@@ -65,7 +86,7 @@ function ReserveNumberForm() {
           if (
             now - timestamp < reservationTime &&
             JSON.stringify(numbers.sort()) ===
-              JSON.stringify(selectedNumbers.sort())
+            JSON.stringify(selectedNumbers.sort())
           ) {
             // Reservation is still valid, mark as complete
             setReservationComplete(true)
@@ -73,20 +94,33 @@ function ReserveNumberForm() {
           } else {
             // Reservation expired, redirect back
             // TODO call to release numbers endpoint
-            handleCancel()
+            releaseReservation()
             toast.error('Reservation expired. Please select numbers again.')
-            navigate({ to: '/slot/$drawingId', params: { drawingId } })
+            navigate({
+              to: '/slot/$drawingId',
+              params: { drawingId },
+              replace: true,
+            })
           }
         } catch (e) {
           // Invalid data, redirect back
-          handleCancel()
+          releaseReservation()
           toast.error('Invalid reservation. Please select numbers again.')
-          navigate({ to: '/slot/$drawingId', params: { drawingId } })
+          navigate({
+            to: '/slot/$drawingId',
+            params: { drawingId },
+            replace: true,
+          })
         }
       } else {
         // No reservation found, redirect back
         toast.error('No reservation found. Please select numbers again.')
-        navigate({ to: '/slot/$drawingId', params: { drawingId } })
+        canGoBack ? router.history.back() :
+          navigate({
+            to: '/slot/$drawingId',
+            params: { drawingId },
+            replace: true,
+          })
       }
     }
 
@@ -99,6 +133,7 @@ function ReserveNumberForm() {
     selectedNumbers,
     reservationTimeData,
     navigate,
+    releaseReservation,
   ])
 
   // Countdown timer effect
@@ -223,24 +258,7 @@ function ReserveNumberForm() {
   }
 
   const handleCancel = async () => {
-    // Clean up localStorage
-    localStorage.removeItem(reservationKey)
-
-    if (selectedNumbers.length > 0) {
-      try {
-        await fetch(`/api/drawings/${drawingId}/reserve`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          keepalive: true,
-          body: JSON.stringify({ numbers: selectedNumbers }),
-        })
-
-        queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
-      } catch (error) {
-        console.error('Error releasing reservations:', error)
-      }
-    }
-
+    await releaseReservation()
     navigate({ to: '/slot/$drawingId', params: { drawingId } })
   }
 
