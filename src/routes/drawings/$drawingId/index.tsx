@@ -121,6 +121,7 @@ function DrawingDetail() {
   }
 
   const handleSearch = () => {
+    if (searchInput.trim() === nameSearch) return
     setNameSearch(searchInput)
     setPage(1)
     setAccumulatedParticipants([])
@@ -232,7 +233,7 @@ function DrawingDetail() {
 
   if (!session.data) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-4xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center">
@@ -252,7 +253,7 @@ function DrawingDetail() {
 
   if (drawingLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-6xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center">Loading...</p>
@@ -264,7 +265,7 @@ function DrawingDetail() {
 
   if (!drawing) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-6xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center">Drawing not found</p>
@@ -412,7 +413,7 @@ function DrawingDetail() {
           <Expandable defaultOpen>
             <ExpandableTitle>filters</ExpandableTitle>
             <ExpandableContent>
-              <div className="space-y-4">
+              <div className="space-y-4 mt-1">
                 {/* Status Filter Tabs */}
                 <div className="flex flex-wrap gap-2">
                   {(
@@ -427,7 +428,7 @@ function DrawingDetail() {
                           : 'hover:bg-accent'
                       }`}
                     >
-                      {status === 'all' && '• '}
+                      {/* {status === 'all' && '• '} */}
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </button>
                   ))}
