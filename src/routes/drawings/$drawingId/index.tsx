@@ -35,6 +35,7 @@ import {
   ExpandableTitle,
   ExpandableContent,
 } from '@/components/ui/expandable'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export const Route = createFileRoute('/drawings/$drawingId/')({
   component: DrawingDetail,
@@ -249,7 +250,7 @@ function DrawingDetail() {
     )
   }
 
-  if (drawingLoading || participantsLoading) {
+  if (drawingLoading) {
     return (
       <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
         <div className="max-w-6xl mx-auto">
@@ -460,40 +461,63 @@ function DrawingDetail() {
             </ExpandableContent>
           </Expandable>
 
-          {participants && participants.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full ">
-                <thead>
-                  <tr className="border-b border-slate-700">
-                    <th
-                      className="text-left p-2 cursor-pointer hover:bg-accent/50 select-none"
-                      onClick={() => handleSort('name')}
+          <div className="overflow-x-auto">
+            <table className="w-full ">
+              <thead>
+                <tr className="border-b border-slate-700">
+                  <th
+                    className="text-left p-2 cursor-pointer hover:bg-accent/50 select-none"
+                    onClick={() => handleSort('name')}
+                  >
+                    Name
+                    <SortIndicator field="name" />
+                  </th>
+                  {/* <th className="text-left p-2">Phone</th> */}
+                  {drawing.winnerSelection === 'number' && (
+                    <th className="text-left p-2">#</th>
+                  )}
+                  <th
+                    className="text-left p-2 cursor-pointer hover:bg-accent/50 select-none"
+                    onClick={() => handleSort('status')}
+                  >
+                    Status
+                    <SortIndicator field="status" />
+                  </th>
+                  <th
+                    className="text-left p-2 cursor-pointer hover:bg-accent/50 select-none"
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    Date
+                    <SortIndicator field="createdAt" />
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {participantsLoading && participants.length === 0 ? (
+                  // Skeleton rows while loading
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <tr
+                      key={`skeleton-${index}`}
+                      className="border-b border-slate-700"
                     >
-                      Name
-                      <SortIndicator field="name" />
-                    </th>
-                    {/* <th className="text-left p-2">Phone</th> */}
-                    {drawing.winnerSelection === 'number' && (
-                      <th className="text-left p-2">#</th>
-                    )}
-                    <th
-                      className="text-left p-2 cursor-pointer hover:bg-accent/50 select-none"
-                      onClick={() => handleSort('status')}
-                    >
-                      Status
-                      <SortIndicator field="status" />
-                    </th>
-                    <th
-                      className="text-left p-2 cursor-pointer hover:bg-accent/50 select-none"
-                      onClick={() => handleSort('createdAt')}
-                    >
-                      Date
-                      <SortIndicator field="createdAt" />
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {participants.map((participant) => (
+                      <td className="p-2">
+                        <Skeleton className="h-4 w-24" />
+                      </td>
+                      {drawing.winnerSelection === 'number' && (
+                        <td className="p-2">
+                          <Skeleton className="h-4 w-8" />
+                        </td>
+                      )}
+                      <td className="p-2">
+                        <Skeleton className="h-4 w-16" />
+                      </td>
+                      <td className="p-2">
+                        <Skeleton className="h-4 w-20" />
+                      </td>
+                    </tr>
+                  ))
+                ) : participants && participants.length > 0 ? (
+                  participants.map((participant) => (
                     <tr
                       key={participant.id}
                       className="border-b border-slate-700 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-800"
@@ -581,30 +605,37 @@ function DrawingDetail() {
                         })()}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* Pagination Info & Show More */}
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700">
-                <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                  {participants.length} of{' '}
-                  {pagination?.total || participants.length}
-                </span>
-                {pagination?.hasMore && (
-                  <button
-                    onClick={handleShowMore}
-                    disabled={participantsLoading}
-                    className="text-sm text-blue-400 hover:text-blue-300 disabled:opacity-50"
-                  >
-                    {participantsLoading ? 'Loading...' : 'show more'}
-                  </button>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={drawing.winnerSelection === 'number' ? 4 : 3}
+                      className="p-4 text-center text-secondary"
+                    >
+                      No participants yet
+                    </td>
+                  </tr>
                 )}
-              </div>
+              </tbody>
+            </table>
+
+            {/* Pagination Info & Show More */}
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700">
+              <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                {participants.length} of{' '}
+                {pagination?.total || participants.length}
+              </span>
+              {pagination?.hasMore && (
+                <button
+                  onClick={handleShowMore}
+                  disabled={participantsLoading}
+                  className="text-sm text-blue-400 hover:text-blue-300 disabled:opacity-50"
+                >
+                  {participantsLoading ? 'Loading...' : 'show more'}
+                </button>
+              )}
             </div>
-          ) : (
-            <p className="text-secondary text-center">No participants yet</p>
-          )}
+          </div>
         </Card>
       </div>
     </div>
