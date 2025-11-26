@@ -1,5 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { EllipsisVerticalIcon, TrophyIcon, GripIcon, CopyIcon, Share2Icon } from 'lucide-react'
+import {
+  EllipsisVerticalIcon,
+  TrophyIcon,
+  GripIcon,
+  CopyIcon,
+  Share2Icon,
+} from 'lucide-react'
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { authClient } from '@/lib/auth-client'
@@ -62,7 +68,8 @@ function DrawingDetail() {
       }
 
       toast.success(
-        data.message || `Successfully selected ${data.data.winners.length} winner(s)`,
+        data.message ||
+          `Successfully selected ${data.data.winners.length} winner(s)`,
       )
 
       // Optionally navigate to winners view or refresh data
@@ -212,11 +219,14 @@ function DrawingDetail() {
                   </p>
                   <p className="mb-2  text-sm">
                     <strong>Selection Method:</strong>{' '}
-                    {drawing.winnerSelection === 'random' ? 'Random' : 'By Number'}
+                    {drawing.winnerSelection === 'random'
+                      ? 'Random'
+                      : 'By Number'}
                   </p>
                   {drawing.winnerSelection === 'number' && (
                     <p className="mb-2 text-sm">
-                      <strong>Total Numbers:</strong> {drawing.quantityOfNumbers}
+                      <strong>Total Numbers:</strong>{' '}
+                      {drawing.quantityOfNumbers}
                     </p>
                   )}
                   <p className="mb-2 text-sm">
@@ -247,14 +257,17 @@ function DrawingDetail() {
                 <div className="space-y-2">
                   <p className="text-sm">
                     <strong>Selection Method:</strong>{' '}
-                    {drawing.winnerSelection === 'random' ? 'Random' : 'By Number'}
+                    {drawing.winnerSelection === 'random'
+                      ? 'Random'
+                      : 'By Number'}
                   </p>
                   <p className="text-sm">
                     <strong>Winners to Select:</strong> {drawing.winnersAmount}
                   </p>
                   <p className="text-sm">
                     <strong>Eligible Participants:</strong>{' '}
-                    {participants?.filter((p) => p.isEligible === true).length || 0}
+                    {participants?.filter((p) => p.isEligible === true)
+                      .length || 0}
                   </p>
                   {drawing.winnerSelection === 'number' && (
                     <p className="text-sm">
@@ -268,20 +281,22 @@ function DrawingDetail() {
 
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
                   <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                    <strong>Note:</strong> This will select winners based on your
-                    drawing configuration. You can re-run the selection if needed.
+                    <strong>Note:</strong> This will select winners based on
+                    your drawing configuration. You can re-run the selection if
+                    needed.
                   </p>
                 </div>
 
-                <div className='flex justify-center md:justify-end w-full '>
+                <div className="flex justify-center md:justify-end w-full ">
                   <Button
                     onClick={handleSelectWinners}
                     disabled={isSelectingWinners}
                     className="md:max-w-max"
                   >
-                    {isSelectingWinners ? 'Selecting Winners...' : 'Select Winners'}
+                    {isSelectingWinners
+                      ? 'Selecting Winners...'
+                      : 'Select Winners'}
                   </Button>
-
                 </div>
               </div>
             </ExpandableContent>

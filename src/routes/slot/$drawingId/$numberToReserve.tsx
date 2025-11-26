@@ -1,4 +1,9 @@
-import { createFileRoute, useNavigate, useRouter, useCanGoBack } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  useNavigate,
+  useRouter,
+  useCanGoBack,
+} from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -21,7 +26,7 @@ function ReserveNumberForm() {
   const { drawingId, numberToReserve } = Route.useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const router = useRouter();
+  const router = useRouter()
   const canGoBack = useCanGoBack()
 
   const [formData, setFormData] = useState({
@@ -86,7 +91,7 @@ function ReserveNumberForm() {
           if (
             now - timestamp < reservationTime &&
             JSON.stringify(numbers.sort()) ===
-            JSON.stringify(selectedNumbers.sort())
+              JSON.stringify(selectedNumbers.sort())
           ) {
             // Reservation is still valid, mark as complete
             setReservationComplete(true)
@@ -115,12 +120,13 @@ function ReserveNumberForm() {
       } else {
         // No reservation found, redirect back
         toast.error('No reservation found. Please select numbers again.')
-        canGoBack ? router.history.back() :
-          navigate({
-            to: '/slot/$drawingId',
-            params: { drawingId },
-            replace: true,
-          })
+        canGoBack
+          ? router.history.back()
+          : navigate({
+              to: '/slot/$drawingId',
+              params: { drawingId },
+              replace: true,
+            })
       }
     }
 

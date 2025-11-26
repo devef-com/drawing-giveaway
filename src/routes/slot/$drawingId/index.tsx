@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { CircleAlert, Image, InfoIcon } from 'lucide-react'
+import { CircleAlert, Image, InfoIcon, Trophy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,6 +15,7 @@ import { useDrawingStats } from '@/querys/useDrawingStats'
 import { useNumberSlots } from '@/querys/useNumberSlots'
 import { useReservationTime } from '@/querys/useReservationTime'
 import { useParticipate } from '@/querys/useParticipate'
+import { useDrawingWinners } from '@/querys/useDrawingWinners'
 import { Drawing } from '@/db/schema'
 
 export const Route = createFileRoute('/slot/$drawingId/')({
@@ -126,6 +127,15 @@ function SlotDrawingParticipation() {
   // Fetch drawing details
   const { data: drawing, isLoading: drawingLoading } = useDrawing(drawingId)
 
+  // Check if drawing has ended
+  const hasDrawingEnded = drawing ? new Date(drawing.endAt) < new Date() : false
+
+  // Fetch winners if drawing has ended
+  const { data: winnersData, isLoading: winnersLoading } = useDrawingWinners(
+    drawingId,
+    hasDrawingEnded,
+  )
+
   // Fetch drawing statistics
   const { data: stats } = useDrawingStats(
     drawingId,
@@ -167,7 +177,7 @@ function SlotDrawingParticipation() {
   const { data: slotsData } = useNumberSlots(
     drawingId,
     numbersToFetch,
-    !!drawing && drawing.winnerSelection === 'number',
+    !!drawing && drawing.winnerSelection === 'number' && !hasDrawingEnded,
     {
       staleTime: 30000,
       refetchOnWindowFocus: true,
@@ -400,7 +410,11 @@ function SlotDrawingParticipation() {
     <div className="relative bg-background-light dark:bg-background-dark font-display min-h-screen">
       <div className="flex w-full flex-col p-4 sm:max-w-[600px] sm:mx-auto">
         {/* Drawing Details Card */}
-        <DrawingSlotHeader drawing={drawing} stats={stats} />
+        <DrawingSlotHeader
+          drawing={drawing}
+          stats={stats}
+          hasEnded={hasDrawingEnded}
+        />
         <div className="grid grid-cols-[max-content_1fr] items-center gap-4 mb-4">
           <Image size={120} strokeWidth={0.7} />
           {drawing.guidelines && drawing.guidelines.length > 0 && (
@@ -416,9 +430,73 @@ function SlotDrawingParticipation() {
             </div>
           )}
         </div>
+        {/* Winners Section - shown when drawing has ended */}
+        {hasDrawingEnded && (
+          <Card className="p-4 mb-4 bg-linear-to-r from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 border-amber-200 dark:border-amber-700">
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="w-6 h-6 text-amber-500" />
+              <h2 className="text-lg font-semibold text-amber-800 dark:text-amber-200">
+                Drawing Ended
+              </h2>
+            </div>
+            {winnersLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-500"></div>
+                <span className="ml-2 text-amber-700 dark:text-amber-300">
+                  Loading winners...
+                </span>
+              </div>
+            ) : winnersData?.winners && winnersData.winners.length > 0 ? (
+              <div>
+                <p className="text-amber-700 dark:text-amber-300 mb-3">
+                  🎉 Congratulations to the winner
+                  {winnersData.winners.length > 1 ? 's' : ''}!
+                </p>
+                {winnersData.winnerNumbers &&
+                  winnersData.winnerNumbers.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-sm text-amber-600 dark:text-amber-400 mb-1">
+                        Winning number
+                        {winnersData.winnerNumbers.length > 1 ? 's' : ''}:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {winnersData.winnerNumbers.map((num) => (
+                          <span
+                            key={num}
+                            className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-amber-500 text-white font-bold"
+                          >
+                            {num}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                <ul className="space-y-2">
+                  {winnersData.winners.map((winner, index) => (
+                    <li
+                      key={winner.participantId}
+                      className="flex items-center gap-2 p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg"
+                    >
+                      <span className="font-bold text-amber-600 dark:text-amber-400">
+                        #{index + 1}
+                      </span>
+                      <span className="text-amber-800 dark:text-amber-200">
+                        {winner.participantName}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-amber-700 dark:text-amber-300">
+                Winners have not been selected yet. Check back soon!
+              </p>
+            )}
+          </Card>
+        )}
 
-        {/* Number Selection Grid (only for number-based drawings) */}
-        {drawing.winnerSelection === 'number' && (
+        {/* Number Selection Grid (only for number-based drawings that haven't ended) */}
+        {drawing.winnerSelection === 'number' && !hasDrawingEnded && (
           <div className="relative">
             <div
               ref={scrollContainerRef}

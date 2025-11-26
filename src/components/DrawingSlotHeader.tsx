@@ -9,9 +9,14 @@ interface DrawingSlotHeaderProps {
     available: number
     total: number
   }
+  hasEnded?: boolean
 }
 
-function DrawingSlotHeader({ drawing, stats }: DrawingSlotHeaderProps) {
+function DrawingSlotHeader({
+  drawing,
+  stats,
+  hasEnded,
+}: DrawingSlotHeaderProps) {
   const [isTitleExpanded, setIsTitleExpanded] = useState(false)
 
   // Calculate time remaining
@@ -75,8 +80,8 @@ function DrawingSlotHeader({ drawing, stats }: DrawingSlotHeaderProps) {
             </span>
           </div>
         </div>
-        {/* Available Slots */}
-        {stats && (
+        {/* Available Slots - only show when drawing hasn't ended */}
+        {stats && !hasEnded && (
           <div className="text-center mb-2">
             <div className="text-xl md:text-4xl font-bold text-teal-600 dark:text-teal-400">
               {stats.available} / {stats.total}
