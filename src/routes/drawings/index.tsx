@@ -81,7 +81,7 @@ function DrawingsList() {
                     <p className="text-md text-text-light-secondary dark:text-text-dark-secondary mb-2">
                       Type:{' '}
                       {drawing.isPaid
-                        ? `Paid ($${(drawing.price / 100).toFixed(2)})`
+                        ? `Paid ($${(drawing.price ?? 0).toLocaleString()})`
                         : 'Free'}
                     </p>
                     <p className="text-md text-text-light-secondary dark:text-text-dark-secondary">

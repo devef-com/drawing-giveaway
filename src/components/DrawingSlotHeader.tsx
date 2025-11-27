@@ -49,7 +49,7 @@ function DrawingSlotHeader({
             <HandCoins className="w-6 h-6 text-teal-600 dark:text-teal-400" />
             <span className="text-sm font-semibold text-teal-700 dark:text-teal-300">
               {drawing.isPaid
-                ? `$${drawing.price?.toLocaleString()}`
+                ? `$${(drawing.price ?? 0).toLocaleString()}`
                 : 'Gratis'}
             </span>
           </div>

@@ -295,7 +295,7 @@ function DrawingDetail() {
                   <p className="mb-2 text-sm">
                     <strong>Type:</strong>{' '}
                     {drawing.isPaid && drawing.price
-                      ? `Paid ($${(drawing.price / 100).toFixed(2)})`
+                      ? `Paid ($${(drawing.price ?? 0).toLocaleString()})`
                       : 'Free'}
                   </p>
                   <p className="mb-2  text-sm">

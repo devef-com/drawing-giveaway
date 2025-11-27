@@ -324,13 +324,13 @@ function CreateDrawing() {
             {formData.isPaid && (
               <div>
                 <Label htmlFor="price" className="mb-1">
-                  Price (in dollars)
+                  Price
                 </Label>
                 <Input
                   id="price"
                   type="number"
-                  min="0"
-                  step="0.01"
+                  min="1"
+                  // step="0.01"
                   value={formData.price}
                   onChange={(e) =>
                     setFormData({
