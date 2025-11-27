@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   EllipsisVerticalIcon,
   // TrophyIcon,
@@ -36,6 +37,8 @@ import {
   ExpandableContent,
 } from '@/components/ui/expandable'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatDateGiway } from '@/lib/utils'
+import { useDrawingWinners } from '@/querys/useDrawingWinners'
 
 export const Route = createFileRoute('/drawings/$drawingId/')({
   component: DrawingDetail,
@@ -44,6 +47,7 @@ export const Route = createFileRoute('/drawings/$drawingId/')({
 function DrawingDetail() {
   const { drawingId } = Route.useParams()
   const session = authClient.useSession()
+  const queryClient = useQueryClient()
 
   const navigate = useNavigate()
 
@@ -51,6 +55,7 @@ function DrawingDetail() {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
   const [isSelectingWinners, setIsSelectingWinners] = useState(false)
+  const [loadWinners, setLoadWinners] = useState(false)
 
   // Filter and sorting state
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -63,6 +68,10 @@ function DrawingDetail() {
   const { data: drawing, isLoading: drawingLoading } = useDrawing(
     drawingId,
     !!session.data,
+  )
+  const { data: drawingWinners, isLoading: loadingWinners } = useDrawingWinners(
+    drawingId,
+    !!session.data && loadWinners,
   )
 
   const {
@@ -153,6 +162,7 @@ function DrawingDetail() {
         data.message ||
           `Successfully selected ${data.data.winners.length} winner(s)`,
       )
+      queryClient.invalidateQueries({ queryKey: ['drawing', drawingId] })
 
       // Optionally navigate to winners view or refresh data
       // navigate({ to: `/drawings/${drawingId}/winners` })
@@ -371,6 +381,34 @@ function DrawingDetail() {
                       </p>
                     )}
                 </div>
+                {drawing.winnerNumbers && drawing.winnerNumbers.length > 0 && (
+                  <Expandable onClick={() => setLoadWinners(true)}>
+                    <ExpandableTitle>
+                      Winners ({drawing.winnerNumbers.join(', ')})
+                    </ExpandableTitle>
+                    <ExpandableContent>
+                      {loadingWinners && <span>...</span>}
+                      {drawingWinners?.winners.map((winner) => (
+                        <div key={winner.participantId} className="mb-2 ml-4">
+                          <Link
+                            resetScroll={false}
+                            className="text-sm underline"
+                            to={'/drawings/$drawingId/m/$participant'}
+                            params={{
+                              drawingId: drawingId,
+                              participant: winner.participantId.toString(),
+                            }}
+                          >
+                            {winner.participantName}
+                          </Link>
+                        </div>
+                      ))}
+                      <pre className="hidden text-sm">
+                        {JSON.stringify(drawingWinners, null, 2)}
+                      </pre>
+                    </ExpandableContent>
+                  </Expandable>
+                )}
 
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
                   <p className="text-xs text-yellow-800 dark:text-yellow-200">
@@ -558,44 +596,9 @@ function DrawingDetail() {
                         )}
                       </td>
                       <td className="p-2 text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                        {(() => {
-                          // Parse the UTC timestamp and display in UTC to match stored time
-                          const date = new Date(participant.createdAt)
-                          const now = new Date()
-
-                          // Compare dates in UTC
-                          const todayUTC = Date.UTC(
-                            now.getUTCFullYear(),
-                            now.getUTCMonth(),
-                            now.getUTCDate(),
-                          )
-                          const yesterdayUTC = todayUTC - 86400000 // 24 hours in ms
-                          const participantDayUTC = Date.UTC(
-                            date.getUTCFullYear(),
-                            date.getUTCMonth(),
-                            date.getUTCDate(),
-                          )
-
-                          const time = date.toLocaleTimeString('en-US', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true,
-                            timeZone: 'UTC',
-                          })
-
-                          if (participantDayUTC === todayUTC) {
-                            return `Today ${time}`
-                          } else if (participantDayUTC === yesterdayUTC) {
-                            return `Yesterday ${time}`
-                          } else {
-                            const monthDay = date.toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: '2-digit',
-                              timeZone: 'UTC',
-                            })
-                            return `${monthDay} ${time}`
-                          }
-                        })()}
+                        {formatDateGiway(
+                          participant.createdAt as unknown as string,
+                        )}
                       </td>
                     </tr>
                   ))

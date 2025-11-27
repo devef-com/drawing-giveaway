@@ -32,7 +32,7 @@ export interface WinnerSelectionResult {
     winningNumber?: number
   }>
   winnerNumbers?: number[]
-  selectionMethod: 'random' | 'number'
+  selectionMethod: 'manually' | 'system'
   timestamp: Date
 }
 
@@ -327,7 +327,7 @@ export async function selectWinners(
     result = {
       drawingId,
       winners,
-      selectionMethod: 'random',
+      selectionMethod: 'system',
       timestamp,
     }
   } else {
@@ -354,7 +354,7 @@ export async function selectWinners(
       drawingId,
       winners,
       winnerNumbers,
-      selectionMethod: 'number',
+      selectionMethod: isSystemGenerated ? 'system' : 'manually',
       timestamp,
     }
   }
