@@ -47,6 +47,7 @@ export interface SelectNumberWinnersParams {
   quantityOfNumbers: number
   winnerSelectionIsManually: boolean
   existingWinnerNumbers?: number[] | null
+  passedWinnerNumbers?: number[] | null // Numbers passed at selection time (for manually mode)
 }
 
 // ============================================================================
@@ -139,6 +140,7 @@ export async function selectNumberWinners(
     quantityOfNumbers,
     winnerSelectionIsManually,
     existingWinnerNumbers,
+    passedWinnerNumbers,
   } = params
 
   // Step 1: Determine winning numbers
@@ -152,11 +154,17 @@ export async function selectNumberWinners(
       winnersAmount,
     )
   } else {
-    // Use pre-defined winner numbers (manually entered)
-    if (!existingWinnerNumbers || existingWinnerNumbers.length === 0) {
-      throw new Error('Winner numbers not defined for manual selection')
+    // Use winner numbers passed at selection time, or fall back to pre-defined ones
+    const numbersToUse = passedWinnerNumbers || existingWinnerNumbers
+    if (!numbersToUse || numbersToUse.length === 0) {
+      throw new Error('Winner numbers not provided for manual selection')
     }
-    winnerNumbers = existingWinnerNumbers.slice(0, winnersAmount)
+    if (numbersToUse.length < winnersAmount) {
+      throw new Error(
+        `Not enough winner numbers provided. Expected ${winnersAmount}, got ${numbersToUse.length}`,
+      )
+    }
+    winnerNumbers = numbersToUse.slice(0, winnersAmount)
   }
 
   // Step 2: Find participants who own these winning numbers
@@ -282,6 +290,7 @@ export async function selectNumberWinners(
  */
 export async function selectWinners(
   drawingId: string,
+  winnerNumbersInput?: number[] | null,
 ): Promise<WinnerSelectionResult> {
   // Fetch drawing configuration
   const drawing = await db
@@ -298,6 +307,16 @@ export async function selectWinners(
 
   // Validate drawing has ended
   validateDrawingEnded(drawingData.endAt)
+
+  // Validate winner numbers for manually mode
+  const isManuallyMode =
+    drawingData.playWithNumbers && drawingData.winnerSelection === 'manually'
+  if (
+    isManuallyMode &&
+    (!winnerNumbersInput || winnerNumbersInput.length === 0)
+  ) {
+    throw new Error('Winner numbers are required for manual selection mode')
+  }
 
   // Clear existing winners if any (allow re-running selection)
   const existingWinners = await db
@@ -340,15 +359,14 @@ export async function selectWinners(
       quantityOfNumbers: drawingData.quantityOfNumbers,
       winnerSelectionIsManually: !isSystemGenerated,
       existingWinnerNumbers: drawingData.winnerNumbers,
+      passedWinnerNumbers: winnerNumbersInput,
     })
 
-    // Update drawing with winner numbers if they were system generated
-    if (isSystemGenerated) {
-      await db
-        .update(drawings)
-        .set({ winnerNumbers })
-        .where(eq(drawings.id, drawingId))
-    }
+    // Update drawing with winner numbers (for both system and manually modes)
+    await db
+      .update(drawings)
+      .set({ winnerNumbers })
+      .where(eq(drawings.id, drawingId))
 
     result = {
       drawingId,

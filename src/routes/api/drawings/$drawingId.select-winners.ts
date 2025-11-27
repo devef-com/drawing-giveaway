@@ -16,6 +16,11 @@ export const Route = createFileRoute('/api/drawings/$drawingId/select-winners')(
          * Requirements:
          * - User must be authenticated and be the drawing owner
          * - Drawing must have ended (endAt < now)
+         * - For 'manually' mode: winnerNumbers array is required in body
+         * - For 'system' mode: winnerNumbers is optional (will be generated)
+         *
+         * Body (optional):
+         * - winnerNumbers: number[] - Required for 'manually' mode, optional for 'system'
          *
          * Hosts can re-run winner selection multiple times.
          * Previous winners will be cleared before selecting new ones.
@@ -51,6 +56,19 @@ export const Route = createFileRoute('/api/drawings/$drawingId/select-winners')(
           try {
             const { drawingId } = params
 
+            // Parse body for winnerNumbers (optional)
+            let winnerNumbers: number[] | undefined
+            try {
+              const body = await request.json()
+              if (body.winnerNumbers && Array.isArray(body.winnerNumbers)) {
+                winnerNumbers = body.winnerNumbers
+                  .map((n: any) => parseInt(n, 10))
+                  .filter((n: number) => !isNaN(n))
+              }
+            } catch {
+              // Body might be empty for system mode, that's ok
+            }
+
             // Verify drawing exists and user is the owner
             const drawing = await db
               .select()
@@ -82,8 +100,28 @@ export const Route = createFileRoute('/api/drawings/$drawingId/select-winners')(
               )
             }
 
+            // Validate winnerNumbers for manually mode
+            const isManuallyMode =
+              drawing[0].playWithNumbers &&
+              drawing[0].winnerSelection === 'manually'
+            if (
+              isManuallyMode &&
+              (!winnerNumbers || winnerNumbers.length === 0)
+            ) {
+              return new Response(
+                JSON.stringify({
+                  error:
+                    'Winner numbers are required for manual selection mode',
+                }),
+                {
+                  status: 400,
+                  headers: { 'Content-Type': 'application/json' },
+                },
+              )
+            }
+
             // Select winners
-            const result = await selectWinners(drawingId)
+            const result = await selectWinners(drawingId, winnerNumbers)
 
             return new Response(
               JSON.stringify({
