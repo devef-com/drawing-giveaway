@@ -63,8 +63,7 @@ const expandableContentVariants = cva(
 )
 
 interface ExpandableProps
-  extends React.ComponentProps<'div'>,
-    VariantProps<typeof expandableVariants> {
+  extends React.ComponentProps<'div'>, VariantProps<typeof expandableVariants> {
   defaultOpen?: boolean
 }
 
@@ -95,7 +94,8 @@ function Expandable({
 }
 
 interface ExpandableTitleProps
-  extends React.ComponentProps<'p'>,
+  extends
+    React.ComponentProps<'p'>,
     VariantProps<typeof expandableTitleVariants> {}
 
 function ExpandableTitle({
@@ -131,7 +131,8 @@ function ExpandableTitle({
 }
 
 interface ExpandableContentProps
-  extends React.ComponentProps<'div'>,
+  extends
+    React.ComponentProps<'div'>,
     VariantProps<typeof expandableContentVariants> {}
 
 function ExpandableContent({
