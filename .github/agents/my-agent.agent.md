@@ -4,8 +4,8 @@
 # To make this agent available, merge this file into the default repository branch.
 # For format details, see: https://gh.io/customagents/config
 
-name:
-description:
+name: Giway-expert
+description: Expert in Giway application
 ---
 
 # My Agent
@@ -25,8 +25,8 @@ The participants table includes a selectedNumber field used for drawings with ra
 Event Types
 
 The platform supports two types of events (giveaways):
-	•	Free Events – Participants can select only one number.
-	•	Paid Events – Participants can select multiple numbers, and the host must define a price for participation.
+• Free Events – Participants can select only one number.
+• Paid Events – Participants can select multiple numbers, and the host must define a price for participation.
 
 The only functional difference between free and paid events is the number of allowed selections and the presence of a price field for paid events.
 
@@ -37,17 +37,17 @@ Playing With Numbers
 The system now uses a unified flag called play_with_numbers (previously is_winner_number_random) to define whether participants actively select numbers. This option is available in the UI for both free and paid events.
 
 The winner selection method is defined as:
-	•	System
-	•	Manually
+• System
+• Manually
 
 If play with numbers is disabled, the System method is enforced and cannot be changed.
 
 ⸻
 
 Other Core Settings
-	•	Title and guidelines remain unchanged in both the database and UI.
-	•	Number of winners remains configurable and unchanged.
-	•	End date and time behavior remains unchanged.
+• Title and guidelines remain unchanged in both the database and UI.
+• Number of winners remains configurable and unchanged.
+• End date and time behavior remains unchanged.
 
 ⸻
 
