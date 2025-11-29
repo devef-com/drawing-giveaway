@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+.npm
+
+# Build outputs
+.output
+.nitro
+.tanstack
+.vinxi
+dist
+dist-ssr
+
+# Development files
+.git
+.gitignore
+.vscode
+*.local
+
+# Environment files (will be mounted/provided at runtime)
+.env
+.env.*
+!.env.example
+
+# Misc
+.DS_Store
+*.log
+count.txt
+todos.json
+
+# Documentation
+*.md
+!README.md
+
+# Wrangler (Cloudflare)
+.wrangler
