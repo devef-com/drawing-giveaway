@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { format } from 'date-fns'
 import {
+  AlertCircle,
+  CalendarIcon,
   EraserIcon,
   Pencil,
-  Trash2,
-  CalendarIcon,
   PlusIcon,
+  Trash2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -34,9 +36,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { authClient } from '@/lib/auth-client'
-import { format } from 'date-fns'
 import useMobile from '@/hooks/useMobile'
+import { useUserBalance } from '@/querys/useUserBalance'
 
 export const Route = createFileRoute('/drawings/create')({
   component: CreateDrawing,
@@ -45,16 +48,19 @@ export const Route = createFileRoute('/drawings/create')({
 function CreateDrawing() {
   const navigate = useNavigate()
   const session = authClient.useSession()
+  const { data: balance, isLoading: isBalanceLoading } = useUserBalance(
+    !!session.data,
+  )
   const [formData, setFormData] = useState({
     title: '',
-    guidelines: [] as string[],
+    guidelines: [] as Array<string>,
     isPaid: false,
     price: 0,
     winnerSelection: 'system' as 'manually' | 'system',
     quantityOfNumbers: 100,
     playWithNumbers: false,
     winnersAmount: 1,
-    winnerNumbers: [] as number[],
+    winnerNumbers: [] as Array<number>,
     endAt: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -68,6 +74,12 @@ function CreateDrawing() {
   const [isOpen, setIsOpen] = useState(false)
   const isMobile = useMobile()
   const [endAtError, setEndAtError] = useState('')
+  const [balanceError, setBalanceError] = useState('')
+
+  // Calculate max participants available based on play mode
+  const maxParticipants = formData.playWithNumbers
+    ? (balance?.playWithNumbers.participants ?? 0)
+    : (balance?.noNumbers.participants ?? 0)
 
   const addGuideline = () => {
     if (!currentGuideline.trim()) return
@@ -152,7 +164,16 @@ function CreateDrawing() {
       return
     }
 
+    // Validate balance for play with numbers
+    if (formData.playWithNumbers && formData.quantityOfNumbers > maxParticipants) {
+      setBalanceError(
+        `Insufficient balance. You need ${formData.quantityOfNumbers} participants but only have ${maxParticipants} available.`,
+      )
+      return
+    }
+
     setEndAtError('')
+    setBalanceError('')
     setIsSubmitting(true)
 
     try {
@@ -176,7 +197,11 @@ function CreateDrawing() {
         navigate({ to: `/drawings/${data.id}` })
       } else {
         const error = await response.json()
-        alert(error.message || 'Failed to create drawing. Please try again.')
+        if (error.error === 'Insufficient balance') {
+          setBalanceError(error.message)
+        } else {
+          alert(error.message || 'Failed to create drawing. Please try again.')
+        }
       }
     } catch (error) {
       console.error('Error creating drawing:', error)
@@ -210,6 +235,43 @@ function CreateDrawing() {
       <div className="max-w-2xl mx-auto">
         <Card className="p-6">
           <h1 className="text-xl font-bold mb-2">Create New Drawing</h1>
+
+          {/* Balance Info */}
+          {!isBalanceLoading && balance && (
+            <div className="mb-6 p-4 rounded-lg border bg-muted/50">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium">Your Balance</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.playWithNumbers
+                      ? `Raffle: ${balance.playWithNumbers.participants} participants available`
+                      : `Giveaway: ${balance.noNumbers.participants} participants available`}
+                  </p>
+                </div>
+                <Link to="/store">
+                  <Button variant="outline" size="sm">
+                    Get More
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {balanceError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Insufficient Balance</AlertTitle>
+              <AlertDescription>
+                {balanceError}{' '}
+                <Link
+                  to="/store"
+                  className="underline font-medium hover:no-underline"
+                >
+                  Get more packs
+                </Link>
+              </AlertDescription>
+            </Alert>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -388,18 +450,27 @@ function CreateDrawing() {
                   id="quantityOfNumbers"
                   type="number"
                   min="50"
-                  max="500"
+                  max={maxParticipants > 0 ? maxParticipants : 500}
                   value={formData.quantityOfNumbers}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 100
                     setFormData({
                       ...formData,
-                      quantityOfNumbers: parseInt(e.target.value) || 100,
+                      quantityOfNumbers: Math.min(
+                        value,
+                        maxParticipants > 0 ? maxParticipants : 500,
+                      ),
                     })
-                  }
+                  }}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   System will generate {formData.quantityOfNumbers} numbers to
                   play.
+                  {maxParticipants > 0 && (
+                    <span className="block text-primary">
+                      Max available from your balance: {maxParticipants}
+                    </span>
+                  )}
                 </p>
               </div>
             )}
