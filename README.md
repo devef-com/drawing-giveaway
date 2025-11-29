@@ -17,6 +17,111 @@ To build this application for production:
 npm run build
 ```
 
+## Docker Deployment
+
+This project includes Docker support for easy deployment on VPS environments.
+
+### Prerequisites
+
+- Docker and Docker Compose installed on your VPS
+- Environment variables configured in a `.env` file
+
+### Quick Start
+
+1. Copy the environment example file and configure your variables:
+
+```bash
+cp .env.example .env
+```
+
+2. Edit the `.env` file with your production values:
+
+```env
+# Database - use the Docker Compose PostgreSQL or external database
+DATABASE_URL=postgresql://your_user:your_password@db:5432/drawing_giveaway
+
+# Better Auth configuration (required)
+BETTER_AUTH_SECRET=your-secure-secret-key
+BETTER_AUTH_URL=https://your-domain.com
+APP_HOST=https://your-domain.com
+
+# Optional: R2/S3 storage configuration
+R2_ENDPOINT=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET_NAME=
+R2_PUBLIC_DOMAIN=
+
+# Required: PostgreSQL credentials for docker-compose (use strong values!)
+POSTGRES_USER=your_db_user
+POSTGRES_PASSWORD=your_secure_password
+POSTGRES_DB=drawing_giveaway
+```
+
+3. Build and start the application:
+
+```bash
+# Build and start all services
+docker compose up -d --build
+
+# View logs
+docker compose logs -f app
+
+# Stop all services
+docker compose down
+```
+
+### Using External PostgreSQL
+
+If you have an external PostgreSQL database (e.g., Neon, Supabase, AWS RDS):
+
+```bash
+# Build only the app image
+docker build -t drawing-giveaway .
+
+# Run with external database
+docker run -d \
+  --name drawing-giveaway \
+  -p 3000:3000 \
+  --env-file .env \
+  drawing-giveaway
+```
+
+### Updating Environment Variables
+
+To update environment variables without rebuilding:
+
+1. Edit your `.env` file
+2. Restart the container:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+### PM2 Process Management
+
+The application uses PM2 for process management inside the container. PM2 provides:
+
+- Automatic restarts on crashes
+- Log management
+- Health monitoring
+
+View PM2 status inside the container:
+
+```bash
+docker exec drawing-giveaway-app pm2 status
+docker exec drawing-giveaway-app pm2 logs
+```
+
+### Database Migrations
+
+Migrations run automatically on container startup. To run manually:
+
+```bash
+docker exec drawing-giveaway-app npx drizzle-kit migrate
+```
+
 ## Testing
 
 This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
