@@ -1,11 +1,78 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { eq } from 'drizzle-orm'
+import { and, eq, gt, isNull, or } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 
+import type { Drawing } from '@/db/schema'
 import { db } from '@/db/index'
-import { Drawing, drawings } from '@/db/schema'
+import { drawings, userBalances } from '@/db/schema'
 import { auth } from '@/lib/auth'
 import { initializeNumberSlots } from '@/lib/number-slots'
+
+// Helper function to get user's available balance
+async function getUserBalance(
+  userId: string,
+  giwayType: 'play_with_numbers' | 'no_numbers',
+) {
+  const now = new Date()
+  const balances = await db
+    .select()
+    .from(userBalances)
+    .where(
+      and(
+        eq(userBalances.userId, userId),
+        eq(userBalances.giwayType, giwayType),
+        or(isNull(userBalances.expiresAt), gt(userBalances.expiresAt, now)),
+      ),
+    )
+
+  return {
+    participants: balances.reduce((sum, b) => sum + b.participants, 0),
+    images: balances.reduce((sum, b) => sum + b.images, 0),
+    emails: balances.reduce((sum, b) => sum + b.emails, 0),
+  }
+}
+
+// Helper function to deduct from user balance
+async function deductFromBalance(
+  userId: string,
+  giwayType: 'play_with_numbers' | 'no_numbers',
+  participantsNeeded: number,
+) {
+  const now = new Date()
+
+  // Get all non-expired balances ordered by expiration (expiring first, then never-expiring)
+  const balances = await db
+    .select()
+    .from(userBalances)
+    .where(
+      and(
+        eq(userBalances.userId, userId),
+        eq(userBalances.giwayType, giwayType),
+        or(isNull(userBalances.expiresAt), gt(userBalances.expiresAt, now)),
+      ),
+    )
+    .orderBy(userBalances.expiresAt) // This puts NULL last, which is what we want
+
+  let remaining = participantsNeeded
+
+  for (const balance of balances) {
+    if (remaining <= 0) break
+
+    const toDeduct = Math.min(balance.participants, remaining)
+    remaining -= toDeduct
+
+    // Update the balance
+    await db
+      .update(userBalances)
+      .set({
+        participants: balance.participants - toDeduct,
+        updatedAt: now,
+      })
+      .where(eq(userBalances.id, balance.id))
+  }
+
+  return remaining === 0
+}
 
 export const Route = createFileRoute('/api/drawings/')({
   server: {
@@ -50,6 +117,50 @@ export const Route = createFileRoute('/api/drawings/')({
 
         try {
           const body = (await request.json()) as Omit<Drawing, 'id' | 'userId'>
+
+          // Determine giway type based on playWithNumbers
+          const giwayType = body.playWithNumbers
+            ? 'play_with_numbers'
+            : 'no_numbers'
+
+          // Get user's current balance for this giway type
+          const balance = await getUserBalance(session.user.id, giwayType)
+
+          // For play_with_numbers, the participants limit is quantityOfNumbers
+          // For no_numbers, there's no predefined number limit (unlimited participants)
+          const participantsNeeded = body.playWithNumbers
+            ? body.quantityOfNumbers || 0
+            : 0
+
+          // Validate that user has enough participant balance (only for play_with_numbers)
+          if (body.playWithNumbers && participantsNeeded > balance.participants) {
+            return new Response(
+              JSON.stringify({
+                error: 'Insufficient balance',
+                message: `You need ${participantsNeeded} participants but only have ${balance.participants} available.`,
+                maxParticipants: balance.participants,
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } },
+            )
+          }
+
+          // Deduct from balance if play_with_numbers
+          if (body.playWithNumbers && participantsNeeded > 0) {
+            const deductSuccess = await deductFromBalance(
+              session.user.id,
+              giwayType,
+              participantsNeeded,
+            )
+            if (!deductSuccess) {
+              return new Response(
+                JSON.stringify({
+                  error: 'Failed to deduct balance',
+                  message: 'Could not deduct participants from your balance.',
+                }),
+                { status: 400, headers: { 'Content-Type': 'application/json' } },
+              )
+            }
+          }
 
           const newDrawing = await db
             .insert(drawings)
