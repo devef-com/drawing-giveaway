@@ -159,11 +159,19 @@ export const Route = createFileRoute('/api/drawings/$drawingId/assets')({
 
         try {
           const url = new URL(request.url)
-          const assetId = url.searchParams.get('assetId')
+          const assetIdParam = url.searchParams.get('assetId')
 
-          if (!assetId) {
+          if (!assetIdParam) {
             return new Response(
               JSON.stringify({ error: 'Asset ID is required' }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } },
+            )
+          }
+
+          const assetId = parseInt(assetIdParam, 10)
+          if (isNaN(assetId)) {
+            return new Response(
+              JSON.stringify({ error: 'Invalid asset ID format' }),
               { status: 400, headers: { 'Content-Type': 'application/json' } },
             )
           }
@@ -195,7 +203,7 @@ export const Route = createFileRoute('/api/drawings/$drawingId/assets')({
           const assetToDelete = await db
             .select()
             .from(assets)
-            .where(eq(assets.id, parseInt(assetId)))
+            .where(eq(assets.id, assetId))
             .limit(1)
 
           if (assetToDelete.length === 0) {
@@ -221,12 +229,12 @@ export const Route = createFileRoute('/api/drawings/$drawingId/assets')({
             .where(
               and(
                 eq(drawingAssets.drawingId, params.drawingId),
-                eq(drawingAssets.assetId, parseInt(assetId)),
+                eq(drawingAssets.assetId, assetId),
               ),
             )
 
           // Delete the asset record
-          await db.delete(assets).where(eq(assets.id, parseInt(assetId)))
+          await db.delete(assets).where(eq(assets.id, assetId))
 
           return new Response(JSON.stringify({ success: true }), {
             status: 200,

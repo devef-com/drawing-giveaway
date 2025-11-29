@@ -177,9 +177,9 @@ function CreateDrawing() {
       if (response.ok) {
         const data = await response.json()
 
-        // Upload pending images if any
+        // Upload pending images if any (concurrently)
         if (pendingImages.length > 0) {
-          for (const image of pendingImages) {
+          const uploadPromises = pendingImages.map(async (image) => {
             try {
               // 1. Get presigned upload URL
               const uploadUrlResponse = await fetch(
@@ -195,8 +195,12 @@ function CreateDrawing() {
               )
 
               if (!uploadUrlResponse.ok) {
-                console.error('Failed to get upload URL for image')
-                continue
+                const errorData = await uploadUrlResponse.json().catch(() => ({}))
+                console.error(
+                  `Failed to get upload URL: ${uploadUrlResponse.status}`,
+                  errorData,
+                )
+                return { success: false, error: 'Failed to get upload URL' }
               }
 
               const { uploadUrl, s3Key, publicUrl } =
@@ -212,8 +216,10 @@ function CreateDrawing() {
               })
 
               if (!uploadResponse.ok) {
-                console.error('Failed to upload image to storage')
-                continue
+                console.error(
+                  `Failed to upload to storage: ${uploadResponse.status}`,
+                )
+                return { success: false, error: 'Failed to upload to storage' }
               }
 
               // 3. Confirm upload and save asset metadata
@@ -227,10 +233,23 @@ function CreateDrawing() {
                   s3Key,
                 }),
               })
+
+              return { success: true }
             } catch (uploadError) {
               console.error('Error uploading image:', uploadError)
-              toast.error('Failed to upload some images')
+              return { success: false, error: uploadError }
             }
+          })
+
+          const results = await Promise.allSettled(uploadPromises)
+          const failedCount = results.filter(
+            (r) =>
+              r.status === 'rejected' ||
+              (r.status === 'fulfilled' && !r.value.success),
+          ).length
+
+          if (failedCount > 0) {
+            toast.error(`Failed to upload ${failedCount} image(s)`)
           }
         }
 

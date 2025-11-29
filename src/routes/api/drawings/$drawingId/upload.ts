@@ -2,13 +2,16 @@ import { createFileRoute } from '@tanstack/react-router'
 import { nanoid } from 'nanoid'
 
 import { db } from '@/db/index'
-import { assets, drawingAssets, drawings } from '@/db/schema'
+import { drawings } from '@/db/schema'
 import { auth } from '@/lib/auth'
 import { getSignedUploadUrl } from '@/lib/s3'
 import { eq } from 'drizzle-orm'
 
 // Allowed image MIME types (browser-supported formats)
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const
+
+// Maximum file size in bytes (5MB - allows for compression results up to this size)
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
 
 type AllowedImageType = (typeof ALLOWED_IMAGE_TYPES)[number]
 
@@ -63,12 +66,11 @@ export const Route = createFileRoute('/api/drawings/$drawingId/upload')({
             )
           }
 
-          // Validate file size (max 5MB after compression)
-          const maxSize = 5 * 1024 * 1024 // 5MB
-          if (size > maxSize) {
+          // Validate file size
+          if (size > MAX_FILE_SIZE_BYTES) {
             return new Response(
               JSON.stringify({
-                error: `File size too large. Maximum allowed: ${maxSize / (1024 * 1024)}MB`,
+                error: `File size too large. Maximum allowed: ${MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB`,
               }),
               { status: 400, headers: { 'Content-Type': 'application/json' } },
             )

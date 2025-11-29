@@ -1,5 +1,6 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ImageIcon, Trash2, X } from 'lucide-react'
+import { nanoid } from 'nanoid'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
@@ -83,7 +84,7 @@ export function ImageUpload({
             const previewUrl = createImagePreview(compressedFile)
 
             const uploadedImage: UploadedImage = {
-              id: crypto.randomUUID(),
+              id: nanoid(),
               file: compressedFile,
               previewUrl,
               status: 'pending',
@@ -226,12 +227,13 @@ export function ImageUpload({
   const uploadAllImages = useCallback(async () => {
     const pendingImages = images.filter((img) => img.status === 'pending')
 
-    for (const image of pendingImages) {
-      try {
-        await uploadImage(image)
-      } catch (error) {
-        toast.error(`Failed to upload image`)
-      }
+    const results = await Promise.allSettled(
+      pendingImages.map((image) => uploadImage(image)),
+    )
+
+    const failedCount = results.filter((r) => r.status === 'rejected').length
+    if (failedCount > 0) {
+      toast.error(`Failed to upload ${failedCount} image(s)`)
     }
   }, [images, uploadImage])
 
