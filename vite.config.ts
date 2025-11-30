@@ -4,13 +4,11 @@ import viteReact from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
-// import neon from './neon-vite-plugin.ts'
 
-const config = defineConfig({
+export default defineConfig({
+  base: '/', // ✅ prevent asset path mismatch
   plugins: [
-    // neon,
     nitro(),
-    // this is the plugin that enables path aliases
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
@@ -18,7 +16,15 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
   ],
-  nitro: {},
+  build: {
+    manifest: true, // ✅ REQUIRED for Nitro asset mapping
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]',
+      },
+    },
+  },
 })
-
-export default config
