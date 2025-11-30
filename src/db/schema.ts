@@ -16,6 +16,18 @@ export const winnerSelectionEnum = pgEnum('winner_selection', [
   'system',
 ])
 
+export const giwayTypeEnum = pgEnum('giway_type', [
+  'play_with_numbers', // raffle
+  'no_numbers', // giveaway drawing
+])
+
+export const redemptionSourceEnum = pgEnum('redemption_source', [
+  'purchase', // bought with money
+  'coupon', // redeemed with coupon
+  'ads', // earned by watching ads
+  'monthly', // monthly free allowance
+])
+
 // Assets table (polymorphic)
 export const assets = pgTable('assets', {
   id: serial('id').primaryKey(),
@@ -114,6 +126,72 @@ export const todos = pgTable('todos', {
   createdAt: timestamp('created_at').defaultNow(),
 })
 
+// Packs table - defines available packs for purchase/redemption
+export const packs = pgTable('packs', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+  giwayType: giwayTypeEnum('giway_type').notNull(), // 'play_with_numbers' or 'no_numbers'
+  participants: integer('participants').notNull().default(0), // max participants allowed
+  images: integer('images').notNull().default(0), // max images that can be uploaded
+  emails: integer('emails').notNull().default(0), // max email notifications
+  price: integer('price').notNull().default(0), // price in cents
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
+
+// User balances table - tracks current available balance for users
+export const userBalances = pgTable('user_balances', {
+  id: serial('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  giwayType: giwayTypeEnum('giway_type').notNull(), // separate balances for each giway type
+  participants: integer('participants').notNull().default(0),
+  images: integer('images').notNull().default(0),
+  emails: integer('emails').notNull().default(0),
+  expiresAt: timestamp('expires_at'), // null = never expires (purchased), set = monthly allowance
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
+
+// Pack redemptions table - logs all pack purchases/redemptions
+export const packRedemptions = pgTable('pack_redemptions', {
+  id: serial('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  packId: integer('pack_id').references(() => packs.id, {
+    onDelete: 'set null',
+  }),
+  source: redemptionSourceEnum('source').notNull(), // 'purchase', 'coupon', 'ads', 'monthly'
+  couponId: integer('coupon_id').references(() => coupons.id, {
+    onDelete: 'set null',
+  }),
+  giwayType: giwayTypeEnum('giway_type').notNull(),
+  participants: integer('participants').notNull().default(0), // amount added
+  images: integer('images').notNull().default(0),
+  emails: integer('emails').notNull().default(0),
+  amountPaid: integer('amount_paid').default(0), // amount in cents if purchased
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+})
+
+// Coupons table - for coupon redemption system
+export const coupons = pgTable('coupons', {
+  id: serial('id').primaryKey(),
+  code: varchar('code', { length: 50 }).notNull().unique(),
+  giwayType: giwayTypeEnum('giway_type').notNull(),
+  participants: integer('participants').notNull().default(0),
+  images: integer('images').notNull().default(0),
+  emails: integer('emails').notNull().default(0),
+  maxUses: integer('max_uses'), // null = unlimited
+  usedCount: integer('used_count').notNull().default(0),
+  expiresAt: timestamp('expires_at'), // null = never expires
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+})
+
 // Better Auth tables
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -178,6 +256,8 @@ export const verification = pgTable('verification', {
 // Relations
 export const usersRelations = relations(user, ({ many }) => ({
   drawings: many(drawings),
+  balances: many(userBalances),
+  packRedemptions: many(packRedemptions),
 }))
 
 export const drawingsRelations = relations(drawings, ({ one, many }) => ({
@@ -186,8 +266,8 @@ export const drawingsRelations = relations(drawings, ({ one, many }) => ({
     references: [user.id],
   }),
   participants: many(participants),
-  winners: many(drawingWinners), // Add this relation
-  drawingAssets: many(drawingAssets), // Relation to drawing images
+  winners: many(drawingWinners),
+  drawingAssets: many(drawingAssets),
 }))
 
 export const participantsRelations = relations(
@@ -202,7 +282,7 @@ export const participantsRelations = relations(
       references: [assets.id],
     }),
     numberSlots: many(numberSlots),
-    wonDrawings: many(drawingWinners), // Add this relation
+    wonDrawings: many(drawingWinners),
   }),
 )
 
@@ -238,6 +318,40 @@ export const assetsRelations = relations(assets, ({ one, many }) => ({
   drawingAssets: many(drawingAssets),
 }))
 
+// User balance relations
+export const userBalancesRelations = relations(userBalances, ({ one }) => ({
+  user: one(user, {
+    fields: [userBalances.userId],
+    references: [user.id],
+  }),
+}))
+
+export const packRedemptionsRelations = relations(
+  packRedemptions,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [packRedemptions.userId],
+      references: [user.id],
+    }),
+    pack: one(packs, {
+      fields: [packRedemptions.packId],
+      references: [packs.id],
+    }),
+    coupon: one(coupons, {
+      fields: [packRedemptions.couponId],
+      references: [coupons.id],
+    }),
+  }),
+)
+
+export const packsRelations = relations(packs, ({ many }) => ({
+  redemptions: many(packRedemptions),
+}))
+
+export const couponsRelations = relations(coupons, ({ many }) => ({
+  redemptions: many(packRedemptions),
+}))
+
 // Type exports for TypeScript usage
 export type Drawing = typeof drawings.$inferSelect
 export type NewDrawing = typeof drawings.$inferInsert
@@ -251,3 +365,11 @@ export type DrawingWinner = typeof drawingWinners.$inferSelect
 export type NewDrawingWinner = typeof drawingWinners.$inferInsert
 export type DrawingAsset = typeof drawingAssets.$inferSelect
 export type NewDrawingAsset = typeof drawingAssets.$inferInsert
+export type Pack = typeof packs.$inferSelect
+export type NewPack = typeof packs.$inferInsert
+export type UserBalance = typeof userBalances.$inferSelect
+export type NewUserBalance = typeof userBalances.$inferInsert
+export type PackRedemption = typeof packRedemptions.$inferSelect
+export type NewPackRedemption = typeof packRedemptions.$inferInsert
+export type Coupon = typeof coupons.$inferSelect
+export type NewCoupon = typeof coupons.$inferInsert
