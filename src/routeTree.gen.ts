@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DrawingsIndexRouteImport } from './routes/drawings/index'
 import { Route as AuthenticationIndexRouteImport } from './routes/authentication/index'
@@ -47,6 +48,11 @@ import { Route as ApiDrawingsDrawingIdParticipantsRouteImport } from './routes/a
 import { Route as ApiDrawingsDrawingIdAssetsRouteImport } from './routes/api/drawings/$drawingId/assets'
 import { Route as ApiDrawingsDrawingIdParticipantIdRouteImport } from './routes/api/drawings/$drawingId/$participantId'
 
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -249,6 +255,7 @@ const ApiDrawingsDrawingIdParticipantIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/support': typeof SupportRoute
   '/authentication/login': typeof AuthenticationLoginRoute
   '/authentication/signup': typeof AuthenticationSignupRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/support': typeof SupportRoute
   '/authentication/login': typeof AuthenticationLoginRoute
   '/authentication/signup': typeof AuthenticationSignupRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
@@ -328,6 +336,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/support': typeof SupportRoute
   '/authentication/login': typeof AuthenticationLoginRoute
   '/authentication/signup': typeof AuthenticationSignupRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
@@ -369,6 +378,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/support'
     | '/authentication/login'
     | '/authentication/signup'
     | '/demo/drizzle'
@@ -408,6 +418,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/support'
     | '/authentication/login'
     | '/authentication/signup'
     | '/demo/drizzle'
@@ -447,6 +458,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/support'
     | '/authentication/login'
     | '/authentication/signup'
     | '/demo/drizzle'
@@ -487,6 +499,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SupportRoute: typeof SupportRoute
   AuthenticationLoginRoute: typeof AuthenticationLoginRoute
   AuthenticationSignupRoute: typeof AuthenticationSignupRoute
   DemoDrizzleRoute: typeof DemoDrizzleRoute
@@ -518,6 +531,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -811,6 +831,7 @@ const ApiDrawingsDrawingIdRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SupportRoute: SupportRoute,
   AuthenticationLoginRoute: AuthenticationLoginRoute,
   AuthenticationSignupRoute: AuthenticationSignupRoute,
   DemoDrizzleRoute: DemoDrizzleRoute,
