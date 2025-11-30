@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
+  CalendarIcon,
   EraserIcon,
   Pencil,
-  Trash2,
-  CalendarIcon,
   PlusIcon,
+  Trash2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,6 +37,8 @@ import {
 import { authClient } from '@/lib/auth-client'
 import { format } from 'date-fns'
 import useMobile from '@/hooks/useMobile'
+import { ImageUpload, type UploadedImage } from '@/components/ImageUpload'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/drawings/create')({
   component: CreateDrawing,
@@ -68,6 +70,7 @@ function CreateDrawing() {
   const [isOpen, setIsOpen] = useState(false)
   const isMobile = useMobile()
   const [endAtError, setEndAtError] = useState('')
+  const [pendingImages, setPendingImages] = useState<Array<UploadedImage>>([])
 
   const addGuideline = () => {
     if (!currentGuideline.trim()) return
@@ -173,6 +176,85 @@ function CreateDrawing() {
 
       if (response.ok) {
         const data = await response.json()
+
+        // Upload pending images if any (concurrently)
+        if (pendingImages.length > 0) {
+          const uploadPromises = pendingImages.map(async (image) => {
+            try {
+              // 1. Get presigned upload URL
+              const uploadUrlResponse = await fetch(
+                `/api/drawings/${data.id}/upload`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    mimeType: image.file.type,
+                    size: image.file.size,
+                  }),
+                },
+              )
+
+              if (!uploadUrlResponse.ok) {
+                const errorData = await uploadUrlResponse
+                  .json()
+                  .catch(() => ({}))
+                console.error(
+                  `Failed to get upload URL: ${uploadUrlResponse.status}`,
+                  errorData,
+                )
+                return { success: false, error: 'Failed to get upload URL' }
+              }
+
+              const { uploadUrl, s3Key, publicUrl } =
+                await uploadUrlResponse.json()
+
+              // 2. Upload file to S3/R2
+              const uploadResponse = await fetch(uploadUrl, {
+                method: 'PUT',
+                body: image.file,
+                headers: {
+                  'Content-Type': image.file.type,
+                },
+              })
+
+              if (!uploadResponse.ok) {
+                console.error(
+                  `Failed to upload to storage: ${uploadResponse.status}`,
+                )
+                return { success: false, error: 'Failed to upload to storage' }
+              }
+
+              // 3. Confirm upload and save asset metadata
+              await fetch(`/api/drawings/${data.id}/assets`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  url: publicUrl,
+                  mimeType: image.file.type,
+                  size: image.file.size,
+                  s3Key,
+                }),
+              })
+
+              return { success: true }
+            } catch (uploadError) {
+              console.error('Error uploading image:', uploadError)
+              return { success: false, error: uploadError }
+            }
+          })
+
+          const results = await Promise.allSettled(uploadPromises)
+          const failedCount = results.filter(
+            (r) =>
+              r.status === 'rejected' ||
+              (r.status === 'fulfilled' && !r.value.success),
+          ).length
+
+          if (failedCount > 0) {
+            toast.error(`Failed to upload ${failedCount} image(s)`)
+          }
+        }
+
         navigate({ to: `/drawings/${data.id}` })
       } else {
         const error = await response.json()
@@ -223,6 +305,16 @@ function CreateDrawing() {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 required
+              />
+            </div>
+
+            {/* Image Upload Section */}
+            <div>
+              <Label className="mb-2">Images (Optional)</Label>
+              <ImageUpload
+                onImagesChange={setPendingImages}
+                maxImages={5}
+                disabled={isSubmitting}
               />
             </div>
 
