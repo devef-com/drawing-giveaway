@@ -362,13 +362,12 @@ export function ImageUpload({
       {/* Upload area */}
       {canAddMore && (
         <div
-          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-            disabled || isCompressing
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${disabled || isCompressing
               ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
               : isDragging
                 ? 'border-primary bg-primary/10 cursor-pointer'
                 : 'border-gray-300 hover:border-primary cursor-pointer'
-          }`}
+            }`}
           onClick={() =>
             !disabled && !isCompressing && fileInputRef.current?.click()
           }
