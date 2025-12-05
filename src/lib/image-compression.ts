@@ -1,5 +1,8 @@
 import imageCompression from 'browser-image-compression'
 
+// Server URL for image compression (from environment variable)
+const IMAGE_COMPRESS_HOST = import.meta.env.VITE_IMAGE_COMPRESS_HOST || ''
+
 type Options = Partial<{
   maxSizeMB: number // (default: Number.POSITIVE_INFINITY)
   maxWidthOrHeight: number // compressedFile will scale down by ratio to a point that width or height is smaller than maxWidthOrHeight (default: undefined)
@@ -58,7 +61,54 @@ export function getExtensionFromMimeType(mimeType: string): string {
 }
 
 /**
+ * Compresses an image file using the server-side compression service
+ */
+async function compressImageServer(file: File): Promise<File> {
+  if (!IMAGE_COMPRESS_HOST) {
+    throw new Error('IMAGE_COMPRESS_HOST is not configured')
+  }
+
+  const formData = new FormData()
+  formData.append('image', file)
+
+  const response = await fetch(`${IMAGE_COMPRESS_HOST}/convert`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  if (!response.ok) {
+    throw new Error(`Server compression failed: ${response.statusText}`)
+  }
+
+  const blob = await response.blob()
+  const compressedFile = new File(
+    [blob],
+    file.name.replace(/\.[^/.]+$/, '.webp'),
+    { type: 'image/webp' },
+  )
+
+  return compressedFile
+}
+
+/**
  * Compresses an image file on the client side
+ */
+async function compressImageClient(
+  file: File,
+  options?: Partial<Options>,
+): Promise<File> {
+  const compressionOptions = {
+    ...DEFAULT_COMPRESSION_OPTIONS,
+    ...options,
+  }
+
+  const compressedFile = await imageCompression(file, compressionOptions)
+  return compressedFile
+}
+
+/**
+ * Compresses an image file - tests both client and server compression in parallel
+ * and returns the server result if available, falling back to client compression
  */
 export async function compressImage(
   file: File,
@@ -71,18 +121,77 @@ export async function compressImage(
     )
   }
 
-  const compressionOptions = {
-    ...DEFAULT_COMPRESSION_OPTIONS,
-    ...options,
+  const startTime = performance.now()
+
+  // Run both compression methods in parallel for testing
+  const clientPromise = compressImageClient(file, options)
+    .then((result) => {
+      const duration = performance.now() - startTime
+      console.log(
+        `[Image Compression] Client: ${duration.toFixed(0)}ms, size: ${(result.size / 1024).toFixed(1)}KB`,
+      )
+      return { source: 'client' as const, file: result, duration }
+    })
+    .catch((error) => {
+      console.error('[Image Compression] Client failed:', error)
+      return {
+        source: 'client' as const,
+        error,
+        duration: performance.now() - startTime,
+      }
+    })
+
+  const serverPromise = IMAGE_COMPRESS_HOST
+    ? compressImageServer(file)
+        .then((result) => {
+          const duration = performance.now() - startTime
+          console.log(
+            `[Image Compression] Server: ${duration.toFixed(0)}ms, size: ${(result.size / 1024).toFixed(1)}KB`,
+          )
+          return { source: 'server' as const, file: result, duration }
+        })
+        .catch((error) => {
+          console.error('[Image Compression] Server failed:', error)
+          return {
+            source: 'server' as const,
+            error,
+            duration: performance.now() - startTime,
+          }
+        })
+    : Promise.resolve({
+        source: 'server' as const,
+        error: new Error('Server not configured'),
+        duration: 0,
+      })
+
+  const [clientResult, serverResult] = await Promise.all([
+    clientPromise,
+    serverPromise,
+  ])
+
+  // Log comparison results
+  console.log('[Image Compression] Comparison:', {
+    original: `${(file.size / 1024).toFixed(1)}KB`,
+    client:
+      'file' in clientResult
+        ? `${(clientResult.file.size / 1024).toFixed(1)}KB in ${clientResult.duration.toFixed(0)}ms`
+        : 'failed',
+    server:
+      'file' in serverResult
+        ? `${(serverResult.file.size / 1024).toFixed(1)}KB in ${serverResult.duration.toFixed(0)}ms`
+        : 'failed',
+  })
+
+  // Prefer server result if available, fall back to client
+  if ('file' in serverResult) {
+    return serverResult.file
   }
 
-  try {
-    const compressedFile = await imageCompression(file, compressionOptions)
-    return compressedFile
-  } catch (error) {
-    console.error('Image compression failed:', error)
-    throw new Error('Failed to compress image')
+  if ('file' in clientResult) {
+    return clientResult.file
   }
+
+  throw new Error('Both compression methods failed')
 }
 
 /**
