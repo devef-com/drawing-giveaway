@@ -16,20 +16,17 @@ export default defineConfig({
     tanstackStart(),
     viteReact(),
   ],
-  // build: {
-  //   manifest: true, // ✅ REQUIRED for Nitro asset mapping
-  //   assetsDir: 'assets',
-  //   rollupOptions: {
-  //     output: {
-  //       entryFileNames: 'assets/[name]-[hash].js',
-  //       chunkFileNames: 'assets/[name]-[hash].js',
-  //       assetFileNames: (assetInfo) => {
-  //         if (assetInfo.names.includes('styles.css')) {
-  //           return 'assets/styles[extname]'
-  //         }
-  //         return 'assets/[name]-[hash][extname]'
-  //       },
-  //     },
-  //   },
-  // },
+  build: {
+    rollupOptions: {
+      output: {
+        // Use hash for cache busting - hash is based on content so it's consistent
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.names?.includes('styles.css')) {
+            return 'assets/app-[hash].css'
+          }
+          return 'assets/[name]-[hash][extname]'
+        },
+      },
+    },
+  },
 })
