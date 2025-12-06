@@ -100,10 +100,12 @@ export default function Header() {
           </nav>
 
           {/* Desktop Theme Switcher (dev only) */}
-          {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === 'production' ? (
             <div className="hidden md:block">
               <ThemeSwitcher />
             </div>
+          ) : (
+            <span className="hidden md:block w-24" />
           )}
         </div>
       </header>

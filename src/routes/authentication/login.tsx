@@ -57,7 +57,7 @@ function Login() {
 
   React.useEffect(() => {
     if (session.data) {
-      navigate({ to: '/' })
+      navigate({ to: '/drawings' })
     }
   }, [session, navigate])
 

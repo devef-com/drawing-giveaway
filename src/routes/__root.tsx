@@ -15,6 +15,7 @@ import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/sonner'
+import Footer from '@/components/Footer'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -117,6 +118,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Header />
           {children}
+          <Footer />
           {process.env.NODE_ENV !== 'production' && (
             <TanStackDevtools
               config={{
