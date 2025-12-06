@@ -1,46 +1,69 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { CopyIcon, Share2Icon, PlusIcon } from 'lucide-react'
+import {
+  Calendar,
+  CopyIcon,
+  Cpu,
+  DollarSign,
+  Eye,
+  Gift,
+  Hash,
+  PlusIcon,
+  Share2Icon,
+  User,
+} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { authClient } from '@/lib/auth-client'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useDrawings } from '@/querys/useDrawings'
 import { getTimeRemainingText } from '@/lib/utils'
+import getSession from '@/server-fn/get-session'
 
 export const Route = createFileRoute('/drawings/')({
   component: DrawingsList,
+  loader: async () => {
+    const session = await getSession()
+    return { session }
+  },
 })
 
 function DrawingsList() {
-  const session = authClient.useSession()
+  // const session = authClient.useSession()
+  const { session } = Route.useLoaderData()
 
-  const { data: drawings, isLoading } = useDrawings(!!session.data)
+  const { data: drawings, isLoading } = useDrawings(!!session)
 
   // navigator.userAgent.includes
 
-  if (!session.data) {
-    return (
-      <div className="min-h-screen dark:bg-linear-to-b from-slate-900 via-slate-800 to-slate-900 p-6">
-        <div className="max-w-4xl mx-auto">
-          <Card className="p-6 bg-slate-800/50 border-slate-700">
-            <p className="text-white text-center">
-              Please log in to view your drawings.{' '}
-              <a
-                href="/authentication/login"
-                className="text-cyan-400 hover:text-cyan-300"
-              >
-                Login
-              </a>
-            </p>
-          </Card>
-        </div>
-      </div>
-    )
-  }
+  // if (!session.data) {
+  //   return (
+  //     <div className="min-h-screen p-6">
+  //       <div className="max-w-4xl mx-auto">
+  //         <Card className="p-6 bg-slate-800/50 border-slate-700">
+  //           <p className="text-white text-center">
+  //             Please log in to view your drawings.{' '}
+  //             <a
+  //               href="/authentication/login"
+  //               className="text-cyan-400 hover:text-cyan-300"
+  //             >
+  //               Login
+  //             </a>
+  //           </p>
+  //         </Card>
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-[calc(100svh-128px)] p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-xl font-bold">My Drawings</h1>
@@ -52,89 +75,144 @@ function DrawingsList() {
           </Link>
         </div>
         {isLoading ? (
-          <Card className="p-6 bg-slate-800/50 border-slate-700">
-            <p className="text-white text-center">Loading...</p>
-          </Card>
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={`skeleton-${i}`}>
+                <CardHeader>
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col justify-between items-start h-32">
+                    <div>
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-full" />
+                    </div>
+                    <div className="flex gap-2 self-end mt-2">
+                      <Skeleton className="h-10 w-16" />
+                      <Skeleton className="h-10 w-10" />
+                      <Skeleton className="h-10 w-10" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         ) : drawings && drawings.length > 0 ? (
-          <div className="grid gap-4">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             {drawings.map((drawing: any) => (
-              <Card
-                key={drawing.id}
-                className="p-4 dark:bg-slate-900/50 border-slate-700 hover:border-cyan-500 transition-colors"
-              >
-                <div className="flex flex-col justify-between items-start">
-                  <div>
-                    <h2 className="text-lg font-semibold line-clamp-2 dark:text-white mb-2">
-                      {drawing.title}
-                    </h2>
-                    <p className="text-md text-text-light-secondary dark:text-text-dark-secondary mb-2">
-                      Selection:{' '}
-                      {drawing.winnerSelection === 'manually'
-                        ? 'Enter number manually'
-                        : 'System generated'}
-                    </p>
-                    {drawing.playWithNumbers && (
-                      <p className="text-md text-text-light-secondary dark:text-text-dark-secondary mb-2">
-                        Numbers: {drawing.quantityOfNumbers}
-                      </p>
+              <Card key={drawing.id} className="">
+                <CardHeader>
+                  <CardTitle>{drawing.title}</CardTitle>
+                  <CardDescription>
+                    Created on{' '}
+                    {new Date(drawing.createdAt).toLocaleDateString(
+                      navigator.language,
+                      {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      },
                     )}
-                    <p className="text-md text-text-light-secondary dark:text-text-dark-secondary mb-2">
-                      Type:{' '}
-                      {drawing.isPaid
-                        ? `Paid ($${(drawing.price ?? 0).toLocaleString()})`
-                        : 'Free'}
-                    </p>
-                    <p className="text-md text-text-light-secondary dark:text-text-dark-secondary">
-                      End Date: {getTimeRemainingText(drawing.endAt)}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 self-end mt-2">
-                    <Link
-                      to={`/drawings/$drawingId`}
-                      params={{ drawingId: drawing.id }}
-                    >
-                      <Button variant="outline">View</Button>
-                    </Link>
-                    <Button
-                      onClick={() => {
-                        // toast.success('Lol!')
-                        const url = `${window.location.origin}/slot/${drawing.id}`
-                        navigator.clipboard.writeText(url).then(() => {
-                          toast.success('Link copied to clipboard!')
-                        })
-                      }}
-                      variant="outline"
-                      size="icon"
-                    >
-                      <CopyIcon className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        const url = `${window.location.origin}/slot/${drawing.id}`
-                        navigator
-                          .share({
-                            title: 'Join my drawing!',
-                            text: drawing.title,
-                            url: url,
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col justify-between items-start">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        {drawing.winnerSelection === 'manually' ? (
+                          <User className="w-4 h-4" />
+                        ) : (
+                          <Cpu className="w-4 h-4" />
+                        )}
+                        <span className="text-md text-text-light-secondary dark:text-text-dark-secondary">
+                          Selection:{' '}
+                          {drawing.winnerSelection === 'manually'
+                            ? 'Enter number manually'
+                            : 'System generated'}
+                        </span>
+                      </div>
+                      {drawing.playWithNumbers && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <Hash className="w-4 h-4" />
+                          <span className="text-md text-text-light-secondary dark:text-text-dark-secondary">
+                            Numbers: {drawing.quantityOfNumbers}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 mb-2">
+                        {drawing.isPaid ? (
+                          <DollarSign className="w-4 h-4" />
+                        ) : (
+                          <Gift className="w-4 h-4" />
+                        )}
+                        <span className="text-md text-text-light-secondary dark:text-text-dark-secondary">
+                          Type:{' '}
+                          {drawing.isPaid
+                            ? `Paid ($${(drawing.price ?? 0).toLocaleString()})`
+                            : 'Free'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        <span className="text-md text-text-light-secondary dark:text-text-dark-secondary">
+                          End Date: {getTimeRemainingText(drawing.endAt)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 self-end mt-2">
+                      <Link
+                        to={`/drawings/$drawingId`}
+                        params={{ drawingId: drawing.id }}
+                      >
+                        <Button variant="outline">
+                          <Eye className="w-4 h-4 mr-2" />
+                          View
+                        </Button>
+                      </Link>
+                      <Button
+                        onClick={() => {
+                          // toast.success('Lol!')
+                          const url = `${window.location.origin}/slot/${drawing.id}`
+                          navigator.clipboard.writeText(url).then(() => {
+                            toast.success('Link copied to clipboard!')
                           })
-                          .catch(() => {
-                            // Handle share failure or cancellation
-                            console.log('Share failed or was cancelled')
-                          })
-                      }}
-                      variant="outline"
-                      size="icon"
-                    >
-                      <Share2Icon className="w-4 h-4" />
-                    </Button>
+                        }}
+                        variant="outline"
+                        size="icon"
+                      >
+                        <CopyIcon className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          const url = `${window.location.origin}/slot/${drawing.id}`
+                          navigator
+                            .share({
+                              title: 'Join my drawing!',
+                              text: drawing.title,
+                              url: url,
+                            })
+                            .catch(() => {
+                              // Handle share failure or cancellation
+                              console.log('Share failed or was cancelled')
+                            })
+                        }}
+                        variant="outline"
+                        size="icon"
+                      >
+                        <Share2Icon className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </CardContent>
               </Card>
             ))}
           </div>
         ) : (
           <Card className="p-6 bg-slate-800/50 border-slate-700">
-            <p className="text-white text-center">
+            <p className="text-center">
               No drawings yet.{' '}
               <Link
                 to="/drawings/create"
