@@ -1,6 +1,7 @@
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { Monitor, Moon, Sun } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export default function ThemeSwitcher() {
   const { theme, setTheme } = useTheme()
@@ -12,7 +13,7 @@ export default function ThemeSwitcher() {
   }, [])
 
   if (!mounted) {
-    return <div className="w-24" /> // Placeholder to prevent layout shift
+    return <div className="w-[88px] h-8" /> // Placeholder to prevent layout shift
   }
 
   const themes = [
@@ -22,21 +23,21 @@ export default function ThemeSwitcher() {
   ]
 
   return (
-    <div className="flex items-center gap-1 bg-gray-700 rounded-lg p-1">
+    <div className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-muted/50 p-1">
       {themes.map(({ name, value, icon: Icon }) => (
         <button
           key={value}
           onClick={() => setTheme(value)}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+          className={cn(
+            'flex items-center justify-center w-7 h-7 rounded-md transition-colors',
             theme === value
-              ? 'bg-cyan-600 text-white'
-              : 'text-gray-300 hover:bg-gray-600 hover:text-white'
-          }`}
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+          )}
           aria-label={`Switch to ${name} theme`}
-          title={`Switch to ${name} theme`}
+          title={name}
         >
           <Icon size={16} />
-          <span className="hidden sm:inline">{name}</span>
         </button>
       ))}
     </div>

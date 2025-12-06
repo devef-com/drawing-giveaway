@@ -1,173 +1,167 @@
 import { Link } from '@tanstack/react-router'
-
-import { useState } from 'react'
-import {
-  ChevronDown,
-  ChevronRight,
-  Home,
-  Menu,
-  StickyNote,
-  Ticket,
-  X,
-} from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Menu, X } from 'lucide-react'
 import ThemeSwitcher from './ThemeSwitcher'
 import { cn } from '@/lib/utils'
 
+const Logo = () => (
+  <Link to="/" className="inline-flex items-center gap-2">
+    <figure className="w-6 h-6">
+      <img
+        src="/logo192.png"
+        alt="Giway logo"
+        className="w-full h-full object-contain"
+      />
+    </figure>
+    <span className="text-lg font-bold text-foreground">Giway</span>
+  </Link>
+)
+
+interface NavLinkProps {
+  to: string
+  children: React.ReactNode
+  onClick?: () => void
+  isMobile?: boolean
+}
+
+const NavLink = ({ to, children, onClick, isMobile = false }: NavLinkProps) => (
+  <Link
+    to={to}
+    onClick={onClick}
+    className={cn(
+      'text-foreground/80 hover:text-foreground transition-colors',
+      isMobile
+        ? 'block py-3 px-2 text-base rounded-lg hover:bg-muted'
+        : 'text-sm font-medium',
+    )}
+    activeProps={{
+      className: cn(
+        'text-foreground font-semibold',
+        isMobile
+          ? 'block py-3 px-2 text-base rounded-lg bg-muted'
+          : 'text-sm before:content-["•"] before:mr-1',
+      ),
+    }}
+  >
+    {children}
+  </Link>
+)
+
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const [groupedExpanded, setGroupedExpanded] = useState<
-    Record<string, boolean>
-  >({})
+
+  // Close menu on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [])
+
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
 
   return (
     <>
-      <header className="p-4 flex items-center justify-between dark:bg-background-dark text-white shadow-lg border-dashed border-b border-gray-300 dark:border-gray-700">
-        <div className="flex items-center">
-          <button
-            onClick={() => setIsOpen(true)}
-            className="p-2 text-primary hover:text-blue-400 hover:dark:sbg-gray-700 rounded-lg transition-colors"
-            aria-label="Open menu"
-          >
-            <Menu size={24} />
-          </button>
-          <h1 className="ml-2 text-xl text-primary dark:text-white font-black">
-            <Link to="/" className="inline-flex items-center gap-4">
-              <figure className="max-w-8 ml-4">
-                <img
-                  src="/logo192.png"
-                  alt="Giway logo"
-                  className="inline-block w-full h-full"
-                />
-              </figure>
-              Giway
-            </Link>
-          </h1>
-        </div>
-        {process.env.NODE_ENV === 'development' && <ThemeSwitcher />}
-      </header>
-
-      <aside
-        className={cn(
-          'fixed top-0 left-0 h-full w-80 bg-white dark:bg-gray-900 dark:text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col border-r border-gray-200',
-          isOpen ? 'translate-x-0' : '-translate-x-full',
-          isOpen ? 'shadow-background-light dark:shadow-background-dark ' : '',
-        )}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h2 className="text-xl font-bold">Navigation</h2>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-            aria-label="Close menu"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <Link
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:text-white hover:bg-gray-800 transition-colors mb-2"
-            activeProps={{
-              className:
-                'text-white flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-            }}
-          >
-            <Home size={20} />
-            <span className="font-medium">Home</span>
-          </Link>
-
-          <Link
-            to="/drawings"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:text-white hover:bg-gray-800 transition-colors mb-2"
-            activeProps={{
-              className:
-                'text-white flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-            }}
-          >
-            <Ticket size={20} />
-            <span className="font-medium">My Drawings</span>
-          </Link>
-
-          <div className="hidden flex-row justify-between">
-            <Link
-              to="/demo/start/ssr"
-              onClick={() => setIsOpen(false)}
-              className="flex-1 flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-              activeProps={{
-                className:
-                  'flex-1 flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-              }}
-            >
-              <StickyNote size={20} />
-              <span className="font-medium">Start - SSR Demos</span>
-            </Link>
+      <header className="sticky top-0 z-40 w-full border-b border-dashed border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="flex h-14 items-center justify-between px-4">
+          {/* Mobile: Hamburger + Logo */}
+          <div className="flex items-center gap-2 md:hidden">
             <button
-              className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-              onClick={() =>
-                setGroupedExpanded((prev) => ({
-                  ...prev,
-                  StartSSRDemo: !prev.StartSSRDemo,
-                }))
-              }
+              onClick={() => setIsOpen(true)}
+              className="p-2 -ml-2 text-foreground hover:bg-muted rounded-lg transition-colors"
+              aria-label="Open menu"
             >
-              {groupedExpanded.StartSSRDemo ? (
-                <ChevronDown size={20} />
-              ) : (
-                <ChevronRight size={20} />
-              )}
+              <Menu size={20} />
             </button>
+            <Logo />
           </div>
-          {groupedExpanded.StartSSRDemo && (
-            <div className="flex flex-col ml-4">
-              <Link
-                to="/demo/start/ssr/spa-mode"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-                activeProps={{
-                  className:
-                    'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-                }}
-              >
-                <StickyNote size={20} />
-                <span className="font-medium">SPA Mode</span>
-              </Link>
 
-              <Link
-                to="/demo/start/ssr/full-ssr"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-                activeProps={{
-                  className:
-                    'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-                }}
-              >
-                <StickyNote size={20} />
-                <span className="font-medium">Full SSR</span>
-              </Link>
+          {/* Desktop: Logo + Nav */}
+          <div className="hidden md:flex md:items-center md:gap-6">
+            <Logo />
+          </div>
 
-              <Link
-                to="/demo/start/ssr/data-only"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-                activeProps={{
-                  className:
-                    'flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2',
-                }}
-              >
-                <StickyNote size={20} />
-                <span className="font-medium">Data Only</span>
-              </Link>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex md:items-center md:gap-6">
+            <NavLink to="/">Home</NavLink>
+            <NavLink to="/drawings">Drawings</NavLink>
+            <NavLink to="/store">Store</NavLink>
+          </nav>
+
+          {/* Desktop Theme Switcher (dev only) */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="hidden md:block">
+              <ThemeSwitcher />
             </div>
           )}
+        </div>
+      </header>
 
-          {/* Demo Links End */}
+      {/* Mobile Menu Overlay */}
+      <div
+        className={cn(
+          'fixed inset-0 z-50 bg-black/50 transition-opacity duration-300 md:hidden',
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none',
+        )}
+        onClick={() => setIsOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Mobile Sidebar */}
+      <aside
+        className={cn(
+          'fixed top-0 left-0 z-50 h-full w-80 max-w-[85vw] bg-background shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col md:hidden',
+          isOpen ? 'translate-x-0' : '-translate-x-full',
+        )}
+      >
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between p-4 border-b border-dashed border-border">
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-2 -ml-2 text-foreground hover:bg-muted rounded-lg transition-colors"
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
+          <Logo />
+          <div className="w-9" /> {/* Spacer for centering logo */}
+        </div>
+
+        {/* User Info */}
+        <div className="px-4 py-3 border-b border-border">
+          <p className="text-sm text-muted-foreground">username@domain.com</p>
+        </div>
+
+        {/* Navigation Links */}
+        <nav className="flex-1 p-4 overflow-y-auto space-y-1">
+          <NavLink to="/" onClick={() => setIsOpen(false)} isMobile>
+            Home
+          </NavLink>
+          <NavLink to="/drawings" onClick={() => setIsOpen(false)} isMobile>
+            Drawings
+          </NavLink>
+          <NavLink to="/store" onClick={() => setIsOpen(false)} isMobile>
+            Store
+          </NavLink>
         </nav>
-        {/* <div className='grow'></div> */}
-        <div className="flex justify-center mb-2">
-          <ThemeSwitcher />
+
+        {/* Theme Switcher */}
+        <div className="p-4 border-t border-border">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Theme</span>
+            <ThemeSwitcher />
+          </div>
         </div>
       </aside>
     </>
