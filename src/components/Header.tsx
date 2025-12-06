@@ -32,11 +32,11 @@ const NavLink = ({ to, children, onClick, isMobile = false }: NavLinkProps) => (
       'text-foreground/80 hover:text-foreground transition-colors',
       isMobile
         ? 'block py-3 px-2 text-base rounded-lg hover:bg-muted'
-        : 'text-sm font-medium',
+        : 'text-sm font-light',
     )}
     activeProps={{
       className: cn(
-        'text-foreground font-semibold',
+        'text-foreground font-semibold text-teal-primary',
         isMobile
           ? 'block py-3 px-2 text-base rounded-lg bg-muted'
           : 'text-sm before:content-["•"] before:mr-1',
