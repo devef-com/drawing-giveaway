@@ -1,10 +1,11 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import {
   AlertCircle,
   CalendarIcon,
   EraserIcon,
+  ImageIcon,
   Loader2,
   Pencil,
   PlusIcon,
@@ -95,8 +96,6 @@ function CreateDrawing() {
   const [couponCode, setCouponCode] = useState('')
   const redeemCoupon = useRedeemCoupon()
 
-  const balanceRef = useRef<HTMLDivElement>(null)
-
   const handleRedeemCoupon = async () => {
     if (!couponCode.trim()) return
 
@@ -117,6 +116,11 @@ function CreateDrawing() {
   const maxParticipants = formData.playWithNumbers
     ? (balance?.playWithNumbers.participants ?? 0)
     : (balance?.noNumbers.participants ?? 0)
+
+  // Calculate max images available based on play mode
+  const maxImages = formData.playWithNumbers
+    ? (balance?.playWithNumbers.images ?? 0)
+    : (balance?.noNumbers.images ?? 0)
 
   const addGuideline = () => {
     if (!currentGuideline.trim()) return
@@ -354,8 +358,7 @@ function CreateDrawing() {
           {/* Balance Info */}
           {!isBalanceLoading && balance && (
             <div
-              ref={balanceRef}
-              className=" p-4 rounded-lg border bg-muted/50"
+              className="p-4 rounded-lg border bg-muted/50"
               id="balance"
             >
               <div className="flex justify-between items-center">
@@ -430,14 +433,33 @@ function CreateDrawing() {
             </div>
 
             {/* Image Upload Section */}
-            <div>
-              <Label className="mb-2">Images (Optional)</Label>
+            {/* <div> */}
+            {/* <Label className="mb-2">Images (Optional)</Label> */}
+            {maxImages > 0 ? (
               <ImageUpload
                 onImagesChange={setPendingImages}
-                maxImages={5}
+                maxImages={maxImages}
                 disabled={isSubmitting}
               />
-            </div>
+            ) : (
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-dashed bg-muted/30">
+                <div className="flex items-center justify-center w-10 h-10 rounded-md bg-muted">
+                  <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground">
+                    No image uploads available
+                  </p>
+                  <Link
+                    to="/store"
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Get a pack to add images
+                  </Link>
+                </div>
+              </div>
+            )}
+            {/* </div> */}
 
             <div>
               <Label className="mb-2">Guidelines (Optional)</Label>
@@ -449,7 +471,7 @@ function CreateDrawing() {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                       e.preventDefault()
                       addGuideline()
-                      ;(e.target as HTMLTextAreaElement).style.height = 'auto'
+                        ; (e.target as HTMLTextAreaElement).style.height = 'auto'
                     }
                   }}
                   placeholder="Enter guideline text..."
@@ -583,7 +605,7 @@ function CreateDrawing() {
                 {formData.isPaid
                   ? 'Participants can choose multiple numbers.'
                   : 'Participants can choose a single number. Max participants: ' +
-                    formData.quantityOfNumbers}
+                  formData.quantityOfNumbers}
               </p>
             ) : (
               <p className="text-xs text-muted-foreground -mt-4">
@@ -686,12 +708,12 @@ function CreateDrawing() {
                   })
                 }}
                 onInvalid={(e) => {
-                  ;(e.target as HTMLInputElement).setCustomValidity(
+                  ; (e.target as HTMLInputElement).setCustomValidity(
                     'Please enter a number greater than 0',
                   )
                 }}
                 onInput={(e) => {
-                  ;(e.target as HTMLInputElement).setCustomValidity('')
+                  ; (e.target as HTMLInputElement).setCustomValidity('')
                 }}
                 required
               />
@@ -994,7 +1016,7 @@ function CreateDrawing() {
                 disabled={isSubmitting}
                 variant="primary"
 
-                // className="bg-cyan-600 hover:bg-cyan-700"
+              // className="bg-cyan-600 hover:bg-cyan-700"
               >
                 {isSubmitting ? 'Creating...' : 'Create Drawing'}
               </Button>
