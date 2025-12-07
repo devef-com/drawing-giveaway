@@ -6,6 +6,7 @@ import { drawings } from '@/db/schema'
 import { auth } from '@/lib/auth'
 import { getSignedUploadUrl } from '@/lib/s3'
 import { eq } from 'drizzle-orm'
+import { calculateUserBalance } from '@/routes/api/user/balance'
 
 // Allowed image MIME types (browser-supported formats)
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const
@@ -97,6 +98,29 @@ export const Route = createFileRoute('/api/drawings/$drawingId/upload')({
                   'You are not authorized to upload images to this drawing',
               }),
               { status: 403, headers: { 'Content-Type': 'application/json' } },
+            )
+          }
+
+          // Check user's image balance
+          const giwayType = drawing[0].playWithNumbers
+            ? 'play_with_numbers'
+            : 'no_numbers'
+          const balance = await calculateUserBalance(session.user.id)
+          const availableImages =
+            giwayType === 'play_with_numbers'
+              ? balance.playWithNumbers.images
+              : balance.noNumbers.images
+
+          // Check if user has image balance available
+          // Note: We check before upload but consume after successful asset creation
+          if (availableImages <= 0) {
+            return new Response(
+              JSON.stringify({
+                error: 'Insufficient image balance',
+                message:
+                  'You have no image uploads available. Please purchase more packs.',
+              }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } },
             )
           }
 

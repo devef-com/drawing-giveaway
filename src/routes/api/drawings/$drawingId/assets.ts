@@ -1,9 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { db } from '@/db/index'
-import { assets, drawingAssets, drawings } from '@/db/schema'
+import {
+  assets,
+  drawingAssets,
+  drawings,
+  balanceConsumptions,
+} from '@/db/schema'
 import { auth } from '@/lib/auth'
-import { eq, and, ne } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { deleteFile } from '@/lib/s3'
 
 export const Route = createFileRoute('/api/drawings/$drawingId/assets')({
@@ -101,6 +106,17 @@ export const Route = createFileRoute('/api/drawings/$drawingId/assets')({
             })
             .returning()
 
+          // Update balance consumption for images (only for non-cover images)
+          // Cover images are just cropped versions, not additional uploads
+          if (!isCover) {
+            await db
+              .update(balanceConsumptions)
+              .set({
+                images: sql`${balanceConsumptions.images} + 1`,
+              })
+              .where(eq(balanceConsumptions.drawingId, params.drawingId))
+          }
+
           return new Response(
             JSON.stringify({
               asset: newAsset,
@@ -119,10 +135,10 @@ export const Route = createFileRoute('/api/drawings/$drawingId/assets')({
 
       // Get all assets for a drawing
       GET: async ({
-        request,
+        // request,
         params,
       }: {
-        request: Request
+        // request: Request
         params: { drawingId: string }
       }) => {
         try {
