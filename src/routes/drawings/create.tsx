@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import {
@@ -52,6 +52,7 @@ import {
   ExpandableContent,
   ExpandableTitle,
 } from '@/components/ui/expandable'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/drawings/create')({
   component: CreateDrawing,
@@ -93,6 +94,8 @@ function CreateDrawing() {
   const [pendingImages, setPendingImages] = useState<Array<UploadedImage>>([])
   const [couponCode, setCouponCode] = useState('')
   const redeemCoupon = useRedeemCoupon()
+
+  const balanceRef = useRef<HTMLDivElement>(null)
 
   const handleRedeemCoupon = async () => {
     if (!couponCode.trim()) return
@@ -206,6 +209,7 @@ function CreateDrawing() {
       setBalanceError(
         `Insufficient balance. You need ${formData.quantityOfNumbers} participants but only have ${maxParticipants} available.`,
       )
+
       return
     }
 
@@ -349,7 +353,11 @@ function CreateDrawing() {
 
           {/* Balance Info */}
           {!isBalanceLoading && balance && (
-            <div className=" p-4 rounded-lg border bg-muted/50">
+            <div
+              ref={balanceRef}
+              className=" p-4 rounded-lg border bg-muted/50"
+              id="balance"
+            >
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-sm font-medium">Your Balance</p>
@@ -405,22 +413,6 @@ function CreateDrawing() {
               </div>
             </ExpandableContent>
           </Expandable>
-
-          {balanceError && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Insufficient Balance</AlertTitle>
-              <AlertDescription>
-                {balanceError}{' '}
-                <Link
-                  to="/store"
-                  className="underline font-medium hover:no-underline"
-                >
-                  Get more packs
-                </Link>
-              </AlertDescription>
-            </Alert>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -971,6 +963,23 @@ function CreateDrawing() {
                 </Popover>
               )}
             </div>
+
+            <Alert
+              variant="destructive"
+              className={cn('mb-6', balanceError ? '' : 'hidden')}
+            >
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Insufficient Balance</AlertTitle>
+              <AlertDescription>
+                {balanceError}{' '}
+                <Link
+                  to="/store"
+                  className="underline font-medium hover:no-underline"
+                >
+                  Get more packs
+                </Link>
+              </AlertDescription>
+            </Alert>
 
             <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
               <Button
