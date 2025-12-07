@@ -127,7 +127,7 @@ function DrawingsList() {
                         ) : (
                           <Cpu className="w-4 h-4" />
                         )}
-                        <span className="text-md text-text-light-secondary dark:text-text-dark-secondary">
+                        <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
                           Selection:{' '}
                           {drawing.winnerSelection === 'manually'
                             ? 'Enter number manually'
@@ -137,7 +137,7 @@ function DrawingsList() {
                       {drawing.playWithNumbers && (
                         <div className="flex items-center gap-2 mb-2">
                           <Hash className="w-4 h-4" />
-                          <span className="text-md text-text-light-secondary dark:text-text-dark-secondary">
+                          <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
                             Numbers: {drawing.quantityOfNumbers}
                           </span>
                         </div>
@@ -148,7 +148,7 @@ function DrawingsList() {
                         ) : (
                           <Gift className="w-4 h-4" />
                         )}
-                        <span className="text-md text-text-light-secondary dark:text-text-dark-secondary">
+                        <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
                           Type:{' '}
                           {drawing.isPaid
                             ? `Paid ($${(drawing.price ?? 0).toLocaleString()})`
@@ -157,7 +157,7 @@ function DrawingsList() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        <span className="text-md text-text-light-secondary dark:text-text-dark-secondary">
+                        <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
                           End Date: {getTimeRemainingText(drawing.endAt)}
                         </span>
                       </div>

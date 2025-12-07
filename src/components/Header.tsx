@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 const NOT_VISIBLE_AT = [
   '/',
   '/authentication/login',
-  '/authentication/register',
+  '/authentication/signup',
   '/slot/*',
   '/s/*',
 ]
