@@ -2,14 +2,16 @@
 
 ## Overview
 
-This proposal outlines the implementation of a commenting system that allows drawing hosts to add comments to participants. These comments will be visible to both the host (in the management view) and the participant (in their participant view).
+This proposal outlines the implementation of a **bidirectional commenting system** that enables communication between drawing hosts and participants. Both hosts and participants can add comments, creating a conversation thread for each participant.
 
 ## Use Cases
 
 1. **Host Communication**: Hosts can add notes, instructions, or feedback for individual participants
-2. **Participant Information**: Participants can view comments left by the host on their participant page
-3. **Audit Trail**: Comments maintain a history of communication between host and participant
-4. **Status Updates**: Hosts can provide context for status changes or additional requirements
+2. **Participant Responses**: Participants can reply to host messages, ask questions, or provide updates
+3. **Two-Way Dialogue**: Enable back-and-forth conversation between host and participant
+4. **Audit Trail**: Comments maintain a complete history of communication between host and participant
+5. **Status Updates**: Hosts can provide context for status changes or additional requirements
+6. **No Login Required**: Participants can comment without authentication (using their participant page link)
 
 ## Database Schema
 
@@ -19,9 +21,11 @@ This proposal outlines the implementation of a commenting system that allows dra
 CREATE TABLE participant_comments (
   id SERIAL PRIMARY KEY,
   participant_id INTEGER NOT NULL REFERENCES participants(id) ON DELETE CASCADE,
-  author_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+  author_id TEXT REFERENCES user(id) ON DELETE CASCADE, -- NULL for participant comments
+  author_type VARCHAR(20) NOT NULL DEFAULT 'host', -- 'host' or 'participant'
+  author_name VARCHAR(255), -- For participant comments (from participant name)
   comment TEXT NOT NULL,
-  is_visible_to_participant BOOLEAN NOT NULL DEFAULT TRUE,
+  is_visible_to_participant BOOLEAN NOT NULL DEFAULT TRUE, -- Only used for host comments
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -30,6 +34,7 @@ CREATE TABLE participant_comments (
 CREATE INDEX idx_participant_comments_participant_id ON participant_comments(participant_id);
 CREATE INDEX idx_participant_comments_author_id ON participant_comments(author_id);
 CREATE INDEX idx_participant_comments_created_at ON participant_comments(created_at DESC);
+CREATE INDEX idx_participant_comments_author_type ON participant_comments(author_type);
 ```
 
 ### Drizzle ORM Schema Definition
@@ -37,18 +42,20 @@ CREATE INDEX idx_participant_comments_created_at ON participant_comments(created
 Add to `src/db/schema.ts`:
 
 ```typescript
+export const authorTypeEnum = pgEnum('author_type', ['host', 'participant'])
+
 export const participantComments = pgTable('participant_comments', {
   id: serial('id').primaryKey(),
   participantId: integer('participant_id')
     .notNull()
     .references(() => participants.id, { onDelete: 'cascade' }),
-  authorId: text('author_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
+  authorId: text('author_id').references(() => user.id, { onDelete: 'cascade' }), // NULL for participant comments
+  authorType: authorTypeEnum('author_type').notNull().default('host'),
+  authorName: varchar('author_name', { length: 255 }), // For participant comments
   comment: text('comment').notNull(),
   isVisibleToParticipant: boolean('is_visible_to_participant')
     .notNull()
-    .default(true),
+    .default(true), // Only relevant for host comments
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at')
     .notNull()
@@ -87,11 +94,13 @@ export type NewParticipantComment = typeof participantComments.$inferInsert
 
 ## API Endpoints
 
-### 1. Get Comments for a Participant (Host View)
+### 1. Get All Comments for a Participant (Both Views)
 
-**Endpoint**: `GET /api/participant/:participantId/comments`
+**Endpoint**: `GET /api/drawings/:drawingId/p/:participantId/comments`
 
-**Authentication**: Required (Host must own the drawing)
+**Authentication**: None (Public access)
+
+**Description**: Returns all comments in the conversation. Host comments respect the `isVisibleToParticipant` flag, while participant comments are always visible.
 
 **Response**:
 ```json
@@ -101,17 +110,23 @@ export type NewParticipantComment = typeof participantComments.$inferInsert
       "id": 1,
       "participantId": 123,
       "comment": "Please submit payment proof by tomorrow",
-      "authorId": "user_123",
-      "authorName": "John Doe",
-      "isVisibleToParticipant": true,
-      "createdAt": "2025-12-08T10:00:00Z",
-      "updatedAt": "2025-12-08T10:00:00Z"
+      "authorType": "host",
+      "authorName": "John Doe (Host)",
+      "createdAt": "2025-12-08T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "participantId": 123,
+      "comment": "I will submit it by today evening",
+      "authorType": "participant",
+      "authorName": "Jane Smith",
+      "createdAt": "2025-12-08T11:00:00Z"
     }
   ]
 }
 ```
 
-### 2. Add Comment (Host Only)
+### 2. Add Comment as Host
 
 **Endpoint**: `POST /api/participant/:participantId/comments`
 
@@ -133,6 +148,7 @@ export type NewParticipantComment = typeof participantComments.$inferInsert
     "id": 1,
     "participantId": 123,
     "comment": "Please submit payment proof by tomorrow",
+    "authorType": "host",
     "authorId": "user_123",
     "isVisibleToParticipant": true,
     "createdAt": "2025-12-08T10:00:00Z"
@@ -140,11 +156,39 @@ export type NewParticipantComment = typeof participantComments.$inferInsert
 }
 ```
 
-### 3. Update Comment (Host Only)
+### 3. Add Comment as Participant
+
+**Endpoint**: `POST /api/drawings/:drawingId/p/:participantId/comments`
+
+**Authentication**: None (Public access - no login required)
+
+**Request Body**:
+```json
+{
+  "comment": "I will submit it by today evening"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "comment": {
+    "id": 2,
+    "participantId": 123,
+    "comment": "I will submit it by today evening",
+    "authorType": "participant",
+    "authorName": "Jane Smith",
+    "createdAt": "2025-12-08T11:00:00Z"
+  }
+}
+```
+
+### 4. Update Comment (Host Only)
 
 **Endpoint**: `PATCH /api/participant/:participantId/comments/:commentId`
 
-**Authentication**: Required (Must be comment author)
+**Authentication**: Required (Must be comment author and host)
 
 **Request Body**:
 ```json
@@ -154,27 +198,55 @@ export type NewParticipantComment = typeof participantComments.$inferInsert
 }
 ```
 
-### 4. Delete Comment (Host Only)
+**Note**: Only host comments can be edited. Participant comments cannot be edited.
+
+### 5. Delete Comment (Host Only)
 
 **Endpoint**: `DELETE /api/participant/:participantId/comments/:commentId`
 
-**Authentication**: Required (Must be comment author)
+**Authentication**: Required (Must be comment author and host)
 
-### 5. Get Participant's Comments (Participant View)
+**Note**: Only host comments can be deleted. Participant comments cannot be deleted.
 
-**Endpoint**: `GET /api/drawings/:drawingId/p/:participantId/comments`
+### 6. Get Comments for Host View (All Comments)
 
-**Authentication**: None (Public participant view)
+**Endpoint**: `GET /api/participant/:participantId/comments`
 
-**Response**: Only returns comments where `isVisibleToParticipant = true`
+**Authentication**: Required (Host must own the drawing)
 
+**Description**: Returns all comments including private host comments (for host management view)
+
+**Response**:
 ```json
 {
   "comments": [
     {
       "id": 1,
-      "comment": "Thank you for participating!",
+      "participantId": 123,
+      "comment": "Please submit payment proof by tomorrow",
+      "authorType": "host",
+      "authorId": "user_123",
+      "authorName": "John Doe",
+      "isVisibleToParticipant": true,
       "createdAt": "2025-12-08T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "participantId": 123,
+      "comment": "I will submit it by today evening",
+      "authorType": "participant",
+      "authorName": "Jane Smith",
+      "createdAt": "2025-12-08T11:00:00Z"
+    },
+    {
+      "id": 3,
+      "participantId": 123,
+      "comment": "Internal note: Follow up required",
+      "authorType": "host",
+      "authorId": "user_123",
+      "authorName": "John Doe",
+      "isVisibleToParticipant": false,
+      "createdAt": "2025-12-08T12:00:00Z"
     }
   ]
 }
@@ -187,13 +259,18 @@ Create `src/lib/comments/index.ts`:
 ```typescript
 import { db } from '@/db/index'
 import { participantComments, participants, drawings, user } from '@/db/schema'
-import { eq, and, desc } from 'drizzle-orm'
+import { eq, and, desc, or, sql } from 'drizzle-orm'
 
-export interface CreateCommentParams {
+export interface CreateHostCommentParams {
   participantId: number
   authorId: string
   comment: string
   isVisibleToParticipant?: boolean
+}
+
+export interface CreateParticipantCommentParams {
+  participantId: number
+  comment: string
 }
 
 export interface UpdateCommentParams {
@@ -220,17 +297,26 @@ export async function verifyDrawingOwnership(
 }
 
 /**
- * Create a new comment for a participant
+ * Create a new comment from host
  */
-export async function createComment(
-  params: CreateCommentParams,
+export async function createHostComment(
+  params: CreateHostCommentParams,
 ): Promise<{ success: boolean; comment?: any; error?: string }> {
   try {
+    // Get host name
+    const hostUser = await db
+      .select({ name: user.name })
+      .from(user)
+      .where(eq(user.id, params.authorId))
+      .limit(1)
+
     const [comment] = await db
       .insert(participantComments)
       .values({
         participantId: params.participantId,
         authorId: params.authorId,
+        authorType: 'host',
+        authorName: hostUser[0]?.name || 'Host',
         comment: params.comment,
         isVisibleToParticipant: params.isVisibleToParticipant ?? true,
       })
@@ -238,13 +324,50 @@ export async function createComment(
 
     return { success: true, comment }
   } catch (error) {
-    console.error('Error creating comment:', error)
+    console.error('Error creating host comment:', error)
     return { success: false, error: 'Failed to create comment' }
   }
 }
 
 /**
- * Get all comments for a participant (host view)
+ * Create a new comment from participant (no authentication required)
+ */
+export async function createParticipantComment(
+  params: CreateParticipantCommentParams,
+): Promise<{ success: boolean; comment?: any; error?: string }> {
+  try {
+    // Get participant name
+    const participant = await db
+      .select({ name: participants.name })
+      .from(participants)
+      .where(eq(participants.id, params.participantId))
+      .limit(1)
+
+    if (!participant || participant.length === 0) {
+      return { success: false, error: 'Participant not found' }
+    }
+
+    const [comment] = await db
+      .insert(participantComments)
+      .values({
+        participantId: params.participantId,
+        authorId: null, // No user account for participants
+        authorType: 'participant',
+        authorName: participant[0].name,
+        comment: params.comment,
+        isVisibleToParticipant: true, // Always visible
+      })
+      .returning()
+
+    return { success: true, comment }
+  } catch (error) {
+    console.error('Error creating participant comment:', error)
+    return { success: false, error: 'Failed to create comment' }
+  }
+}
+
+/**
+ * Get all comments for a participant (host view - includes private comments)
  */
 export async function getCommentsForHost(
   participantId: number,
@@ -255,20 +378,20 @@ export async function getCommentsForHost(
       participantId: participantComments.participantId,
       comment: participantComments.comment,
       authorId: participantComments.authorId,
-      authorName: user.name,
-      authorEmail: user.email,
+      authorType: participantComments.authorType,
+      authorName: participantComments.authorName,
       isVisibleToParticipant: participantComments.isVisibleToParticipant,
       createdAt: participantComments.createdAt,
       updatedAt: participantComments.updatedAt,
     })
     .from(participantComments)
-    .innerJoin(user, eq(participantComments.authorId, user.id))
     .where(eq(participantComments.participantId, participantId))
-    .orderBy(desc(participantComments.createdAt))
+    .orderBy(participantComments.createdAt) // Chronological order for conversation flow
 }
 
 /**
  * Get visible comments for a participant (participant view)
+ * Returns all comments: participant comments + visible host comments
  */
 export async function getCommentsForParticipant(
   participantId: number,
@@ -277,16 +400,21 @@ export async function getCommentsForParticipant(
     .select({
       id: participantComments.id,
       comment: participantComments.comment,
+      authorType: participantComments.authorType,
+      authorName: participantComments.authorName,
       createdAt: participantComments.createdAt,
     })
     .from(participantComments)
     .where(
       and(
         eq(participantComments.participantId, participantId),
-        eq(participantComments.isVisibleToParticipant, true),
+        or(
+          eq(participantComments.authorType, 'participant'), // All participant comments
+          eq(participantComments.isVisibleToParticipant, true), // Visible host comments
+        ),
       ),
     )
-    .orderBy(desc(participantComments.createdAt))
+    .orderBy(participantComments.createdAt) // Chronological order
 }
 
 /**
@@ -459,26 +587,35 @@ export function ParticipantComments({ participantId }: { participantId: number }
         </div>
       </div>
 
-      {/* Comments List */}
+      {/* Comments List - Conversation Thread */}
       <div className="space-y-3">
         {comments.length === 0 ? (
-          <p className="text-sm text-gray-500">No comments yet</p>
+          <p className="text-sm text-gray-500">No messages yet. Start the conversation!</p>
         ) : (
           comments.map((comment) => (
             <div
               key={comment.id}
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+              className={`border rounded-lg p-4 ${
+                comment.authorType === 'participant'
+                  ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950'
+                  : 'border-gray-200 dark:border-gray-700'
+              }`}
             >
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <span className="font-semibold text-sm">
                     {comment.authorName}
+                    {comment.authorType === 'participant' && (
+                      <span className="ml-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded">
+                        Participant
+                      </span>
+                    )}
                   </span>
                   <span className="text-xs text-gray-500 ml-2">
                     {new Date(comment.createdAt).toLocaleString()}
                   </span>
                 </div>
-                {!comment.isVisibleToParticipant && (
+                {comment.authorType === 'host' && !comment.isVisibleToParticipant && (
                   <span className="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-1 rounded">
                     Private
                   </span>
@@ -505,7 +642,7 @@ import { ParticipantComments } from '@/components/ParticipantComments'
 
 ### 2. Participant View (`/drawings/$drawingId/p/$participateId`)
 
-Add a comments section to show messages from the host:
+Add a bidirectional conversation section where participants can view and reply to messages:
 
 ```tsx
 // New component or inline in the participant view
@@ -517,34 +654,91 @@ function ParticipantCommentsView({
   participantId: string 
 }) {
   const [comments, setComments] = useState<any[]>([])
+  const [newComment, setNewComment] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    fetch(`/api/drawings/${drawingId}/p/${participantId}/comments`)
-      .then((res) => res.json())
-      .then((data) => setComments(data.comments || []))
+    fetchComments()
   }, [drawingId, participantId])
 
-  if (comments.length === 0) {
-    return null
+  const fetchComments = async () => {
+    const response = await fetch(`/api/drawings/${drawingId}/p/${participantId}/comments`)
+    if (response.ok) {
+      const data = await response.json()
+      setComments(data.comments || [])
+    }
+  }
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/drawings/${drawingId}/p/${participantId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment: newComment }),
+      })
+
+      if (response.ok) {
+        setNewComment('')
+        await fetchComments()
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <Card className="p-4 mt-4">
       <h2 className="text-lg font-semibold mb-3">
-        Messages from Host
+        Conversation with Host
       </h2>
-      <div className="space-y-3">
-        {comments.map((comment) => (
-          <div
-            key={comment.id}
-            className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3"
-          >
-            <p className="text-sm whitespace-pre-wrap">{comment.comment}</p>
-            <p className="text-xs text-gray-500 mt-2">
-              {new Date(comment.createdAt).toLocaleString()}
-            </p>
-          </div>
-        ))}
+      
+      {/* Conversation Thread */}
+      <div className="space-y-3 mb-4">
+        {comments.length === 0 ? (
+          <p className="text-sm text-gray-500">No messages yet</p>
+        ) : (
+          comments.map((comment) => (
+            <div
+              key={comment.id}
+              className={`rounded-lg p-3 ${
+                comment.authorType === 'host'
+                  ? 'bg-gray-50 dark:bg-gray-800'
+                  : 'bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-semibold">
+                  {comment.authorName}
+                  {comment.authorType === 'host' && ' (Host)'}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {new Date(comment.createdAt).toLocaleString()}
+                </span>
+              </div>
+              <p className="text-sm whitespace-pre-wrap">{comment.comment}</p>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Reply Form */}
+      <div className="space-y-2">
+        <Textarea
+          placeholder="Write your message..."
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          className="min-h-[80px]"
+        />
+        <Button
+          onClick={handleAddComment}
+          disabled={isSubmitting || !newComment.trim()}
+          className="w-full"
+        >
+          {isSubmitting ? 'Sending...' : 'Send Message'}
+        </Button>
       </div>
     </Card>
   )
@@ -571,7 +765,7 @@ Create `src/routes/api/participant/$participantId.comments.ts`:
 import { createFileRoute } from '@tanstack/react-router'
 import { auth } from '@/lib/auth'
 import {
-  createComment,
+  createHostComment,
   getCommentsForHost,
   verifyDrawingOwnership,
 } from '@/lib/comments'
@@ -660,7 +854,7 @@ export const Route = createFileRoute('/api/participant/$participantId/comments')
             )
           }
 
-          const result = await createComment({
+          const result = await createHostComment({
             participantId,
             authorId: session.user.id,
             comment,
@@ -690,13 +884,13 @@ export const Route = createFileRoute('/api/participant/$participantId/comments')
 })
 ```
 
-### 2. `/api/drawings/:drawingId/p/:participantId/comments` (Participant)
+### 2. `/api/drawings/:drawingId/p/:participantId/comments` (Participant - Public)
 
 Create `src/routes/api/drawings/$drawingId/p/$participantId.comments.ts`:
 
 ```typescript
 import { createFileRoute } from '@tanstack/react-router'
-import { getCommentsForParticipant } from '@/lib/comments'
+import { getCommentsForParticipant, createParticipantComment } from '@/lib/comments'
 
 export const Route = createFileRoute(
   '/api/drawings/$drawingId/p/$participantId/comments',
@@ -722,6 +916,51 @@ export const Route = createFileRoute(
         } catch (error) {
           return new Response(
             JSON.stringify({ error: 'Failed to fetch comments' }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } },
+          )
+        }
+      },
+
+      POST: async ({ request, params }) => {
+        const participantId = parseInt(params.participantId, 10)
+        
+        if (isNaN(participantId)) {
+          return new Response(
+            JSON.stringify({ error: 'Invalid participant ID' }),
+            { status: 400, headers: { 'Content-Type': 'application/json' } },
+          )
+        }
+
+        try {
+          const body = await request.json()
+          const { comment } = body
+
+          if (!comment || typeof comment !== 'string') {
+            return new Response(
+              JSON.stringify({ error: 'Comment text is required' }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } },
+            )
+          }
+
+          const result = await createParticipantComment({
+            participantId,
+            comment,
+          })
+
+          if (!result.success) {
+            return new Response(
+              JSON.stringify({ error: result.error }),
+              { status: 500, headers: { 'Content-Type': 'application/json' } },
+            )
+          }
+
+          return new Response(
+            JSON.stringify({ success: true, comment: result.comment }),
+            { status: 201, headers: { 'Content-Type': 'application/json' } },
+          )
+        } catch (error) {
+          return new Response(
+            JSON.stringify({ error: 'Failed to create comment' }),
             { status: 500, headers: { 'Content-Type': 'application/json' } },
           )
         }
@@ -752,11 +991,15 @@ npm run db:generate
 Or manually create the migration SQL:
 
 ```sql
--- Migration: Add participant comments
+-- Migration: Add participant comments (bidirectional)
+CREATE TYPE author_type AS ENUM ('host', 'participant');
+
 CREATE TABLE IF NOT EXISTS participant_comments (
   id SERIAL PRIMARY KEY,
   participant_id INTEGER NOT NULL REFERENCES participants(id) ON DELETE CASCADE,
-  author_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  author_id TEXT REFERENCES "user"(id) ON DELETE CASCADE, -- NULL for participant comments
+  author_type author_type NOT NULL DEFAULT 'host',
+  author_name VARCHAR(255), -- For participant comments
   comment TEXT NOT NULL,
   is_visible_to_participant BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -765,48 +1008,59 @@ CREATE TABLE IF NOT EXISTS participant_comments (
 
 CREATE INDEX idx_participant_comments_participant_id ON participant_comments(participant_id);
 CREATE INDEX idx_participant_comments_author_id ON participant_comments(author_id);
-CREATE INDEX idx_participant_comments_created_at ON participant_comments(created_at DESC);
+CREATE INDEX idx_participant_comments_created_at ON participant_comments(created_at);
+CREATE INDEX idx_participant_comments_author_type ON participant_comments(author_type);
 ```
 
 ## Security Considerations
 
-1. **Authorization**: Only drawing owners can add/edit/delete comments
-2. **Visibility Control**: `isVisibleToParticipant` flag controls participant access
-3. **Input Validation**: Sanitize and validate all comment text
-4. **Rate Limiting**: Consider implementing rate limits on comment creation
-5. **XSS Prevention**: Properly escape comment text in the UI
+1. **Authorization**: Only drawing owners can add/edit/delete host comments
+2. **No Authentication for Participants**: Participants can comment without logging in (using their unique participant link)
+3. **Visibility Control**: `isVisibleToParticipant` flag controls whether host comments are shown to participants
+4. **Input Validation**: Sanitize and validate all comment text
+5. **Rate Limiting**: Consider implementing rate limits on comment creation to prevent spam
+6. **XSS Prevention**: Properly escape comment text in the UI
+7. **Participant Verification**: Comments are tied to participant_id, ensuring participants can only comment on their own page
 
 ## Future Enhancements
 
 1. **Rich Text**: Support for markdown or rich text formatting
-2. **Attachments**: Allow hosts to attach files to comments
-3. **Notifications**: Email notifications when hosts add comments
-4. **Comment Editing**: Allow hosts to edit their comments
-5. **Participant Replies**: Allow participants to reply to host comments (optional)
+2. **Attachments**: Allow both hosts and participants to attach files
+3. **Notifications**: Email notifications when new comments are added
+4. **Comment Editing**: Allow users to edit their own comments (with edit history)
+5. **Comment Reactions**: Allow simple emoji reactions to comments
 6. **Comment History**: Track edit history for comments
-7. **Bulk Comments**: Add comments to multiple participants at once
+7. **Bulk Comments**: Add comments to multiple participants at once (host only)
+8. **Read Receipts**: Show when host/participant has read messages
 
 ## Testing Checklist
 
-- [ ] Host can view comments for their participants
-- [ ] Host can add new comments
-- [ ] Host can toggle visibility of comments
-- [ ] Participant can view only visible comments
-- [ ] Participant cannot view private comments
-- [ ] Comments are sorted by creation date (newest first)
-- [ ] Unauthorized users cannot access comments
+- [ ] Host can view all comments (including participant replies)
+- [ ] Host can add new comments with visibility toggle
+- [ ] Host can see participant comments in conversation
+- [ ] Participant can view visible host comments
+- [ ] Participant can add comments without logging in
+- [ ] Participant comments are always visible
+- [ ] Private host comments are hidden from participants
+- [ ] Comments display in chronological order
+- [ ] Conversation flow is clear and intuitive
+- [ ] Unauthorized users cannot access host-only endpoints
 - [ ] Comments are properly deleted when participant is deleted (cascade)
 - [ ] UI displays properly on mobile and desktop
 - [ ] Comments with line breaks render correctly
+- [ ] Author type badges display correctly (Host/Participant)
 
 ## Conclusion
 
-This proposal provides a comprehensive, production-ready implementation of a participant commenting system that:
+This proposal provides a comprehensive, production-ready implementation of a **bidirectional** participant commenting system that:
 
+- Enables two-way communication between hosts and participants
+- Requires no authentication for participants (using their unique link)
 - Integrates seamlessly with the existing architecture
 - Follows the established patterns in the codebase
 - Provides clear separation between host and participant views
 - Includes proper security and authorization
+- Supports conversation-style threading
 - Is scalable and maintainable
 
 The implementation is minimal yet complete, focusing on essential features while leaving room for future enhancements.

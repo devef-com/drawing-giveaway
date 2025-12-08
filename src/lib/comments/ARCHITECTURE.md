@@ -11,10 +11,11 @@
 │  │   Host View        │           │   Participant View      │  │
 │  │  m.$participant    │           │  p.$participateId       │  │
 │  ├────────────────────┤           ├─────────────────────────┤  │
-│  │ • Add comments     │           │ • View public comments  │  │
-│  │ • Toggle visibility│           │ • See host messages     │  │
-│  │ • View all         │           │ • Timestamp display     │  │
-│  │ • Edit/Delete      │           │ • Read-only access      │  │
+│  │ • Add comments     │           │ • View conversation     │  │
+│  │ • Toggle visibility│           │ • Reply to host         │  │
+│  │ • View full thread │           │ • Add comments          │  │
+│  │ • See replies      │           │ • NO LOGIN REQUIRED     │  │
+│  │ • Edit/Delete own  │           │                         │  │
 │  └────────┬───────────┘           └────────┬────────────────┘  │
 │           │                                │                   │
 └───────────┼────────────────────────────────┼───────────────────┘
@@ -36,7 +37,8 @@
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │  /api/drawings/:drawingId/p/:participantId/comments      │  │
 │  ├──────────────────────────────────────────────────────────┤  │
-│  │  GET    - Fetch public comments (no auth required)       │  │
+│  │  GET  - Fetch visible comments (NO AUTH - public)        │  │
+│  │  POST - Create participant comment (NO AUTH - public)    │  │
 │  └──────────────────────────────────────────────────────────┘  │
 │                                                                 │
 └───────────────────────────────┬─────────────────────────────────┘
@@ -48,12 +50,13 @@
 │                                                                 │
 │  src/lib/comments/index.ts                                      │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │  • createComment()                                        │  │
-│  │  • getCommentsForHost()                                   │  │
-│  │  • getCommentsForParticipant()                            │  │
-│  │  • updateComment()                                        │  │
-│  │  • deleteComment()                                        │  │
-│  │  • verifyDrawingOwnership()                               │  │
+│  │  • createHostComment()        (authenticated)             │  │
+│  │  • createParticipantComment() (NO AUTH)                   │  │
+│  │  • getCommentsForHost()       (full thread)               │  │
+│  │  • getCommentsForParticipant() (visible only)             │  │
+│  │  • updateComment()            (host only)                 │  │
+│  │  • deleteComment()            (host only)                 │  │
+│  │  • verifyDrawingOwnership()   (authorization)             │  │
 │  └──────────────────────────────────────────────────────────┘  │
 │                                                                 │
 └───────────────────────────────┬─────────────────────────────────┘
@@ -63,11 +66,13 @@
 │                       Database Layer                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  participant_comments table                                     │
+│  participant_comments table (BIDIRECTIONAL)                     │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │  id                    SERIAL PRIMARY KEY                 │  │
 │  │  participant_id        INTEGER → participants(id)         │  │
-│  │  author_id             TEXT → user(id)                    │  │
+│  │  author_id             TEXT → user(id) [NULLABLE]         │  │
+│  │  author_type           ENUM ('host', 'participant')       │  │
+│  │  author_name           VARCHAR(255) [for participants]    │  │
 │  │  comment               TEXT NOT NULL                      │  │
 │  │  is_visible_to_participant  BOOLEAN DEFAULT TRUE          │  │
 │  │  created_at            TIMESTAMP DEFAULT NOW()            │  │
@@ -77,6 +82,7 @@
 │  Indexes:                                                       │
 │  • idx_participant_comments_participant_id                      │
 │  • idx_participant_comments_author_id                           │
+│  • idx_participant_comments_author_type [NEW]                   │
 │  • idx_participant_comments_created_at                          │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -90,24 +96,37 @@
 ┌──────────┐     ┌─────────┐     ┌──────────┐     ┌──────────┐
 │  Host UI │────▶│ API POST│────▶│ Validate │────▶│ Database │
 └──────────┘     └─────────┘     │ & Auth   │     │  INSERT  │
-                                 └──────────┘     └──────────┘
-     ▲                                                   │
-     │                                                   │
-     └───────────────────────────────────────────────────┘
+                                 └──────────┘     │ author_  │
+     ▲                                            │ type:    │
+     │                                            │ 'host'   │
+     └────────────────────────────────────────────┴──────────┘
                     Return new comment
 ```
 
-### 2. Participant Views Comments
+### 2. Participant Adds Comment (NO AUTH)
 
 ```
 ┌────────────┐     ┌─────────┐     ┌──────────┐     ┌──────────┐
-│Participant │────▶│ API GET │────▶│  Filter  │────▶│ Database │
-│    UI      │     │         │     │ visible  │     │  SELECT  │
-└────────────┘     └─────────┘     │   only   │     └──────────┘
+│Participant │────▶│ API POST│────▶│ Validate │────▶│ Database │
+│    UI      │     │ (PUBLIC)│     │ comment  │     │  INSERT  │
+└────────────┘     └─────────┘     │   text   │     │ author_  │
+     ▲                             └──────────┘     │ type:    │
+     │                                              │'particip'│
+     └──────────────────────────────────────────────┴──────────┘
+              Return new comment (no auth needed)
+```
+
+### 3. Conversation View (Both Parties)
+
+```
+┌────────────┐     ┌─────────┐     ┌──────────┐     ┌──────────┐
+│  Any User  │────▶│ API GET │────▶│  Filter  │────▶│ Database │
+│            │     │         │     │ by visi- │     │  SELECT  │
+└────────────┘     └─────────┘     │ bility   │     └──────────┘
      ▲                             └──────────┘           │
      │                                                    │
      └────────────────────────────────────────────────────┘
-              Return only public comments
+              Return conversation thread
 ```
 
 ## Component Hierarchy
@@ -116,25 +135,30 @@
 src/routes/drawings/$drawingId/m.$participant.tsx
 ├── Participant Information Card
 ├── Status Change Section
-└── ParticipantComments Component ← NEW
-    ├── Add Comment Form
+└── ParticipantComments Component ← NEW (BIDIRECTIONAL)
+    ├── Add Comment Form (Host)
     │   ├── Textarea (comment input)
     │   ├── Visibility Toggle Switch
     │   └── Submit Button
-    └── Comments List
+    └── Conversation Thread (Chronological)
         └── Comment Item (for each comment)
-            ├── Author & Timestamp
-            ├── Visibility Badge
+            ├── Author Badge (Host/Participant)
+            ├── Author Name & Timestamp
+            ├── Visibility Badge (if private)
             └── Comment Text
 
 src/routes/drawings/$drawingId/p.$participateId.tsx
 ├── Participant Status Card
 ├── QR Code Card
-└── ParticipantCommentsView Component ← NEW
-    └── Comments List (read-only)
-        └── Comment Item (for each)
-            ├── Comment Text
-            └── Timestamp
+└── ParticipantCommentsView Component ← NEW (BIDIRECTIONAL)
+    ├── Conversation Thread (read + write)
+    │   └── Comment Item (for each)
+    │       ├── Author Label (Host/You)
+    │       ├── Comment Text
+    │       └── Timestamp
+    └── Reply Form (Participant can add comments)
+        ├── Textarea
+        └── Send Button
 ```
 
 ## Database Relationships
@@ -153,8 +177,10 @@ src/routes/drawings/$drawingId/p.$participateId.tsx
                      │   ┌───────────────────────────┐│
                      │   │ participant_comments      ││
                      │   │───────────────────────────││
-                     └───│ author_id (FK)            ││
+                     └───│ author_id (FK) [NULLABLE] ││
                          │ participant_id (FK) ──────┘│
+                         │ author_type (ENUM)         │
+                         │ author_name (VARCHAR)      │
                          │ comment                    │
                          │ is_visible_to_participant  │
                          │ created_at                 │
@@ -162,78 +188,105 @@ src/routes/drawings/$drawingId/p.$participateId.tsx
                          └────────────────────────────┘
 
 Cascade Rules:
-• Delete user → Delete their comments
-• Delete participant → Delete all comments
+• Delete user → Delete their host comments (author_id FK)
+• Delete participant → Delete all comments (thread cleanup)
+
+Author Types:
+• 'host' - Comment from drawing host (author_id NOT NULL)
+• 'participant' - Comment from participant (author_id NULL)
 ```
 
 ## Access Control Matrix
 
 ```
-┌──────────────────┬──────────┬─────────────┬─────────────┬──────────┐
-│ Action           │   Host   │  Author     │ Participant │  Public  │
-├──────────────────┼──────────┼─────────────┼─────────────┼──────────┤
-│ View All         │    ✓     │      ✓      │      ✗      │    ✗     │
-│ View Public      │    ✓     │      ✓      │      ✓      │    ✓     │
-│ Create Comment   │    ✓     │      ✓      │      ✗      │    ✗     │
-│ Edit Comment     │    ✗     │      ✓      │      ✗      │    ✗     │
-│ Delete Comment   │    ✗     │      ✓      │      ✗      │    ✗     │
-│ Toggle Visibility│    ✗     │      ✓      │      ✗      │    ✗     │
-└──────────────────┴──────────┴─────────────┴─────────────┴──────────┘
+┌──────────────────────┬──────────┬─────────────────┬──────────┐
+│ Action               │   Host   │   Participant   │  Public  │
+├──────────────────────┼──────────┼─────────────────┼──────────┤
+│ View All (Full)      │    ✓     │        ✗        │    ✗     │
+│ View Visible Thread  │    ✓     │        ✓        │    ✗     │
+│ Create Host Comment  │    ✓     │        ✗        │    ✗     │
+│ Create Part Comment  │    ✗     │        ✓        │    ✗     │
+│ Edit Host Comment    │    ✓*    │        ✗        │    ✗     │
+│ Edit Part Comment    │    ✗     │        ✗        │    ✗     │
+│ Delete Host Comment  │    ✓*    │        ✗        │    ✗     │
+│ Delete Part Comment  │    ✗     │        ✗        │    ✗     │
+│ Toggle Visibility    │    ✓*    │        ✗        │    ✗     │
+└──────────────────────┴──────────┴─────────────────┴──────────┘
 
-Note: Host = Drawing owner, Author = Comment creator
+Notes:
+* Host = Drawing owner (authenticated user)
+* Participant = Uses unique participant link (NO login)
+* ✓* = Only for their own comments
+* Participant comments cannot be edited or deleted (permanent record)
+* Public = Anyone without participant link
 ```
 
 ## UI Mockups (Text-based)
 
-### Host View - Comment Section
+### Host View - Conversation Thread
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Comments                                                    │
+│ Conversation                                                │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Add a comment for this participant...                   │ │
+│ │ Add a message...                                        │ │
 │ │                                                         │ │
 │ │                                                         │ │
 │ └─────────────────────────────────────────────────────────┘ │
 │                                                             │
-│ ☑ Visible to participant          [Add Comment]            │
+│ ☑ Visible to participant          [Send Message]           │
 │                                                             │
+│ ─────────────────────────────────────────────────────────── │
+│ CONVERSATION THREAD                                         │
 │ ─────────────────────────────────────────────────────────── │
 │                                                             │
 │ ┌─────────────────────────────────────────────────────────┐ │
-│ │ John Doe                           2025-12-08 10:00 AM  │ │
+│ │ John Doe (Host)                    2025-12-08 10:00 AM  │ │
 │ │ Please submit payment proof by tomorrow                 │ │
 │ └─────────────────────────────────────────────────────────┘ │
 │                                                             │
+│ ┌───────────────────────────────────────────────[ Participant ]─┐ │
+│ │ Jane Smith                         2025-12-08 11:00 AM  │ │
+│ │ I will submit it by today evening. Thank you!           │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
 │ ┌─────────────────────────────────────────────────────────┐ │
-│ │ John Doe                 [Private] 2025-12-07 02:30 PM  │ │
-│ │ Internal note: Follow up next week                      │ │
+│ │ John Doe (Host)        [Private]   2025-12-08 12:00 PM  │ │
+│ │ Internal note: Follow up tomorrow if not received       │ │
 │ └─────────────────────────────────────────────────────────┘ │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Participant View - Messages Section
+### Participant View - Conversation (Bidirectional)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Messages from Host                                          │
+│ Conversation with Host                                      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Thank you for participating! We'll announce the winners │ │
-│ │ on December 15th.                                       │ │
-│ │                                                         │ │
-│ │                                    2025-12-08 10:00 AM  │ │
+│ │ Host                               2025-12-08 10:00 AM  │ │
+│ │ Please submit payment proof by tomorrow                 │ │
 │ └─────────────────────────────────────────────────────────┘ │
 │                                                             │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Please submit payment proof by tomorrow                 │ │
-│ │                                                         │ │
-│ │                                    2025-12-07 02:30 PM  │ │
+│ ┌───────────────────────────────────────────────[ You ]────┐ │
+│ │ You                                2025-12-08 11:00 AM  │ │
+│ │ I will submit it by today evening. Thank you!           │ │
 │ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│ ─────────────────────────────────────────────────────────── │
+│ SEND A MESSAGE                                              │
+│ ─────────────────────────────────────────────────────────── │
+│                                                             │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ Write your message...                                   │ │
+│ │                                                         │ │
+│ └─────────────────────────────────────────────────────────┘ │
+│                                                             │
+│                                        [Send Message]       │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
