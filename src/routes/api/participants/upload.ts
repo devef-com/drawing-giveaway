@@ -78,6 +78,12 @@ export const Route = createFileRoute('/api/participants/upload')({
 
           // Get public URL
           const publicDomain = process.env.R2_PUBLIC_DOMAIN
+          if (!publicDomain) {
+            return new Response(
+              JSON.stringify({ error: 'R2_PUBLIC_DOMAIN not configured' }),
+              { status: 500, headers: { 'Content-Type': 'application/json' } },
+            )
+          }
           const publicUrl = `https://${publicDomain}/${s3Key}`
 
           return new Response(

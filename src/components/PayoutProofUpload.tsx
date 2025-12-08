@@ -97,11 +97,6 @@ export function PayoutProofUpload({
       } finally {
         setIsProcessing(false)
       }
-
-      // Reset input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
     },
     [onFileChange],
   )
@@ -112,6 +107,10 @@ export function PayoutProofUpload({
     }
     setFileData(null)
     onFileChange?.(null)
+    // Reset input to allow re-selecting the same file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }, [fileData, onFileChange])
 
   return (

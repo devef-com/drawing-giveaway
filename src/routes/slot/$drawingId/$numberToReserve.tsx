@@ -335,7 +335,6 @@ function ReserveNumberForm() {
             ? error.message
             : 'Failed to upload payment proof',
         )
-        setIsUploadingProof(false)
         return
       } finally {
         setIsUploadingProof(false)
