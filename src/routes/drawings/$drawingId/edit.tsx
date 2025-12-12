@@ -94,7 +94,7 @@ function EditDrawing() {
         title: drawing.title,
         guidelines: drawing.guidelines || [],
         isPaid: drawing.isPaid,
-        price: drawing.price ? drawing.price / 100 : 0, // Convert from cents
+        price: drawing.price ? drawing.price : 0,
         winnerSelection: drawing.winnerSelection,
         quantityOfNumbers: drawing.quantityOfNumbers,
         playWithNumbers: drawing.playWithNumbers || false,
@@ -209,7 +209,7 @@ function EditDrawing() {
           title: formData.title,
           guidelines: filteredGuidelines,
           isPaid: formData.isPaid,
-          price: formData.isPaid ? formData.price * 100 : 0, // Convert to cents
+          price: formData.isPaid ? formData.price : 0,
           winnerSelection: formData.winnerSelection,
           winnersAmount: formData.winnersAmount,
           endAt: formData.endAt,

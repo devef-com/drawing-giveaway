@@ -233,7 +233,7 @@ function CreateDrawing() {
         body: JSON.stringify({
           ...formData,
           guidelines: filteredGuidelines,
-          price: formData.isPaid ? formData.price * 100 : 0, // Convert to cents
+          price: formData.isPaid ? formData.price : 0,
         }),
       })
 

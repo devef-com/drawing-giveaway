@@ -38,7 +38,7 @@ import {
   ExpandableContent,
 } from '@/components/ui/expandable'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn, formatDateGiway } from '@/lib/utils'
+import { cn, formatDateGiway, formatNumber } from '@/lib/utils'
 import { useDrawingWinners } from '@/querys/useDrawingWinners'
 
 export const Route = createFileRoute('/drawings/$drawingId/')({
@@ -359,7 +359,7 @@ function DrawingDetail() {
                   <p className="mb-2 text-sm">
                     <strong>Type:</strong>{' '}
                     {drawing.isPaid && drawing.price
-                      ? `Paid ($${(drawing.price ?? 0).toLocaleString()})`
+                      ? `Paid ($${formatNumber(drawing.price ?? 0)})`
                       : 'Free'}
                   </p>
                   <p className="mb-2  text-sm">
