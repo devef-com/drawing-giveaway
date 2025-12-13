@@ -333,9 +333,9 @@ function LandingPage() {
                     <span>Never expires</span>
                   </li>
                 </ul>
-                <Button className="w-full mt-4" asChild>
+                {/* <Button className="w-full mt-4" asChild>
                   <Link to="/store">View Packs</Link>
-                </Button>
+                </Button> */}
               </CardContent>
             </Card>
 
