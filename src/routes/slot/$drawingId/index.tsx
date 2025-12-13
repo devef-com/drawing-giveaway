@@ -647,6 +647,11 @@ function SlotDrawingParticipation() {
                     (_unused, i) => startIdx + i + 1,
                   )
 
+                  const ghostCount = Math.max(
+                    0,
+                    NUMBERS_PER_PAGE - pageNumbers.length,
+                  )
+
                   const pageSlotsData =
                     pageIndex === currentPage
                       ? slotsData
@@ -661,7 +666,7 @@ function SlotDrawingParticipation() {
                   return (
                     <div
                       key={pageIndex}
-                      className="shrink-0 w-full snap-start overflow-y-auto"
+                      className="shrink-0 w-full snap-start overflow-y-auto px-2"
                       style={{
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
@@ -707,6 +712,15 @@ function SlotDrawingParticipation() {
                             </button>
                           )
                         })}
+
+                        {ghostCount > 0 &&
+                          Array.from({ length: ghostCount }, (_unused, i) => (
+                            <div
+                              key={`ghost-${pageIndex}-${i}`}
+                              aria-hidden
+                              className="aspect-square w-full px-0 py-0 rounded-lg border border-border-light dark:border-border-dark bg-transparent"
+                            />
+                          ))}
                       </div>
                     </div>
                   )
@@ -777,7 +791,18 @@ function SlotDrawingParticipation() {
               </div>
               {selectedNumbers.length > 0 && (
                 <div className="text-center mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  Selected: {selectedNumbers.join(', ')}
+                  {(() => {
+                    const maxToShow = 4
+                    const shown = selectedNumbers.slice(0, maxToShow)
+                    const remaining = selectedNumbers.length - shown.length
+
+                    return (
+                      <>
+                        Selected: {shown.join(', ')}
+                        {remaining > 0 ? ` +${remaining}` : ''}
+                      </>
+                    )
+                  })()}
                 </div>
               )}
             </div>
