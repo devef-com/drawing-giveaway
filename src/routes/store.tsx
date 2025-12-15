@@ -310,7 +310,7 @@ function StorePage() {
             <div className="flex gap-4 text-sm">
               <span className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
-                200 participants (Raffle only)
+                100 participants (Raffle only)
               </span>
               <span className="flex items-center gap-1">
                 <Image className="h-4 w-4" />1 image

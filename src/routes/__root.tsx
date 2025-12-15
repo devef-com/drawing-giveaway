@@ -4,13 +4,13 @@ import {
   createRootRouteWithContext,
   useRouterState,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
+// import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+// import { TanStackDevtools } from '@tanstack/react-devtools'
 import { ThemeProvider } from 'next-themes'
 
 import Header from '../components/Header'
 
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+// import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import appCss from '../styles.css?url'
 
@@ -126,7 +126,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           {!isAuthRoute && <Header />}
           {children}
           <Footer />
-          {process.env.NODE_ENV !== 'production' && (
+          {/* {process.env.NODE_ENV !== 'production' && (
             <TanStackDevtools
               config={{
                 position: 'bottom-right',
@@ -139,7 +139,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 TanStackQueryDevtools,
               ]}
             />
-          )}
+          )} */}
           <Scripts />
           <Toaster />
         </ThemeProvider>

@@ -417,7 +417,7 @@ function LandingPage() {
                 <ul className="space-y-2 text-left text-sm">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>200 participants</span>
+                    <span>100 participants</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -510,7 +510,7 @@ function LandingPage() {
             Ready to Host Your First Giway?
           </h2>
           <p className="text-muted-foreground text-lg">
-            Join now and get 200 free participants every month to run your
+            Join now and get 100 free participants every month to run your
             raffles.
           </p>
           <Button size="lg" asChild>

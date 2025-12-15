@@ -13,7 +13,7 @@ export const Route = createFileRoute('/support')({
 function SupportPage() {
   return (
     <div>
-      <main className="container mx-auto py-10 px-4 max-w-3xl">
+      <main className="container mx-auto py-10 px-4 max-w-3xl min-h-[calc(100svh-129px)]">
         <div className="space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold tracking-tight">Support & FAQ</h1>
@@ -73,7 +73,7 @@ function SupportPage() {
                   <p className="text-muted-foreground">
                     You can increase your participant limit by purchasing Packs,
                     redeeming coupons, or watching ads (for Raffle Giways).
-                    Every month, active users also get free rewards (200
+                    Every month, active users also get free rewards (100
                     participants for Raffles).
                   </p>
                 </ExpandableContent>
@@ -113,7 +113,7 @@ function SupportPage() {
             </p>
             {/* Placeholder for contact button or email */}
             <a
-              href="mailto:support@giway.com"
+              href="mailto:team@giway.com"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
               Contact Support
