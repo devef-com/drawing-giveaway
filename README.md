@@ -121,7 +121,18 @@ Migrations run automatically on container startup. To run manually:
 ```bash
 docker exec drawing-giveaway-app npx drizzle-kit migrate
 ```
+### Reload the app
 
+```bash
+# Rebuild image and recreate just the app service (recommended after code/build changes)
+docker compose up -d --no-deps --build --force-recreate app
+
+# Or rebuild & recreate (simpler)
+docker compose up -d --build app
+
+# If image is already updated and you only need PM2 to pick up new files inside container
+docker exec drawing-giveaway-app pm2 reload ecosystem.config.cjs --update-env
+```
 ## Testing
 
 This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
