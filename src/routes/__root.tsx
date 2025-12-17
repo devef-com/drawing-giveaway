@@ -17,7 +17,8 @@ import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/sonner'
 import Footer from '@/components/Footer'
-import { LanguageProvider } from '@/lib/i18n'
+import { LanguageProvider, useLanguage } from '@/lib/i18n'
+import { useEffect } from 'react'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -100,6 +101,44 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
 })
 
+function InnerDocument({
+  children,
+  isAuthRoute,
+}: {
+  children: React.ReactNode
+  isAuthRoute: boolean
+}) {
+  const { locale } = useLanguage()
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
+
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      {!isAuthRoute && <Header />}
+      {children}
+      <Footer />
+      {/* {process.env.NODE_ENV !== 'production' && (
+        <TanStackDevtools
+          config={{
+            position: 'bottom-right',
+          }}
+          plugins={[
+            {
+              name: 'Tanstack Router',
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+            TanStackQueryDevtools,
+          ]}
+        />
+      )} */}
+      <Scripts />
+      <Toaster />
+    </ThemeProvider>
+  )
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   const router = useRouterState()
   const isAuthRoute = [
@@ -108,7 +147,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   ].includes(router.location.pathname)
 
   return (
-    <html lang="en" suppressHydrationWarning className="notranslate">
+    <html suppressHydrationWarning className="notranslate">
       <head>
         <HeadContent />
         <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -124,27 +163,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <LanguageProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {!isAuthRoute && <Header />}
-            {children}
-            <Footer />
-            {/* {process.env.NODE_ENV !== 'production' && (
-              <TanStackDevtools
-                config={{
-                  position: 'bottom-right',
-                }}
-                plugins={[
-                  {
-                    name: 'Tanstack Router',
-                    render: <TanStackRouterDevtoolsPanel />,
-                  },
-                  TanStackQueryDevtools,
-                ]}
-              />
-            )} */}
-            <Scripts />
-            <Toaster />
-          </ThemeProvider>
+          <InnerDocument isAuthRoute={isAuthRoute}>{children}</InnerDocument>
         </LanguageProvider>
       </body>
     </html>

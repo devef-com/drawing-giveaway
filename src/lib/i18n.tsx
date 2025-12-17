@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import {
   type Locale,
   locales,
@@ -37,28 +37,20 @@ function detectBrowserLanguage(): Locale {
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(() => {
-    try {
-      return getLocale() as Locale
-    } catch {
-      return detectBrowserLanguage()
-    }
+    const detected = detectBrowserLanguage()
+    // Initialize the i18n locale
+    setI18nLocale(detected)
+    return detected
   })
 
   const setLocale = (newLocale: Locale) => {
     if (locales.includes(newLocale)) {
       setLocaleState(newLocale)
       localStorage.setItem('PARAGLIDE_LOCALE', newLocale)
-      // Update HTML lang attribute
-      document.documentElement.lang = newLocale
       // Update i18n locale
       setI18nLocale(newLocale)
     }
   }
-
-  useEffect(() => {
-    // Set initial HTML lang attribute
-    document.documentElement.lang = locale
-  }, [locale])
 
   return (
     <LanguageContext.Provider
