@@ -22,6 +22,7 @@ import {
   Mail,
   Play,
 } from 'lucide-react'
+import * as m from '@/lang/messages'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -62,7 +63,9 @@ function GiwayNumbersPreview() {
       <div className="p-5 h-full flex flex-col">
         <div className="flex items-start justify-between gap-4">
           <div className="text-left">
-            <div className="text-sm text-muted-foreground">Giway preview</div>
+            <div className="text-sm text-muted-foreground">
+              {m.app_title()} preview
+            </div>
             <div className="text-xl font-semibold tracking-tight">
               AirPods 4 Gen
             </div>
@@ -71,7 +74,9 @@ function GiwayNumbersPreview() {
             <div className="text-3xl font-bold tracking-tight">
               {TOTAL_NUMBERS}
             </div>
-            <div className="text-xs text-muted-foreground">disponibles</div>
+            <div className="text-xs text-muted-foreground">
+              {m.landing_preview_available()}
+            </div>
           </div>
         </div>
 
@@ -110,7 +115,10 @@ function GiwayNumbersPreview() {
 
         <div className="mt-4 flex items-center justify-between">
           <div className="text-xs text-muted-foreground">
-            Showing {pageStart}–{pageEnd}
+            {m.landing_preview_showing({
+              start: pageStart.toString(),
+              end: pageEnd.toString(),
+            })}
           </div>
 
           <div className="flex items-center gap-3">
@@ -119,7 +127,7 @@ function GiwayNumbersPreview() {
               onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
               disabled={pageIndex === 0}
               className="h-9 w-9 inline-flex items-center justify-center rounded-full border bg-background text-foreground disabled:opacity-50"
-              aria-label="Previous page"
+              aria-label={m.landing_preview_previous()}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -135,7 +143,9 @@ function GiwayNumbersPreview() {
                       ? 'h-2.5 w-2.5 rounded-full bg-primary'
                       : 'h-2 w-2 rounded-full bg-muted-foreground/30 hover:bg-muted-foreground/50'
                   }
-                  aria-label={`Go to page ${i + 1}`}
+                  aria-label={m.landing_preview_goToPage({
+                    page: (i + 1).toString(),
+                  })}
                 />
               ))}
             </div>
@@ -147,7 +157,7 @@ function GiwayNumbersPreview() {
               }
               disabled={pageIndex >= totalPages - 1}
               className="h-9 w-9 inline-flex items-center justify-center rounded-full border bg-background text-foreground disabled:opacity-50"
-              aria-label="Next page"
+              aria-label={m.landing_preview_next()}
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -165,22 +175,20 @@ function LandingPage() {
       <section className="flex-1 flex flex-col items-center justify-center py-20 px-4 text-center space-y-8">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium">
           <Sparkles className="w-4 h-4" />
-          <span>Raffles & Giveaways Made Simple</span>
+          <span>{m.landing_badge()}</span>
         </div>
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-          Host Your <span className="text-primary">Giways</span> With Confidence
+          {m.landing_title({ giway: m.app_title() })}
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl">
-          The complete platform for organizing raffles with number slots or
-          simple giveaway drawings. Manage participants, track reservations, and
-          pick winners fairly.
+          {m.landing_subtitle()}
         </p>
         <div className="flex gap-4">
           <Button asChild size="lg">
-            <Link to="/authentication/signup">Get Started Free</Link>
+            <Link to="/authentication/signup">{m.landing_cta_getStarted()}</Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
-            <Link to="/authentication/login">Login</Link>
+            <Link to="/authentication/login">{m.landing_cta_login()}</Link>
           </Button>
         </div>
 
@@ -194,11 +202,10 @@ function LandingPage() {
       <section className="py-20 px-4 bg-muted/50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-4">
-            Two Ways to Run Your Event
+            {m.landing_eventTypes_title()}
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            Choose between interactive raffles with number selection or simple
-            giveaway drawings
+            {m.landing_eventTypes_subtitle()}
           </p>
           <div className="grid md:grid-cols-2 gap-8">
             <Card className="border-primary/20">
@@ -206,29 +213,28 @@ function LandingPage() {
                 <div className="p-3 bg-primary/10 rounded-full text-primary w-fit mb-2">
                   <Hash className="w-6 h-6" />
                 </div>
-                <CardTitle>Raffles (Play with Numbers)</CardTitle>
+                <CardTitle>{m.landing_eventTypes_raffles_title()}</CardTitle>
                 <CardDescription>
-                  Participants actively select number slots to compete for
-                  prizes
+                  {m.landing_eventTypes_raffles_description()}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                    <span>Configurable number slots per event</span>
+                    <span>{m.landing_eventTypes_raffles_feature1()}</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                    <span>Reserve, release, and track slot status</span>
+                    <span>{m.landing_eventTypes_raffles_feature2()}</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                    <span>System or manual winner selection</span>
+                    <span>{m.landing_eventTypes_raffles_feature3()}</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                    <span>Free (1 number) or Paid (multiple numbers)</span>
+                    <span>{m.landing_eventTypes_raffles_feature4()}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -238,29 +244,28 @@ function LandingPage() {
                 <div className="p-3 bg-primary/10 rounded-full text-primary w-fit mb-2">
                   <Gift className="w-6 h-6" />
                 </div>
-                <CardTitle>Giveaway Drawings</CardTitle>
+                <CardTitle>{m.landing_eventTypes_giveaway_title()}</CardTitle>
                 <CardDescription>
-                  Simple entries without number selection — perfect for large
-                  audiences
+                  {m.landing_eventTypes_giveaway_description()}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                    <span>Very high participant limits</span>
+                    <span>{m.landing_eventTypes_giveaway_feature1()}</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                    <span>System-generated winner selection</span>
+                    <span>{m.landing_eventTypes_giveaway_feature2()}</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                    <span>Quick setup, instant results</span>
+                    <span>{m.landing_eventTypes_giveaway_feature3()}</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                    <span>Transparent and fair drawings</span>
+                    <span>{m.landing_eventTypes_giveaway_feature4()}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -272,36 +277,33 @@ function LandingPage() {
       {/* How it works */}
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">{m.landing_howItWorks_title()}</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="p-4 bg-primary/10 rounded-full text-primary">
                 <Gift className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-semibold">1. Create a Giway</h3>
+              <h3 className="text-xl font-semibold">{m.landing_howItWorks_step1_title()}</h3>
               <p className="text-muted-foreground">
-                Set up your raffle or giveaway with prizes, number slots, and
-                participation rules.
+                {m.landing_howItWorks_step1_description()}
               </p>
             </div>
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="p-4 bg-primary/10 rounded-full text-primary">
                 <Users className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-semibold">2. Invite Participants</h3>
+              <h3 className="text-xl font-semibold">{m.landing_howItWorks_step2_title()}</h3>
               <p className="text-muted-foreground">
-                Share your event link. Participants reserve slots or enter the
-                drawing.
+                {m.landing_howItWorks_step2_description()}
               </p>
             </div>
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="p-4 bg-primary/10 rounded-full text-primary">
                 <Trophy className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-semibold">3. Pick Winners</h3>
+              <h3 className="text-xl font-semibold">{m.landing_howItWorks_step3_title()}</h3>
               <p className="text-muted-foreground">
-                Select winners manually or let the system choose fairly and
-                transparently.
+                {m.landing_howItWorks_step3_description()}
               </p>
             </div>
           </div>
@@ -312,10 +314,10 @@ function LandingPage() {
       <section className="py-20 px-4 bg-muted/50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-4">
-            Powerful Features
+            {m.landing_features_title()}
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            Everything you need to run successful events
+            {m.landing_features_subtitle()}
           </p>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="flex items-start gap-4 p-4">
@@ -323,10 +325,9 @@ function LandingPage() {
                 <Hash className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Number Slot Management</h3>
+                <h3 className="font-semibold mb-1">{m.landing_features_numberSlots_title()}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Track available, reserved, and taken slots with real-time
-                  updates.
+                  {m.landing_features_numberSlots_description()}
                 </p>
               </div>
             </div>
@@ -335,10 +336,9 @@ function LandingPage() {
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Participant History</h3>
+                <h3 className="font-semibold mb-1">{m.landing_features_participantHistory_title()}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Keep track of all entries, even rejected participants with
-                  number logs.
+                  {m.landing_features_participantHistory_description()}
                 </p>
               </div>
             </div>
@@ -348,11 +348,10 @@ function LandingPage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-1">
-                  Flexible Winner Selection
+                  {m.landing_features_winnerSelection_title()}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Choose system-generated random selection or pick winners
-                  manually.
+                  {m.landing_features_winnerSelection_description()}
                 </p>
               </div>
             </div>
@@ -361,10 +360,9 @@ function LandingPage() {
                 <ImageIcon className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Image Uploads</h3>
+                <h3 className="font-semibold mb-1">{m.landing_features_imageUploads_title()}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Add images to showcase prizes and make your events more
-                  engaging.
+                  {m.landing_features_imageUploads_description()}
                 </p>
               </div>
             </div>
@@ -373,9 +371,9 @@ function LandingPage() {
                 <Mail className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Email Notifications</h3>
+                <h3 className="font-semibold mb-1">{m.landing_features_emailNotifications_title()}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Notify participants and winners automatically via email.
+                  {m.landing_features_emailNotifications_description()}
                 </p>
               </div>
             </div>
@@ -384,10 +382,9 @@ function LandingPage() {
                 <Play className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold mb-1">Watch Ads for Credits</h3>
+                <h3 className="font-semibold mb-1">{m.landing_features_watchAds_title()}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Earn extra participants by watching ads for raffle-type
-                  events.
+                  {m.landing_features_watchAds_description()}
                 </p>
               </div>
             </div>
@@ -398,10 +395,9 @@ function LandingPage() {
       {/* Pricing */}
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto text-center space-y-8">
-          <h2 className="text-3xl font-bold">Flexible Balance System</h2>
+          <h2 className="text-3xl font-bold">{m.landing_pricing_title()}</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Get started free with monthly rewards, or purchase packs for larger
-            events
+            {m.landing_pricing_subtitle()}
           </p>
 
           <div className="grid md:grid-cols-3 gap-6 mt-8">
@@ -410,26 +406,26 @@ function LandingPage() {
                 <div className="p-2 bg-green-500/10 rounded-full text-green-500 w-fit mx-auto mb-2">
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <CardTitle className="text-xl">Monthly Free</CardTitle>
-                <CardDescription>For active users every month</CardDescription>
+                <CardTitle className="text-xl">{m.landing_pricing_monthlyFree_title()}</CardTitle>
+                <CardDescription>{m.landing_pricing_monthlyFree_description()}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <ul className="space-y-2 text-left text-sm">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>100 participants</span>
+                    <span>{m.landing_pricing_monthlyFree_feature1()}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>1 image upload</span>
+                    <span>{m.landing_pricing_monthlyFree_feature2()}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>Raffles only (play with numbers)</span>
+                    <span>{m.landing_pricing_monthlyFree_feature3()}</span>
                   </li>
                 </ul>
                 <p className="text-xs text-muted-foreground pt-2">
-                  Resets monthly • Does not accumulate
+                  {m.landing_pricing_monthlyFree_note()}
                 </p>
               </CardContent>
             </Card>
@@ -439,28 +435,28 @@ function LandingPage() {
                 <div className="p-2 bg-primary/10 rounded-full text-primary w-fit mx-auto mb-2">
                   <Gift className="w-5 h-5" />
                 </div>
-                <CardTitle className="text-xl">Purchase Packs</CardTitle>
+                <CardTitle className="text-xl">{m.landing_pricing_purchasePacks_title()}</CardTitle>
                 <CardDescription>
-                  For larger events and giveaways
+                  {m.landing_pricing_purchasePacks_description()}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <ul className="space-y-2 text-left text-sm">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>Higher participant limits</span>
+                    <span>{m.landing_pricing_purchasePacks_feature1()}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>More image uploads</span>
+                    <span>{m.landing_pricing_purchasePacks_feature2()}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>Email notifications included</span>
+                    <span>{m.landing_pricing_purchasePacks_feature3()}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>Never expires</span>
+                    <span>{m.landing_pricing_purchasePacks_feature4()}</span>
                   </li>
                 </ul>
                 {/* <Button className="w-full mt-4" asChild>
@@ -474,28 +470,28 @@ function LandingPage() {
                 <div className="p-2 bg-blue-500/10 rounded-full text-blue-500 w-fit mx-auto mb-2">
                   <Play className="w-5 h-5" />
                 </div>
-                <CardTitle className="text-xl">Watch Ads</CardTitle>
+                <CardTitle className="text-xl">{m.landing_pricing_watchAds_title()}</CardTitle>
                 <CardDescription>
-                  Earn bonus credits for raffles
+                  {m.landing_pricing_watchAds_description()}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <ul className="space-y-2 text-left text-sm">
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>+10 participants per ad</span>
+                    <span>{m.landing_pricing_watchAds_feature1()}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>Raffles only</span>
+                    <span>{m.landing_pricing_watchAds_feature2()}</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span>Quick and easy</span>
+                    <span>{m.landing_pricing_watchAds_feature3()}</span>
                   </li>
                 </ul>
                 <p className="text-xs text-muted-foreground pt-2">
-                  Available in the app when creating events
+                  {m.landing_pricing_watchAds_note()}
                 </p>
               </CardContent>
             </Card>
@@ -507,14 +503,13 @@ function LandingPage() {
       <section className="py-20 px-4 bg-primary/5">
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <h2 className="text-3xl font-bold">
-            Ready to Host Your First Giway?
+            {m.landing_cta_title()}
           </h2>
           <p className="text-muted-foreground text-lg">
-            Join now and get 100 free participants every month to run your
-            raffles.
+            {m.landing_cta_subtitle()}
           </p>
           <Button size="lg" asChild>
-            <Link to="/authentication/signup">Get Started Free</Link>
+            <Link to="/authentication/signup">{m.landing_cta_button()}</Link>
           </Button>
         </div>
       </section>

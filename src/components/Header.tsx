@@ -2,7 +2,9 @@ import { Link, useLocation } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
 import ThemeSwitcher from './ThemeSwitcher'
+import LanguageSwitcher from './LanguageSwitcher'
 import { cn } from '@/lib/utils'
+import * as m from '@/lang/messages'
 
 const NOT_VISIBLE_AT = [
   '/',
@@ -133,21 +135,18 @@ export default function Header() {
           {/* Desktop Navigation */}
           {isNavVisible() && (
             <nav className="hidden md:flex md:items-center md:gap-6">
-              <NavLink to="/">Home</NavLink>
-              <NavLink to="/drawings">Drawings</NavLink>
-              <NavLink to="/store">Store</NavLink>
-              <NavLink to="/account">Account</NavLink>
+              <NavLink to="/">{m.nav_home()}</NavLink>
+              <NavLink to="/drawings">{m.nav_drawings()}</NavLink>
+              <NavLink to="/store">{m.nav_store()}</NavLink>
+              <NavLink to="/account">{m.nav_account()}</NavLink>
             </nav>
           )}
 
-          {/* Desktop Theme Switcher (dev only) */}
-          {process.env.NODE_ENV === 'production' ? (
-            <div className="hidden md:block">
-              <ThemeSwitcher />
-            </div>
-          ) : (
-            <span className="hidden md:block w-24" />
-          )}
+          {/* Desktop Language & Theme Switcher */}
+          <div className="hidden md:flex md:items-center md:gap-2">
+            <LanguageSwitcher />
+            {process.env.NODE_ENV === 'production' && <ThemeSwitcher />}
+          </div>
         </div>
       </header>
 
@@ -190,24 +189,32 @@ export default function Header() {
         {isNavVisible() && (
           <nav className="flex-1 p-4 overflow-y-auto space-y-1">
             <NavLink to="/" onClick={() => setIsOpen(false)} isMobile>
-              Home
+              {m.nav_home()}
             </NavLink>
             <NavLink to="/drawings" onClick={() => setIsOpen(false)} isMobile>
-              Drawings
+              {m.nav_drawings()}
             </NavLink>
             <NavLink to="/store" onClick={() => setIsOpen(false)} isMobile>
-              Store
+              {m.nav_store()}
             </NavLink>
             <NavLink to="/account" onClick={() => setIsOpen(false)} isMobile>
-              Account
+              {m.nav_account()}
             </NavLink>
           </nav>
         )}
 
-        {/* Theme Switcher */}
-        <div className="p-4 border-t border-border">
+        {/* Language & Theme Switcher */}
+        <div className="p-4 border-t border-border space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Theme</span>
+            <span className="text-sm text-muted-foreground">
+              {m.language_switcher_label()}
+            </span>
+            <LanguageSwitcher />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              {m.theme_label()}
+            </span>
             <ThemeSwitcher />
           </div>
         </div>

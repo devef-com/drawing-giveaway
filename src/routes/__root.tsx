@@ -17,6 +17,7 @@ import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/sonner'
 import Footer from '@/components/Footer'
+import { LanguageProvider } from '@/lib/i18n'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -122,27 +123,29 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {!isAuthRoute && <Header />}
-          {children}
-          <Footer />
-          {/* {process.env.NODE_ENV !== 'production' && (
-            <TanStackDevtools
-              config={{
-                position: 'bottom-right',
-              }}
-              plugins={[
-                {
-                  name: 'Tanstack Router',
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-                TanStackQueryDevtools,
-              ]}
-            />
-          )} */}
-          <Scripts />
-          <Toaster />
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            {!isAuthRoute && <Header />}
+            {children}
+            <Footer />
+            {/* {process.env.NODE_ENV !== 'production' && (
+              <TanStackDevtools
+                config={{
+                  position: 'bottom-right',
+                }}
+                plugins={[
+                  {
+                    name: 'Tanstack Router',
+                    render: <TanStackRouterDevtoolsPanel />,
+                  },
+                  TanStackQueryDevtools,
+                ]}
+              />
+            )} */}
+            <Scripts />
+            <Toaster />
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   )
