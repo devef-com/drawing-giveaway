@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
   varchar,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
@@ -69,9 +70,12 @@ export const numberSlots = pgTable('number_slots', {
     .references(() => drawings.id, { onDelete: 'cascade' }),
   number: integer('number').notNull(),
   status: varchar('status', { length: 20 }).notNull().default('available'), // 'available', 'reserved', 'taken'
-  participantId: integer('participant_id').references(() => participants.id, {
-    onDelete: 'set null',
-  }),
+  participantId: varchar('participant_id', { length: 4 }).references(
+    () => participants.id,
+    {
+      onDelete: 'set null',
+    },
+  ),
   reservedAt: timestamp('reserved_at', { withTimezone: true }),
   expiresAt: timestamp('expires_at', { withTimezone: true }), // For temporary reservations
   createdAt: timestamp('created_at', { withTimezone: true })
@@ -83,27 +87,33 @@ export const numberSlots = pgTable('number_slots', {
 })
 
 // Participants table
-export const participants = pgTable('participants', {
-  id: serial('id').primaryKey(),
-  drawingId: varchar('drawing_id', { length: 255 })
-    .notNull()
-    .references(() => drawings.id, { onDelete: 'cascade' }),
-  name: varchar('name', { length: 255 }).notNull(),
-  email: varchar('email', { length: 255 }),
-  phone: varchar('phone', { length: 50 }).notNull(),
-  selectedNumber: integer('selected_number'), // The number chosen by participant (if applicable)
-  logNumbers: integer('log_numbers').array(), // Track numbers selected by rejected participants
-  isEligible: boolean('is_eligible'), // null = pending, true = approved, false = rejected
-  paymentCaptureId: integer('payment_capture_id').references(() => assets.id), // Reference to payment proof asset
-  createdAt: timestamp('created_at', { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-})
+export const participants = pgTable(
+  'participants',
+  {
+    id: varchar('id', { length: 4 }).primaryKey(),
+    drawingId: varchar('drawing_id', { length: 255 })
+      .notNull()
+      .references(() => drawings.id, { onDelete: 'cascade' }),
+    name: varchar('name', { length: 255 }).notNull(),
+    email: varchar('email', { length: 255 }),
+    phone: varchar('phone', { length: 50 }).notNull(),
+    selectedNumber: integer('selected_number'), // The number chosen by participant (if applicable)
+    logNumbers: integer('log_numbers').array(), // Track numbers selected by rejected participants
+    isEligible: boolean('is_eligible'), // null = pending, true = approved, false = rejected
+    paymentCaptureId: integer('payment_capture_id').references(() => assets.id), // Reference to payment proof asset
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('participants_drawing_id_id_idx').on(table.drawingId, table.id),
+  ],
+)
 
 // Participant Comments table (bidirectional communication)
 export const participantComments = pgTable('participant_comments', {
   id: serial('id').primaryKey(),
-  participantId: integer('participant_id')
+  participantId: varchar('participant_id', { length: 4 })
     .notNull()
     .references(() => participants.id, { onDelete: 'cascade' }),
   authorId: text('author_id').references(() => user.id, {
@@ -111,6 +121,7 @@ export const participantComments = pgTable('participant_comments', {
   }), // NULL for participant comments
   authorType: authorTypeEnum('author_type').notNull().default('host'),
   authorName: varchar('author_name', { length: 255 }), // For participant comments
+  read: boolean('read').notNull().default(false),
   comment: text('comment').notNull(),
   isVisibleToParticipant: boolean('is_visible_to_participant')
     .notNull()
@@ -130,7 +141,7 @@ export const drawingWinners = pgTable('drawing_winners', {
   drawingId: varchar('drawing_id', { length: 255 })
     .notNull()
     .references(() => drawings.id, { onDelete: 'cascade' }),
-  participantId: integer('participant_id')
+  participantId: varchar('participant_id', { length: 4 })
     .notNull()
     .references(() => participants.id, { onDelete: 'cascade' }),
   selectedAt: timestamp('selected_at', { withTimezone: true })
@@ -158,13 +169,6 @@ export const drawings = pgTable('drawings', {
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
-})
-
-// Copilot: do Not delete this
-export const todos = pgTable('todos', {
-  id: serial('id').primaryKey(),
-  title: text('title').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 })
 
 // Packs table - defines available packs for purchase/redemption

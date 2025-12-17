@@ -16,7 +16,7 @@ import { numberSlots, participants } from '@/db/schema'
 export interface NumberSlotInfo {
   number: number
   status: 'available' | 'reserved' | 'taken'
-  participantId?: number
+  participantId?: string
   participantName?: string
   expiresAt?: Date
 }
@@ -306,7 +306,7 @@ export async function reserveNumber(
 export async function confirmNumberReservation(
   drawingId: string,
   number: number,
-  participantId: number,
+  participantId: string,
 ): Promise<void> {
   const result = await db
     .update(numberSlots)
@@ -345,7 +345,7 @@ export async function confirmNumberReservation(
 export async function confirmNumberReservations(
   drawingId: string,
   numbers: Array<number>,
-  participantId: number,
+  participantId: string,
 ): Promise<void> {
   if (numbers.length === 0) {
     throw new Error('No numbers provided to confirm')
@@ -553,7 +553,7 @@ export async function isNumberAvailable(
  */
 export async function getParticipantNumbers(
   drawingId: string,
-  participantId: number,
+  participantId: string,
 ): Promise<Array<number>> {
   const slots = await db
     .select({ number: numberSlots.number })

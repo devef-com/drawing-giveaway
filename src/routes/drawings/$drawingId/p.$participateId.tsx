@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useDrawing } from '@/querys/useDrawing'
 import { ParticipantCommentsView } from '@/components/ParticipantCommentsView'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const HOST = import.meta.env.APP_HOST || 'http://localhost:3000'
 
@@ -123,11 +124,11 @@ function RouteComponent() {
     <div className="mx-auto max-w-md p-4 min-h-[calc(100svh-129px)]">
       {participantData ? (
         <>
-          <Card className="p-4">
+          <Card className="p-4 gap-0.5">
             <h1 className="text-regular font-semibold line-clamp-2">
               Participant for Drawing - {drawingData?.title}
             </h1>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 mt-1">
               <p className="m-0">Status:</p>
 
               <p
@@ -139,7 +140,7 @@ function RouteComponent() {
                     ? 'border-2'
                     : !participantData.isEligible &&
                         'border-red-500 text-red-700 bg-red-900/20',
-                  'px-3 py-1 rounded inline-block font-medium',
+                  'px-3 py-0.5 rounded inline-block font-medium',
                 )}
               >
                 {participantData.isEligible
@@ -148,6 +149,23 @@ function RouteComponent() {
                     ? 'Pending'
                     : 'Not Eligible'}
               </p>
+            </div>
+
+            <div
+              className={cn(
+                drawingData?.playWithNumbers ? 'flex' : 'hidden',
+                'items-center gap-2',
+              )}
+            >
+              <span className="font-semibold">#</span>
+              {participantData.numbers.map((number) => (
+                <span
+                  key={number}
+                  className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full mr-2"
+                >
+                  {number}
+                </span>
+              ))}
             </div>
 
             <span
@@ -212,7 +230,21 @@ function RouteComponent() {
           />
         </>
       ) : isLoading ? (
-        <div>Loading participant data...</div>
+        <div className="mx-auto max-w-md p-4 min-h-[calc(100svh-129px)]">
+          <Card className="p-4">
+            <Skeleton className="h-6 w-3/4 mb-4" />
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-6 w-20" />
+            </div>
+            <Skeleton className="h-4 w-full mt-2" />
+          </Card>
+          <Skeleton className="h-62.5 w-full mt-4 rounded-[2.5rem]" />
+          <div className="mt-6 flex justify-center">
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <Skeleton className="h-32 w-full mt-4" />
+        </div>
       ) : (
         <div>No participant data found.</div>
       )}

@@ -30,17 +30,7 @@ export const Route = createFileRoute('/api/participant/$participantId')({
         }
 
         try {
-          const participantId = parseInt(params.participantId, 10)
-
-          if (isNaN(participantId)) {
-            return new Response(
-              JSON.stringify({ error: 'Invalid participant ID' }),
-              {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-              },
-            )
-          }
+          const participantId = params.participantId
 
           // Verify ownership
           const hasOwnership = await verifyParticipantOwnership(
@@ -129,17 +119,7 @@ export const Route = createFileRoute('/api/participant/$participantId')({
         }
 
         try {
-          const participantId = parseInt(params.participantId, 10)
-
-          if (isNaN(participantId)) {
-            return new Response(
-              JSON.stringify({ error: 'Invalid participant ID' }),
-              {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-              },
-            )
-          }
+          const participantId = params.participantId
 
           // Verify that the participant's drawing belongs to the authenticated user
           const hasOwnership = await verifyParticipantOwnership(

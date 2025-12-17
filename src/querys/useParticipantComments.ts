@@ -18,7 +18,7 @@ interface AddCommentRequest {
   isVisibleToParticipant: boolean
 }
 
-export function useParticipantComments(participantId: number, enabled = true) {
+export function useParticipantComments(participantId: string, enabled = true) {
   return useQuery<CommentsResponse>({
     queryKey: ['participant-comments', participantId],
     queryFn: async () => {
@@ -32,7 +32,7 @@ export function useParticipantComments(participantId: number, enabled = true) {
   })
 }
 
-export function useAddParticipantComment(participantId: number) {
+export function useAddParticipantComment(participantId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({

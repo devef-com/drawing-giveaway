@@ -1,0 +1,1 @@
+ALTER TABLE "participant_comments" ADD COLUMN "read" boolean DEFAULT false NOT NULL;

@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export function ParticipantComments({
   participantId,
 }: {
-  participantId: number
+  participantId: string
 }) {
   const [newComment, setNewComment] = useState('')
   const [isVisible, setIsVisible] = useState(true)

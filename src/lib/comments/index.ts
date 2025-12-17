@@ -3,14 +3,14 @@ import { participantComments, participants, drawings, user } from '@/db/schema'
 import { eq, and, or } from 'drizzle-orm'
 
 export interface CreateHostCommentParams {
-  participantId: number
+  participantId: string
   authorId: string
   comment: string
   isVisibleToParticipant?: boolean
 }
 
 export interface CreateParticipantCommentParams {
-  participantId: number
+  participantId: string
   comment: string
 }
 
@@ -24,7 +24,7 @@ export interface UpdateCommentParams {
  * Verify that the user owns the drawing associated with the participant
  */
 export async function verifyDrawingOwnership(
-  participantId: number,
+  participantId: string,
   userId: string,
 ): Promise<boolean> {
   const result = await db
@@ -111,7 +111,7 @@ export async function createParticipantComment(
  * Get all comments for a participant (host view - includes private comments)
  */
 export async function getCommentsForHost(
-  participantId: number,
+  participantId: string,
 ): Promise<Array<any>> {
   return await db
     .select({
@@ -135,7 +135,7 @@ export async function getCommentsForHost(
  * Returns all comments: participant comments + visible host comments
  */
 export async function getCommentsForParticipant(
-  participantId: number,
+  participantId: string,
 ): Promise<Array<any>> {
   return await db
     .select({

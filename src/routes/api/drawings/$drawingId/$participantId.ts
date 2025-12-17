@@ -23,7 +23,7 @@ export const Route = createFileRoute('/api/drawings/$drawingId/$participantId')(
               .where(
                 and(
                   eq(participants.drawingId, drawingId),
-                  eq(participants.id, +participantId),
+                  eq(participants.id, participantId),
                 ),
               )
               .limit(1)
@@ -37,7 +37,7 @@ export const Route = createFileRoute('/api/drawings/$drawingId/$participantId')(
 
             const participantNumbers = await getParticipantNumbers(
               drawingId,
-              +participantId,
+              participantId,
             )
 
             const { selectedNumber, ...rest } = participantInfo[0]

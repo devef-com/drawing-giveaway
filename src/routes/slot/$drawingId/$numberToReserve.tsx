@@ -258,7 +258,7 @@ function ReserveNumberForm() {
           await updateAssetModelId({
             data: {
               assetId: data.paymentCaptureId,
-              participantId: String(data.id),
+              participantId: data.id,
             },
           })
         } catch (error) {

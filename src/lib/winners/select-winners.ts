@@ -27,7 +27,7 @@ import {
 export interface WinnerSelectionResult {
   drawingId: string
   winners: Array<{
-    participantId: number
+    participantId: string
     participantName: string
     winningNumber?: number
   }>
@@ -188,7 +188,7 @@ export async function selectNumberWinners(
 
   // Step 3: Build winner list, handling numbers without eligible participants
   const winners: WinnerSelectionResult['winners'] = []
-  const participantIdsUsed = new Set<number>()
+  const participantIdsUsed = new Set<string>()
 
   // Get all eligible participants for reassignment
   const allEligibleParticipants = await db

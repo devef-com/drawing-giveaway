@@ -16,7 +16,7 @@ import { drawings, participants } from '@/db/schema'
 export type ParticipantStatus = 'pending' | 'approved' | 'rejected'
 
 export interface UpdateParticipantStatusParams {
-  participantId: number
+  participantId: string
   status: ParticipantStatus
 }
 
@@ -86,7 +86,7 @@ export function isEligibleToStatus(
  * }
  */
 export async function updateParticipantStatus(
-  participantId: number,
+  participantId: string,
   status: ParticipantStatus,
 ): Promise<UpdateParticipantStatusResult> {
   try {
@@ -136,7 +136,7 @@ export async function updateParticipantStatus(
  * }
  */
 export async function verifyParticipantOwnership(
-  participantId: number,
+  participantId: string,
   userId: string,
 ): Promise<boolean> {
   try {

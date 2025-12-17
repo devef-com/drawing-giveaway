@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { eq, max } from 'drizzle-orm'
+import { nanoid } from 'nanoid'
 
 import { db } from '@/db/index'
 import { drawings, participants } from '@/db/schema'
@@ -71,6 +72,7 @@ export const Route = createFileRoute('/api/drawings/$drawingId/participate')({
             const newParticipant = await db
               .insert(participants)
               .values({
+                id: nanoid(4),
                 drawingId: params.drawingId,
                 name: body.name,
                 email: body.email || null,
@@ -128,6 +130,7 @@ export const Route = createFileRoute('/api/drawings/$drawingId/participate')({
           const newParticipant = await db
             .insert(participants)
             .values({
+              id: nanoid(4),
               drawingId: params.drawingId,
               name: body.name,
               email: body.email || null,

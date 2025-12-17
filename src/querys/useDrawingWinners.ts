@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 
 export interface Winner {
-  participantId: number
+  participantId: string
   participantName: string
   participantEmail: string | null
   participantPhone: string

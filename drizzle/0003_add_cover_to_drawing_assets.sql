@@ -1,1 +1,0 @@
-ALTER TABLE "drawing_assets" ADD COLUMN "is_cover" boolean DEFAULT false;

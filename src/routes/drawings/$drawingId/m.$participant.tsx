@@ -324,7 +324,7 @@ function RouteComponent() {
           </div>
         </div>
 
-        <ParticipantComments participantId={parseInt(participantId, 10)} />
+        <ParticipantComments participantId={participantId} />
 
         <details className="hidden mt-4">
           <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-400">

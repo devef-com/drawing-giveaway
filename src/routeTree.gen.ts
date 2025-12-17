@@ -17,9 +17,6 @@ import { Route as DrawingsIndexRouteImport } from './routes/drawings/index'
 import { Route as AuthenticationIndexRouteImport } from './routes/authentication/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as DrawingsCreateRouteImport } from './routes/drawings/create'
-import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
-import { Route as DemoNeonRouteImport } from './routes/demo/neon'
-import { Route as DemoDrizzleRouteImport } from './routes/demo/drizzle'
 import { Route as AuthenticationSignupRouteImport } from './routes/authentication/signup'
 import { Route as AuthenticationLoginRouteImport } from './routes/authentication/login'
 import { Route as ApiCheckoutRouteImport } from './routes/api/checkout'
@@ -30,10 +27,6 @@ import { Route as ApiPacksIndexRouteImport } from './routes/api/packs/index'
 import { Route as ApiDrawingsIndexRouteImport } from './routes/api/drawings/index'
 import { Route as SlotDrawingIdNumberToReserveRouteImport } from './routes/slot/$drawingId/$numberToReserve'
 import { Route as DrawingsDrawingIdEditRouteImport } from './routes/drawings/$drawingId/edit'
-import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
-import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
-import { Route as DemoApiTqTodosRouteImport } from './routes/demo/api.tq-todos'
-import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
 import { Route as ApiWebhookPolarRouteImport } from './routes/api/webhook.polar'
 import { Route as ApiWebhookPaypalRouteImport } from './routes/api/webhook.paypal'
 import { Route as ApiUserMonthlyAllowanceRouteImport } from './routes/api/user/monthly-allowance'
@@ -50,12 +43,8 @@ import { Route as ApiCouponsRedeemRouteImport } from './routes/api/coupons/redee
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAdsRedeemRouteImport } from './routes/api/ads/redeem'
 import { Route as ApiACouponsRouteImport } from './routes/api/a/coupons'
-import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
 import { Route as DrawingsDrawingIdPParticipateIdRouteImport } from './routes/drawings/$drawingId/p.$participateId'
 import { Route as DrawingsDrawingIdMParticipantRouteImport } from './routes/drawings/$drawingId/m.$participant'
-import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
-import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
-import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 import { Route as DDrawingIdPParticipantRouteImport } from './routes/d.$drawingId.p.$participant'
 import { Route as ApiParticipantParticipantIdCommentsRouteImport } from './routes/api/participant/$participantId.comments'
 import { Route as ApiDrawingsDrawingIdUploadRouteImport } from './routes/api/drawings/$drawingId/upload'
@@ -109,21 +98,6 @@ const DrawingsCreateRoute = DrawingsCreateRouteImport.update({
   path: '/drawings/create',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
-  id: '/demo/tanstack-query',
-  path: '/demo/tanstack-query',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoNeonRoute = DemoNeonRouteImport.update({
-  id: '/demo/neon',
-  path: '/demo/neon',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoDrizzleRoute = DemoDrizzleRouteImport.update({
-  id: '/demo/drizzle',
-  path: '/demo/drizzle',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticationSignupRoute = AuthenticationSignupRouteImport.update({
   id: '/authentication/signup',
   path: '/authentication/signup',
@@ -173,26 +147,6 @@ const SlotDrawingIdNumberToReserveRoute =
 const DrawingsDrawingIdEditRoute = DrawingsDrawingIdEditRouteImport.update({
   id: '/drawings/$drawingId/edit',
   path: '/drawings/$drawingId/edit',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
-  id: '/demo/start/server-funcs',
-  path: '/demo/start/server-funcs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoStartApiRequestRoute = DemoStartApiRequestRouteImport.update({
-  id: '/demo/start/api-request',
-  path: '/demo/start/api-request',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoApiTqTodosRoute = DemoApiTqTodosRouteImport.update({
-  id: '/demo/api/tq-todos',
-  path: '/demo/api/tq-todos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoApiNamesRoute = DemoApiNamesRouteImport.update({
-  id: '/demo/api/names',
-  path: '/demo/api/names',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiWebhookPolarRoute = ApiWebhookPolarRouteImport.update({
@@ -277,11 +231,6 @@ const ApiACouponsRoute = ApiACouponsRouteImport.update({
   path: '/api/a/coupons',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
-  id: '/demo/start/ssr/',
-  path: '/demo/start/ssr/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DrawingsDrawingIdPParticipateIdRoute =
   DrawingsDrawingIdPParticipateIdRouteImport.update({
     id: '/drawings/$drawingId/p/$participateId',
@@ -294,21 +243,6 @@ const DrawingsDrawingIdMParticipantRoute =
     path: '/drawings/$drawingId/m/$participant',
     getParentRoute: () => rootRouteImport,
   } as any)
-const DemoStartSsrSpaModeRoute = DemoStartSsrSpaModeRouteImport.update({
-  id: '/demo/start/ssr/spa-mode',
-  path: '/demo/start/ssr/spa-mode',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoStartSsrFullSsrRoute = DemoStartSsrFullSsrRouteImport.update({
-  id: '/demo/start/ssr/full-ssr',
-  path: '/demo/start/ssr/full-ssr',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
-  id: '/demo/start/ssr/data-only',
-  path: '/demo/start/ssr/data-only',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DDrawingIdPParticipantRoute = DDrawingIdPParticipantRouteImport.update({
   id: '/d/$drawingId/p/$participant',
   path: '/d/$drawingId/p/$participant',
@@ -390,9 +324,6 @@ export interface FileRoutesByFullPath {
   '/api/checkout': typeof ApiCheckoutRoute
   '/authentication/login': typeof AuthenticationLoginRoute
   '/authentication/signup': typeof AuthenticationSignupRoute
-  '/demo/drizzle': typeof DemoDrizzleRoute
-  '/demo/neon': typeof DemoNeonRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/drawings/create': typeof DrawingsCreateRoute
   '/account': typeof AccountIndexRoute
   '/authentication': typeof AuthenticationIndexRoute
@@ -413,10 +344,6 @@ export interface FileRoutesByFullPath {
   '/api/user/monthly-allowance': typeof ApiUserMonthlyAllowanceRoute
   '/api/webhook/paypal': typeof ApiWebhookPaypalRoute
   '/api/webhook/polar': typeof ApiWebhookPolarRoute
-  '/demo/api/names': typeof DemoApiNamesRoute
-  '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/drawings/$drawingId/edit': typeof DrawingsDrawingIdEditRoute
   '/slot/$drawingId/$numberToReserve': typeof SlotDrawingIdNumberToReserveRoute
   '/api/drawings': typeof ApiDrawingsIndexRoute
@@ -434,12 +361,8 @@ export interface FileRoutesByFullPath {
   '/api/drawings/$drawingId/upload': typeof ApiDrawingsDrawingIdUploadRoute
   '/api/participant/$participantId/comments': typeof ApiParticipantParticipantIdCommentsRoute
   '/d/$drawingId/p/$participant': typeof DDrawingIdPParticipantRoute
-  '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
-  '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
-  '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/drawings/$drawingId/m/$participant': typeof DrawingsDrawingIdMParticipantRoute
   '/drawings/$drawingId/p/$participateId': typeof DrawingsDrawingIdPParticipateIdRoute
-  '/demo/start/ssr': typeof DemoStartSsrIndexRoute
   '/api/drawings/$drawingId/p/$participantId/comments': typeof ApiDrawingsDrawingIdPParticipantIdCommentsRoute
 }
 export interface FileRoutesByTo {
@@ -451,9 +374,6 @@ export interface FileRoutesByTo {
   '/api/checkout': typeof ApiCheckoutRoute
   '/authentication/login': typeof AuthenticationLoginRoute
   '/authentication/signup': typeof AuthenticationSignupRoute
-  '/demo/drizzle': typeof DemoDrizzleRoute
-  '/demo/neon': typeof DemoNeonRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/drawings/create': typeof DrawingsCreateRoute
   '/account': typeof AccountIndexRoute
   '/authentication': typeof AuthenticationIndexRoute
@@ -474,10 +394,6 @@ export interface FileRoutesByTo {
   '/api/user/monthly-allowance': typeof ApiUserMonthlyAllowanceRoute
   '/api/webhook/paypal': typeof ApiWebhookPaypalRoute
   '/api/webhook/polar': typeof ApiWebhookPolarRoute
-  '/demo/api/names': typeof DemoApiNamesRoute
-  '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/drawings/$drawingId/edit': typeof DrawingsDrawingIdEditRoute
   '/slot/$drawingId/$numberToReserve': typeof SlotDrawingIdNumberToReserveRoute
   '/api/drawings': typeof ApiDrawingsIndexRoute
@@ -495,12 +411,8 @@ export interface FileRoutesByTo {
   '/api/drawings/$drawingId/upload': typeof ApiDrawingsDrawingIdUploadRoute
   '/api/participant/$participantId/comments': typeof ApiParticipantParticipantIdCommentsRoute
   '/d/$drawingId/p/$participant': typeof DDrawingIdPParticipantRoute
-  '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
-  '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
-  '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/drawings/$drawingId/m/$participant': typeof DrawingsDrawingIdMParticipantRoute
   '/drawings/$drawingId/p/$participateId': typeof DrawingsDrawingIdPParticipateIdRoute
-  '/demo/start/ssr': typeof DemoStartSsrIndexRoute
   '/api/drawings/$drawingId/p/$participantId/comments': typeof ApiDrawingsDrawingIdPParticipantIdCommentsRoute
 }
 export interface FileRoutesById {
@@ -513,9 +425,6 @@ export interface FileRoutesById {
   '/api/checkout': typeof ApiCheckoutRoute
   '/authentication/login': typeof AuthenticationLoginRoute
   '/authentication/signup': typeof AuthenticationSignupRoute
-  '/demo/drizzle': typeof DemoDrizzleRoute
-  '/demo/neon': typeof DemoNeonRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/drawings/create': typeof DrawingsCreateRoute
   '/account/': typeof AccountIndexRoute
   '/authentication/': typeof AuthenticationIndexRoute
@@ -536,10 +445,6 @@ export interface FileRoutesById {
   '/api/user/monthly-allowance': typeof ApiUserMonthlyAllowanceRoute
   '/api/webhook/paypal': typeof ApiWebhookPaypalRoute
   '/api/webhook/polar': typeof ApiWebhookPolarRoute
-  '/demo/api/names': typeof DemoApiNamesRoute
-  '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/drawings/$drawingId/edit': typeof DrawingsDrawingIdEditRoute
   '/slot/$drawingId/$numberToReserve': typeof SlotDrawingIdNumberToReserveRoute
   '/api/drawings/': typeof ApiDrawingsIndexRoute
@@ -557,12 +462,8 @@ export interface FileRoutesById {
   '/api/drawings/$drawingId/upload': typeof ApiDrawingsDrawingIdUploadRoute
   '/api/participant/$participantId/comments': typeof ApiParticipantParticipantIdCommentsRoute
   '/d/$drawingId/p/$participant': typeof DDrawingIdPParticipantRoute
-  '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
-  '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
-  '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/drawings/$drawingId/m/$participant': typeof DrawingsDrawingIdMParticipantRoute
   '/drawings/$drawingId/p/$participateId': typeof DrawingsDrawingIdPParticipateIdRoute
-  '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
   '/api/drawings/$drawingId/p/$participantId/comments': typeof ApiDrawingsDrawingIdPParticipantIdCommentsRoute
 }
 export interface FileRouteTypes {
@@ -576,9 +477,6 @@ export interface FileRouteTypes {
     | '/api/checkout'
     | '/authentication/login'
     | '/authentication/signup'
-    | '/demo/drizzle'
-    | '/demo/neon'
-    | '/demo/tanstack-query'
     | '/drawings/create'
     | '/account'
     | '/authentication'
@@ -599,10 +497,6 @@ export interface FileRouteTypes {
     | '/api/user/monthly-allowance'
     | '/api/webhook/paypal'
     | '/api/webhook/polar'
-    | '/demo/api/names'
-    | '/demo/api/tq-todos'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
     | '/drawings/$drawingId/edit'
     | '/slot/$drawingId/$numberToReserve'
     | '/api/drawings'
@@ -620,12 +514,8 @@ export interface FileRouteTypes {
     | '/api/drawings/$drawingId/upload'
     | '/api/participant/$participantId/comments'
     | '/d/$drawingId/p/$participant'
-    | '/demo/start/ssr/data-only'
-    | '/demo/start/ssr/full-ssr'
-    | '/demo/start/ssr/spa-mode'
     | '/drawings/$drawingId/m/$participant'
     | '/drawings/$drawingId/p/$participateId'
-    | '/demo/start/ssr'
     | '/api/drawings/$drawingId/p/$participantId/comments'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -637,9 +527,6 @@ export interface FileRouteTypes {
     | '/api/checkout'
     | '/authentication/login'
     | '/authentication/signup'
-    | '/demo/drizzle'
-    | '/demo/neon'
-    | '/demo/tanstack-query'
     | '/drawings/create'
     | '/account'
     | '/authentication'
@@ -660,10 +547,6 @@ export interface FileRouteTypes {
     | '/api/user/monthly-allowance'
     | '/api/webhook/paypal'
     | '/api/webhook/polar'
-    | '/demo/api/names'
-    | '/demo/api/tq-todos'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
     | '/drawings/$drawingId/edit'
     | '/slot/$drawingId/$numberToReserve'
     | '/api/drawings'
@@ -681,12 +564,8 @@ export interface FileRouteTypes {
     | '/api/drawings/$drawingId/upload'
     | '/api/participant/$participantId/comments'
     | '/d/$drawingId/p/$participant'
-    | '/demo/start/ssr/data-only'
-    | '/demo/start/ssr/full-ssr'
-    | '/demo/start/ssr/spa-mode'
     | '/drawings/$drawingId/m/$participant'
     | '/drawings/$drawingId/p/$participateId'
-    | '/demo/start/ssr'
     | '/api/drawings/$drawingId/p/$participantId/comments'
   id:
     | '__root__'
@@ -698,9 +577,6 @@ export interface FileRouteTypes {
     | '/api/checkout'
     | '/authentication/login'
     | '/authentication/signup'
-    | '/demo/drizzle'
-    | '/demo/neon'
-    | '/demo/tanstack-query'
     | '/drawings/create'
     | '/account/'
     | '/authentication/'
@@ -721,10 +597,6 @@ export interface FileRouteTypes {
     | '/api/user/monthly-allowance'
     | '/api/webhook/paypal'
     | '/api/webhook/polar'
-    | '/demo/api/names'
-    | '/demo/api/tq-todos'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
     | '/drawings/$drawingId/edit'
     | '/slot/$drawingId/$numberToReserve'
     | '/api/drawings/'
@@ -742,12 +614,8 @@ export interface FileRouteTypes {
     | '/api/drawings/$drawingId/upload'
     | '/api/participant/$participantId/comments'
     | '/d/$drawingId/p/$participant'
-    | '/demo/start/ssr/data-only'
-    | '/demo/start/ssr/full-ssr'
-    | '/demo/start/ssr/spa-mode'
     | '/drawings/$drawingId/m/$participant'
     | '/drawings/$drawingId/p/$participateId'
-    | '/demo/start/ssr/'
     | '/api/drawings/$drawingId/p/$participantId/comments'
   fileRoutesById: FileRoutesById
 }
@@ -760,9 +628,6 @@ export interface RootRouteChildren {
   ApiCheckoutRoute: typeof ApiCheckoutRoute
   AuthenticationLoginRoute: typeof AuthenticationLoginRoute
   AuthenticationSignupRoute: typeof AuthenticationSignupRoute
-  DemoDrizzleRoute: typeof DemoDrizzleRoute
-  DemoNeonRoute: typeof DemoNeonRoute
-  DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   DrawingsCreateRoute: typeof DrawingsCreateRoute
   AccountIndexRoute: typeof AccountIndexRoute
   AuthenticationIndexRoute: typeof AuthenticationIndexRoute
@@ -783,10 +648,6 @@ export interface RootRouteChildren {
   ApiUserMonthlyAllowanceRoute: typeof ApiUserMonthlyAllowanceRoute
   ApiWebhookPaypalRoute: typeof ApiWebhookPaypalRoute
   ApiWebhookPolarRoute: typeof ApiWebhookPolarRoute
-  DemoApiNamesRoute: typeof DemoApiNamesRoute
-  DemoApiTqTodosRoute: typeof DemoApiTqTodosRoute
-  DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
-  DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
   DrawingsDrawingIdEditRoute: typeof DrawingsDrawingIdEditRoute
   SlotDrawingIdNumberToReserveRoute: typeof SlotDrawingIdNumberToReserveRoute
   ApiDrawingsIndexRoute: typeof ApiDrawingsIndexRoute
@@ -794,12 +655,8 @@ export interface RootRouteChildren {
   DrawingsDrawingIdIndexRoute: typeof DrawingsDrawingIdIndexRoute
   SlotDrawingIdIndexRoute: typeof SlotDrawingIdIndexRoute
   DDrawingIdPParticipantRoute: typeof DDrawingIdPParticipantRoute
-  DemoStartSsrDataOnlyRoute: typeof DemoStartSsrDataOnlyRoute
-  DemoStartSsrFullSsrRoute: typeof DemoStartSsrFullSsrRoute
-  DemoStartSsrSpaModeRoute: typeof DemoStartSsrSpaModeRoute
   DrawingsDrawingIdMParticipantRoute: typeof DrawingsDrawingIdMParticipantRoute
   DrawingsDrawingIdPParticipateIdRoute: typeof DrawingsDrawingIdPParticipateIdRoute
-  DemoStartSsrIndexRoute: typeof DemoStartSsrIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -858,27 +715,6 @@ declare module '@tanstack/react-router' {
       path: '/drawings/create'
       fullPath: '/drawings/create'
       preLoaderRoute: typeof DrawingsCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/tanstack-query': {
-      id: '/demo/tanstack-query'
-      path: '/demo/tanstack-query'
-      fullPath: '/demo/tanstack-query'
-      preLoaderRoute: typeof DemoTanstackQueryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/neon': {
-      id: '/demo/neon'
-      path: '/demo/neon'
-      fullPath: '/demo/neon'
-      preLoaderRoute: typeof DemoNeonRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/drizzle': {
-      id: '/demo/drizzle'
-      path: '/demo/drizzle'
-      fullPath: '/demo/drizzle'
-      preLoaderRoute: typeof DemoDrizzleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/authentication/signup': {
@@ -949,34 +785,6 @@ declare module '@tanstack/react-router' {
       path: '/drawings/$drawingId/edit'
       fullPath: '/drawings/$drawingId/edit'
       preLoaderRoute: typeof DrawingsDrawingIdEditRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/start/server-funcs': {
-      id: '/demo/start/server-funcs'
-      path: '/demo/start/server-funcs'
-      fullPath: '/demo/start/server-funcs'
-      preLoaderRoute: typeof DemoStartServerFuncsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/start/api-request': {
-      id: '/demo/start/api-request'
-      path: '/demo/start/api-request'
-      fullPath: '/demo/start/api-request'
-      preLoaderRoute: typeof DemoStartApiRequestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/api/tq-todos': {
-      id: '/demo/api/tq-todos'
-      path: '/demo/api/tq-todos'
-      fullPath: '/demo/api/tq-todos'
-      preLoaderRoute: typeof DemoApiTqTodosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/api/names': {
-      id: '/demo/api/names'
-      path: '/demo/api/names'
-      fullPath: '/demo/api/names'
-      preLoaderRoute: typeof DemoApiNamesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/webhook/polar': {
@@ -1091,13 +899,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiACouponsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo/start/ssr/': {
-      id: '/demo/start/ssr/'
-      path: '/demo/start/ssr'
-      fullPath: '/demo/start/ssr'
-      preLoaderRoute: typeof DemoStartSsrIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/drawings/$drawingId/p/$participateId': {
       id: '/drawings/$drawingId/p/$participateId'
       path: '/drawings/$drawingId/p/$participateId'
@@ -1110,27 +911,6 @@ declare module '@tanstack/react-router' {
       path: '/drawings/$drawingId/m/$participant'
       fullPath: '/drawings/$drawingId/m/$participant'
       preLoaderRoute: typeof DrawingsDrawingIdMParticipantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/start/ssr/spa-mode': {
-      id: '/demo/start/ssr/spa-mode'
-      path: '/demo/start/ssr/spa-mode'
-      fullPath: '/demo/start/ssr/spa-mode'
-      preLoaderRoute: typeof DemoStartSsrSpaModeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/start/ssr/full-ssr': {
-      id: '/demo/start/ssr/full-ssr'
-      path: '/demo/start/ssr/full-ssr'
-      fullPath: '/demo/start/ssr/full-ssr'
-      preLoaderRoute: typeof DemoStartSsrFullSsrRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/start/ssr/data-only': {
-      id: '/demo/start/ssr/data-only'
-      path: '/demo/start/ssr/data-only'
-      fullPath: '/demo/start/ssr/data-only'
-      preLoaderRoute: typeof DemoStartSsrDataOnlyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/d/$drawingId/p/$participant': {
@@ -1276,9 +1056,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCheckoutRoute: ApiCheckoutRoute,
   AuthenticationLoginRoute: AuthenticationLoginRoute,
   AuthenticationSignupRoute: AuthenticationSignupRoute,
-  DemoDrizzleRoute: DemoDrizzleRoute,
-  DemoNeonRoute: DemoNeonRoute,
-  DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   DrawingsCreateRoute: DrawingsCreateRoute,
   AccountIndexRoute: AccountIndexRoute,
   AuthenticationIndexRoute: AuthenticationIndexRoute,
@@ -1300,10 +1077,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUserMonthlyAllowanceRoute: ApiUserMonthlyAllowanceRoute,
   ApiWebhookPaypalRoute: ApiWebhookPaypalRoute,
   ApiWebhookPolarRoute: ApiWebhookPolarRoute,
-  DemoApiNamesRoute: DemoApiNamesRoute,
-  DemoApiTqTodosRoute: DemoApiTqTodosRoute,
-  DemoStartApiRequestRoute: DemoStartApiRequestRoute,
-  DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,
   DrawingsDrawingIdEditRoute: DrawingsDrawingIdEditRoute,
   SlotDrawingIdNumberToReserveRoute: SlotDrawingIdNumberToReserveRoute,
   ApiDrawingsIndexRoute: ApiDrawingsIndexRoute,
@@ -1311,12 +1084,8 @@ const rootRouteChildren: RootRouteChildren = {
   DrawingsDrawingIdIndexRoute: DrawingsDrawingIdIndexRoute,
   SlotDrawingIdIndexRoute: SlotDrawingIdIndexRoute,
   DDrawingIdPParticipantRoute: DDrawingIdPParticipantRoute,
-  DemoStartSsrDataOnlyRoute: DemoStartSsrDataOnlyRoute,
-  DemoStartSsrFullSsrRoute: DemoStartSsrFullSsrRoute,
-  DemoStartSsrSpaModeRoute: DemoStartSsrSpaModeRoute,
   DrawingsDrawingIdMParticipantRoute: DrawingsDrawingIdMParticipantRoute,
   DrawingsDrawingIdPParticipateIdRoute: DrawingsDrawingIdPParticipateIdRoute,
-  DemoStartSsrIndexRoute: DemoStartSsrIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

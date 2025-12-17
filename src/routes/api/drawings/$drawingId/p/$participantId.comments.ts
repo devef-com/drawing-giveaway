@@ -10,14 +10,7 @@ export const Route = createFileRoute(
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const participantId = parseInt(params.participantId, 10)
-
-        if (isNaN(participantId)) {
-          return new Response(
-            JSON.stringify({ error: 'Invalid participant ID' }),
-            { status: 400, headers: { 'Content-Type': 'application/json' } },
-          )
-        }
+        const participantId = params.participantId
 
         try {
           const comments = await getCommentsForParticipant(participantId)
@@ -34,14 +27,7 @@ export const Route = createFileRoute(
       },
 
       POST: async ({ request, params }) => {
-        const participantId = parseInt(params.participantId, 10)
-
-        if (isNaN(participantId)) {
-          return new Response(
-            JSON.stringify({ error: 'Invalid participant ID' }),
-            { status: 400, headers: { 'Content-Type': 'application/json' } },
-          )
-        }
+        const participantId = params.participantId
 
         try {
           const body = await request.json()
