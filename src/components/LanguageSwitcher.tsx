@@ -1,6 +1,6 @@
 import { Globe } from 'lucide-react'
 import { useLanguage } from '@/lib/i18n'
-import * as m from '@/lang/messages'
+import { m } from '@/lang'
 
 const languageNames: Record<string, string> = {
   en: 'English',

@@ -4,15 +4,10 @@ import viteReact from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
-import { paraglide } from '@inlang/paraglide-js/vite'
 
 export default defineConfig({
   base: '/', // ✅ prevent asset path mismatch
   plugins: [
-    paraglide({
-      project: './project.inlang',
-      outdir: './src/lang',
-    }),
     nitro({
       serverDir: 'server',
     }),

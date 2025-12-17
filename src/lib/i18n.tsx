@@ -1,12 +1,11 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import {
+  type Locale,
   locales,
   baseLocale,
   getLocale,
-  setLocale as setParaglideLocale,
-} from '../lang/runtime.js'
-
-type Locale = (typeof locales)[number]
+  setLocale as setI18nLocale,
+} from '../lang'
 
 interface LanguageContextType {
   locale: Locale
@@ -51,8 +50,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('PARAGLIDE_LOCALE', newLocale)
       // Update HTML lang attribute
       document.documentElement.lang = newLocale
-      // Update Paraglide locale without reload
-      setParaglideLocale(newLocale, { reload: false })
+      // Update i18n locale
+      setI18nLocale(newLocale)
     }
   }
 

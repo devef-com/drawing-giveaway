@@ -4,7 +4,8 @@ import { Menu, X } from 'lucide-react'
 import ThemeSwitcher from './ThemeSwitcher'
 import LanguageSwitcher from './LanguageSwitcher'
 import { cn } from '@/lib/utils'
-import * as m from '@/lang/messages'
+import { m } from '@/lang'
+import { useLanguage } from '@/lib/i18n'
 
 const NOT_VISIBLE_AT = [
   '/',
@@ -62,6 +63,7 @@ const NavLink = ({ to, children, onClick, isMobile = false }: NavLinkProps) => (
 export default function Header() {
   const location = useLocation()
   const currentPath = location.pathname
+  const { locale } = useLanguage() // This will trigger re-render on locale change
 
   /**
    * Determines if the navigation menu should be visible based on the current path.

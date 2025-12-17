@@ -22,7 +22,8 @@ import {
   Mail,
   Play,
 } from 'lucide-react'
-import * as m from '@/lang/messages'
+import { m } from '@/lang'
+import { useLanguage } from '@/lib/i18n'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
@@ -169,6 +170,8 @@ function GiwayNumbersPreview() {
 }
 
 function LandingPage() {
+  const { locale } = useLanguage() // This will trigger re-render on locale change
+  
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Main Section */}

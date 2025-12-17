@@ -15,16 +15,13 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
-    "db:studio": "drizzle-kit studio",
-    "i18n:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/lang"
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.940.0",
     "@aws-sdk/s3-request-presigner": "^3.940.0",
     "@better-auth/expo": "^1.4.7",
     "@google-pay/button-react": "^3.2.1",
-    "@inlang/paraglide-js": "^2.7.0",
-    "@inlang/paraglide-vite": "^1.4.0",
     "@neondatabase/serverless": "^1.0.0",
     "@polar-sh/tanstack-start": "^0.4.0",
     "@radix-ui/react-dialog": "^1.1.15",
