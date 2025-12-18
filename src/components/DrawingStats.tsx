@@ -7,6 +7,8 @@
 
 import { cn } from '@/lib/utils'
 import { useDrawingStats } from '@/querys/useDrawingStats'
+import { m } from '@/lang'
+import { useLanguage } from '@/lib/i18n'
 
 interface DrawingStatsProps {
   drawingId: string
@@ -14,6 +16,7 @@ interface DrawingStatsProps {
 }
 
 export function DrawingStats({ drawingId, className }: DrawingStatsProps) {
+  const { locale } = useLanguage()
   const { data, isLoading } = useDrawingStats(drawingId, true, 30000)
 
   if (isLoading) {
@@ -36,19 +39,19 @@ export function DrawingStats({ drawingId, className }: DrawingStatsProps) {
 
   const stats = [
     {
-      label: 'Available',
+      label: m.drawing_stats_available(),
       value: data.available,
       color: 'text-green-600 dark:text-green-400',
       bgColor: 'bg-green-100 dark:bg-green-900/20',
     },
     {
-      label: 'Taken',
+      label: m.drawing_stats_taken(),
       value: data.taken,
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-100 dark:bg-red-900/20',
     },
     {
-      label: 'Reserved',
+      label: m.drawing_stats_reserved(),
       value: data.reserved,
       color: 'text-yellow-600 dark:text-yellow-400',
       bgColor: 'bg-yellow-100 dark:bg-yellow-900/20',
@@ -60,7 +63,7 @@ export function DrawingStats({ drawingId, className }: DrawingStatsProps) {
       {/* Progress bar */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium">Progress</span>
+          <span className="font-medium">{m.drawing_stats_progress()}</span>
           <span className="text-muted-foreground">
             {data.taken} / {data.total} ({data.percentageTaken.toFixed(1)}%)
           </span>
@@ -91,7 +94,7 @@ export function DrawingStats({ drawingId, className }: DrawingStatsProps) {
       {/* Total count */}
       <div className="pt-2 border-t text-center">
         <div className="text-sm text-muted-foreground">
-          Total Numbers: <span className="font-semibold">{data.total}</span>
+          {m.drawing_stats_totalNumbers()}: <span className="font-semibold">{data.total}</span>
         </div>
       </div>
     </div>

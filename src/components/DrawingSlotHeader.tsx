@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Drawing } from '@/db/schema'
 import { Clock, HandCoins } from 'lucide-react'
 import { cn, getTimeRemainingText } from '@/lib/utils'
+import { m } from '@/lang'
+import { useLanguage } from '@/lib/i18n'
 
 interface DrawingSlotHeaderProps {
   drawing: Drawing
@@ -17,6 +19,7 @@ function DrawingSlotHeader({
   stats,
   hasEnded,
 }: DrawingSlotHeaderProps) {
+  const { locale } = useLanguage()
   const [isTitleExpanded, setIsTitleExpanded] = useState(false)
 
   return (
@@ -39,7 +42,7 @@ function DrawingSlotHeader({
               onClick={() => setIsTitleExpanded(!isTitleExpanded)}
               className="text-cyan-600 dark:text-cyan-400 text-sm hover:underline self-start"
             >
-              {isTitleExpanded ? 'less' : 'more'}
+              {isTitleExpanded ? m.drawing_header_less() : m.drawing_header_more()}
             </button>
           )}
         </section>
@@ -50,7 +53,7 @@ function DrawingSlotHeader({
             <span className="text-sm font-semibold text-teal-700 dark:text-teal-300">
               {drawing.isPaid
                 ? `$${(drawing.price ?? 0).toLocaleString()}`
-                : 'Gratis'}
+                : m.drawing_header_free()}
             </span>
           </div>
 
@@ -69,7 +72,7 @@ function DrawingSlotHeader({
               {stats.available} / {stats.total}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              disponibles
+              {m.drawing_header_available()}
             </div>
           </div>
         )}

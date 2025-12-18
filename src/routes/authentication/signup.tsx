@@ -4,12 +4,15 @@ import { authClient } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { m } from '@/lang'
+import { useLanguage } from '@/lib/i18n'
 
 export const Route = createFileRoute('/authentication/signup')({
   component: SignUp,
 })
 
 function SignUp() {
+  const { locale } = useLanguage()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -45,7 +48,7 @@ function SignUp() {
       })
 
       if (error) {
-        setError(error.message || 'Failed to sign up')
+        setError(error.message || m.auth_signup_errorDefault())
         return
       }
 
@@ -55,7 +58,7 @@ function SignUp() {
         navigate({ to: '/drawings' })
       }
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError(m.auth_signup_errorUnexpected())
       console.error(err)
     } finally {
       setLoading(false)
@@ -79,12 +82,11 @@ function SignUp() {
         <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
         <div className="absolute bottom-10 left-10 right-10 text-white p-8">
           <h2 className="text-3xl font-bold leading-tight">
-            "Seamlessly manage participants and number slots for your next big
-            event."
+            {m.auth_signup_backgroundQuote()}
           </h2>
           <div className="mt-6">
-            <p className="text-lg font-semibold">Giway</p>
-            <p className="text-sm text-gray-300">Advanced Raffle System</p>
+            <p className="text-lg font-semibold">{m.auth_signup_backgroundTitle()}</p>
+            <p className="text-sm text-gray-300">{m.auth_signup_backgroundSubtitle()}</p>
           </div>
         </div>
         <div className="absolute top-8 left-8 flex items-center gap-2 text-white font-bold text-xl">
@@ -101,16 +103,16 @@ function SignUp() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:text-left">
             <h1 className="text-3xl font-bold tracking-tight">
-              Create an account
+              {m.auth_signup_title()}
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Enter your information to create your account
+              {m.auth_signup_subtitle()}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{m.common_name()}</Label>
               <Input
                 id="name"
                 type="text"
@@ -123,7 +125,7 @@ function SignUp() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{m.common_email()}</Label>
               <Input
                 id="email"
                 type="email"
@@ -136,7 +138,7 @@ function SignUp() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{m.common_password()}</Label>
               <Input
                 id="password"
                 type="password"
@@ -161,7 +163,7 @@ function SignUp() {
               className="w-full h-11 bg-teal-primary hover:bg-teal-primary-dark text-white font-semibold text-base"
               disabled={loading}
             >
-              {loading ? 'Creating account...' : 'Sign Up'}
+              {loading ? m.auth_signup_creatingAccount() : m.auth_signup_signUpButton()}
             </Button>
 
             <div className="hidden relative">
@@ -202,12 +204,12 @@ function SignUp() {
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
+            {m.auth_signup_haveAccount()}{' '}
             <Link
               to="/authentication/login"
               className="font-medium text-teal-primary hover:underline"
             >
-              Log in
+              {m.auth_signup_loginLink()}
             </Link>
           </p>
         </div>

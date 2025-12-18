@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { m } from '@/lang'
+import { useLanguage } from '@/lib/i18n'
 
 export const Route = createFileRoute('/authentication/login')({
   component: Login,
 })
 
 function Login() {
+  const { locale } = useLanguage()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -34,7 +37,7 @@ function Login() {
       })
 
       if (error) {
-        setError(error.message || 'Failed to log in')
+        setError(error.message || m.auth_login_errorDefault())
         return
       }
 
@@ -43,7 +46,7 @@ function Login() {
         navigate({ to: '/drawings' })
       }
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError(m.auth_login_errorUnexpected())
       console.error(err)
     } finally {
       setLoading(false)
@@ -74,8 +77,7 @@ function Login() {
         <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
         <div className="absolute bottom-10 left-10 right-10 text-white p-8">
           <h2 className="text-2xl font-bold leading-tight">
-            Free yourself from the task of filling out the information for your
-            raffles or drawings
+            {m.auth_login_backgroundQuote()}
           </h2>
           {/* <div className="mt-6">
             <p className="text-lg font-semibold">Title</p>
@@ -98,17 +100,16 @@ function Login() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:text-left">
             <h1 className="text-3xl font-bold tracking-tight">
-              Welcome back to Giway
+              {m.auth_login_title()}
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Build your design system effortlessly with our powerful component
-              library.
+              {m.auth_login_subtitle()}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{m.common_email()}</Label>
               <Input
                 id="email"
                 type="email"
@@ -121,7 +122,7 @@ function Login() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{m.common_password()}</Label>
               <Input
                 id="password"
                 type="password"
@@ -168,7 +169,7 @@ function Login() {
               className="w-full h-11 bg-teal-primary hover:bg-teal-primary-dark text-white font-semibold text-base"
               disabled={loading}
             >
-              {loading ? 'Logging in...' : 'Log in'}
+              {loading ? m.auth_login_loggingIn() : m.auth_login_loginButton()}
             </Button>
 
             <div className="hidden relative">
@@ -209,12 +210,12 @@ function Login() {
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
-            Don't have an account?{' '}
+            {m.auth_login_noAccount()}{' '}
             <Link
               to="/authentication/signup"
               className="font-medium text-teal-primary hover:underline"
             >
-              Sign up
+              {m.auth_login_signUpLink()}
             </Link>
           </p>
         </div>

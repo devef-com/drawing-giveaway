@@ -3,6 +3,8 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+import { m } from '@/lang'
+import { useLanguage } from '@/lib/i18n'
 
 export function ParticipantCommentsView({
   drawingId,
@@ -11,6 +13,7 @@ export function ParticipantCommentsView({
   drawingId: string
   participantId: string
 }) {
+  const { locale } = useLanguage()
   const [comments, setComments] = useState<any[]>([])
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -51,15 +54,15 @@ export function ParticipantCommentsView({
       )
 
       if (response.ok) {
-        toast.success('Message sent successfully')
+        toast.success(m.participant_commentsView_sendSuccess())
         setNewComment('')
         await fetchComments()
       } else {
         const data = await response.json()
-        toast.error(data.error || 'Failed to send message')
+        toast.error(data.error || m.participant_commentsView_sendError())
       }
     } catch (error) {
-      toast.error('Failed to send message')
+      toast.error(m.participant_commentsView_sendError())
     } finally {
       setIsSubmitting(false)
     }
@@ -68,8 +71,8 @@ export function ParticipantCommentsView({
   if (isLoading) {
     return (
       <Card className="p-4 mt-4">
-        <h2 className="text-lg font-semibold mb-3">Conversation with Host</h2>
-        <p className="text-sm text-gray-500">Loading conversation...</p>
+        <h2 className="text-lg font-semibold mb-3">{m.participant_commentsView_title()}</h2>
+        <p className="text-sm text-gray-500">{m.participant_commentsView_loading()}</p>
       </Card>
     )
   }
@@ -81,12 +84,12 @@ export function ParticipantCommentsView({
 
   return (
     <Card className="p-4 mt-4">
-      <h2 className="text-lg font-semibold mb-3">Conversation with Host</h2>
+      <h2 className="text-lg font-semibold mb-3">{m.participant_commentsView_title()}</h2>
 
       {/* Conversation Thread */}
       <div className="space-y-3 mb-4">
         {comments.length === 0 ? (
-          <p className="text-sm text-gray-500">No messages yet</p>
+          <p className="text-sm text-gray-500">{m.participant_commentsView_noMessages()}</p>
         ) : (
           comments.map((comment) => (
             <div
@@ -100,8 +103,8 @@ export function ParticipantCommentsView({
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-semibold">
                   {comment.authorType === 'host'
-                    ? `${comment.authorName} (Host)`
-                    : 'You'}
+                    ? `${comment.authorName} ${m.participant_commentsView_host()}`
+                    : m.participant_commentsView_you()}
                 </span>
                 <span className="text-xs text-gray-500">
                   {new Date(comment.createdAt).toLocaleString()}
@@ -116,7 +119,7 @@ export function ParticipantCommentsView({
       {/* Reply Form */}
       <div className="space-y-2 border-t pt-4">
         <Textarea
-          placeholder="Write your message..."
+          placeholder={m.participant_commentsView_placeholder()}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           className="min-h-20"
@@ -126,7 +129,7 @@ export function ParticipantCommentsView({
           disabled={isSubmitting || !newComment.trim()}
           className="w-full"
         >
-          {isSubmitting ? 'Sending...' : 'Send Message'}
+          {isSubmitting ? m.participant_comments_sending() : m.participant_comments_sendMessage()}
         </Button>
       </div>
     </Card>

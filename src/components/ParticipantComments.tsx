@@ -10,12 +10,15 @@ import {
   useAddParticipantComment,
 } from '@/querys/useParticipantComments'
 import { Skeleton } from '@/components/ui/skeleton'
+import { m } from '@/lang'
+import { useLanguage } from '@/lib/i18n'
 
 export function ParticipantComments({
   participantId,
 }: {
   participantId: string
 }) {
+  const { locale } = useLanguage()
   const [newComment, setNewComment] = useState('')
   const [isVisible, setIsVisible] = useState(true)
 
@@ -34,12 +37,12 @@ export function ParticipantComments({
       },
       {
         onSuccess: () => {
-          toast.success('Comment added successfully')
+          toast.success(m.participant_comments_success())
           setNewComment('')
           setIsVisible(true)
         },
         onError: (error) => {
-          toast.error(error.message || 'Failed to add comment')
+          toast.error(error.message || m.participant_comments_error())
         },
       },
     )
@@ -48,7 +51,7 @@ export function ParticipantComments({
   if (isLoading) {
     return (
       <Card className="rounded-lg p-6 mt-4">
-        <h3 className="text-xl font-semibold mb-4">Conversation</h3>
+        <h3 className="text-xl font-semibold mb-4">{m.participant_comments_title()}</h3>
 
         <Skeleton className="h-10 w-full mb-4" />
         <Skeleton className="h-10 w-full mb-4" />
@@ -65,12 +68,12 @@ export function ParticipantComments({
 
   return (
     <Card className="rounded-lg p-6 mt-4">
-      <h3 className="text-xl font-semibold mb-4">Conversation</h3>
+      <h3 className="text-xl font-semibold mb-4">{m.participant_comments_title()}</h3>
 
       {/* Add Comment Form */}
       <div className="space-y-3 mb-6">
         <Textarea
-          placeholder="Add a message..."
+          placeholder={m.participant_comments_placeholder()}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           className="min-h-[100px]"
@@ -84,7 +87,7 @@ export function ParticipantComments({
               onCheckedChange={setIsVisible}
             />
             <Label htmlFor="visible-switch" className="text-sm">
-              Visible to participant
+              {m.participant_comments_visibleToParticipant()}
             </Label>
           </div>
 
@@ -92,7 +95,7 @@ export function ParticipantComments({
             onClick={handleAddComment}
             disabled={addComment.isPending || !newComment.trim()}
           >
-            {addComment.isPending ? 'Sending...' : 'Send Message'}
+            {addComment.isPending ? m.participant_comments_sending() : m.participant_comments_sendMessage()}
           </Button>
         </div>
       </div>
@@ -101,7 +104,7 @@ export function ParticipantComments({
       <div className="space-y-3">
         {comments.length === 0 ? (
           <p className="text-sm text-gray-500">
-            No messages yet. Start the conversation!
+            {m.participant_comments_noMessages()}
           </p>
         ) : (
           comments.map((comment) => (
@@ -119,7 +122,7 @@ export function ParticipantComments({
                     {comment.authorName}
                     {comment.authorType === 'participant' && (
                       <span className="ml-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded">
-                        Participant
+                        {m.participant_comments_participant()}
                       </span>
                     )}
                   </span>
@@ -130,7 +133,7 @@ export function ParticipantComments({
                 {comment.authorType === 'host' &&
                   !comment.isVisibleToParticipant && (
                     <span className="text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 px-2 py-1 rounded">
-                      Private
+                      {m.participant_comments_private()}
                     </span>
                   )}
               </div>

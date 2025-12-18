@@ -25,6 +25,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useDrawings } from '@/querys/useDrawings'
 import { getTimeRemainingText } from '@/lib/utils'
 import getSession from '@/server-fn/get-session'
+import { m } from '@/lang'
+import { useLanguage } from '@/lib/i18n'
 
 export const Route = createFileRoute('/drawings/')({
   component: DrawingsList,
@@ -35,6 +37,7 @@ export const Route = createFileRoute('/drawings/')({
 })
 
 function DrawingsList() {
+  const { locale } = useLanguage()
   // const session = authClient.useSession()
   const { session } = Route.useLoaderData()
 
@@ -66,11 +69,11 @@ function DrawingsList() {
     <div className="min-h-[calc(100svh-129px)] p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-xl font-bold">My Drawings</h1>
+          <h1 className="text-xl font-bold">{m.drawings_title()}</h1>
           <Link to="/drawings/create">
             <Button variant="default">
               <PlusIcon className="w-4 h-4" />
-              new
+              {m.drawings_new()}
             </Button>
           </Link>
         </div>

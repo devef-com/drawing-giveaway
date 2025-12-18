@@ -15,12 +15,15 @@ import { PayPalCheckoutButton } from '@/components/PayPalCheckoutButton'
 import { usePacks } from '@/querys/usePacks'
 import { useUserBalance } from '@/querys/useUserBalance'
 import { authClient } from '@/lib/auth-client'
+import { m } from '@/lang'
+import { useLanguage } from '@/lib/i18n'
 
 export const Route = createFileRoute('/store')({
   component: StorePage,
 })
 
 function StorePage() {
+  const { locale } = useLanguage()
   const session = authClient.useSession()
   const { data: packs, isLoading: isPacksLoading } = usePacks()
   const {
@@ -40,7 +43,7 @@ function StorePage() {
   }
 
   const onSuccess = () => {
-    toast.success('Pack purchased successfully!')
+    toast.success(m.store_packPurchased())
     refetch()
     setSelectedPackId(null)
   }
@@ -51,14 +54,14 @@ function StorePage() {
         <div className="max-w-4xl mx-auto">
           <Card className="p-6">
             <p className="text-center">
-              Please{' '}
+              {m.store_loginRequired({ login: '' }).split('{login}')[0]}
               <Link
                 to="/authentication/login"
                 className="text-primary hover:underline"
               >
-                log in
-              </Link>{' '}
-              to view the store.
+                {m.store_loginLink()}
+              </Link>
+              {m.store_loginRequired({ login: '' }).split('{login}')[1]}
             </p>
           </Card>
         </div>
@@ -71,13 +74,13 @@ function StorePage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Store</h1>
+            <h1 className="text-3xl font-bold mb-2">{m.store_title()}</h1>
             <p className="text-muted-foreground">
-              Get packs to create more giways
+              {m.store_subtitle()}
             </p>
           </div>
           <Link to="/drawings/create">
-            <Button>Create Giway</Button>
+            <Button>{m.store_createGiway()}</Button>
           </Link>
         </div>
 
@@ -87,44 +90,44 @@ function StorePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
-                Your Current Balance
+                {m.store_currentBalance()}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg border bg-muted/50">
                   <p className="font-medium mb-2">
-                    Raffles (Play with Numbers)
+                    {m.store_raffleBalance()}
                   </p>
                   <div className="flex gap-4 text-sm">
                     <span className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
-                      {balance.playWithNumbers.participants} participants
+                      {balance.playWithNumbers.participants} {m.store_participants()}
                     </span>
                     <span className="flex items-center gap-1">
                       <Image className="h-4 w-4" />
-                      {balance.playWithNumbers.images} images
+                      {balance.playWithNumbers.images} {m.store_images()}
                     </span>
                     <span className="flex items-center gap-1">
                       <Mail className="h-4 w-4" />
-                      {balance.playWithNumbers.emails} emails
+                      {balance.playWithNumbers.emails} {m.store_emails()}
                     </span>
                   </div>
                 </div>
                 <div className="p-4 rounded-lg border bg-muted/50">
-                  <p className="font-medium mb-2">Giveaways (No Numbers)</p>
+                  <p className="font-medium mb-2">{m.store_giveawayBalance()}</p>
                   <div className="flex gap-4 text-sm">
                     <span className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
-                      {balance.noNumbers.participants} participants
+                      {balance.noNumbers.participants} {m.store_participants()}
                     </span>
                     <span className="flex items-center gap-1">
                       <Image className="h-4 w-4" />
-                      {balance.noNumbers.images} images
+                      {balance.noNumbers.images} {m.store_images()}
                     </span>
                     <span className="flex items-center gap-1">
                       <Mail className="h-4 w-4" />
-                      {balance.noNumbers.emails} emails
+                      {balance.noNumbers.emails} {m.store_emails()}
                     </span>
                   </div>
                 </div>
@@ -135,7 +138,7 @@ function StorePage() {
 
         {isPacksLoading ? (
           <Card className="p-6">
-            <p className="text-center">Loading packs...</p>
+            <p className="text-center">{m.store_loadingPacks()}</p>
           </Card>
         ) : packs && packs.length > 0 ? (
           <>
@@ -143,7 +146,7 @@ function StorePage() {
             {rafflesPacks.length > 0 && (
               <div className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">
-                  Raffle Packs (Play with Numbers)
+                  {m.store_rafflePacks()}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {rafflesPacks.map((pack) => (
@@ -154,7 +157,7 @@ function StorePage() {
                           {pack.name}
                         </CardTitle>
                         <CardDescription>
-                          For raffles where participants pick numbers
+                          {m.store_raffleDescription()}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="flex-1">
@@ -162,16 +165,16 @@ function StorePage() {
                           <li className="flex items-center gap-2 text-sm">
                             <Users className="h-4 w-4 text-primary" />
                             <span>
-                              {pack.participants.toLocaleString()} participants
+                              {pack.participants.toLocaleString()} {m.store_participants()}
                             </span>
                           </li>
                           <li className="flex items-center gap-2 text-sm">
                             <Image className="h-4 w-4 text-primary" />
-                            <span>{pack.images} images</span>
+                            <span>{pack.images} {m.store_images()}</span>
                           </li>
                           <li className="flex items-center gap-2 text-sm">
                             <Mail className="h-4 w-4 text-primary" />
-                            <span>{pack.emails.toLocaleString()} emails</span>
+                            <span>{pack.emails.toLocaleString()} {m.store_emails()}</span>
                           </li>
                         </ul>
                       </CardContent>
@@ -190,8 +193,8 @@ function StorePage() {
                               }
                             >
                               {selectedPackId === pack.id
-                                ? 'Cancel'
-                                : 'Buy Pack'}
+                                ? m.common_cancel()
+                                : m.store_buyPack()}
                             </Button>
                           </div>
                           {selectedPackId === pack.id && session.data?.user && (
@@ -213,18 +216,18 @@ function StorePage() {
             {giveawayPacks.length > 0 && (
               <div className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">
-                  Giveaway Packs (No Numbers)
+                  {m.store_giveawayPacks()}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {giveawayPacks.map((pack) => (
                     <Card key={pack.id} className="flex flex-col">
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Package className="h-5 w-5" />
+                          <Package className="h-5 w-4" />
                           {pack.name}
                         </CardTitle>
                         <CardDescription>
-                          For giveaways with random winner selection
+                          {m.store_giveawayDescription()}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="flex-1">
@@ -232,17 +235,17 @@ function StorePage() {
                           <li className="flex items-center gap-2 text-sm">
                             <Users className="h-4 w-4 text-primary" />
                             <span>
-                              {pack.participants.toLocaleString()} participants
+                              {pack.participants.toLocaleString()} {m.store_participants()}
                             </span>
                           </li>
                           <li className="flex items-center gap-2 text-sm">
                             <Image className="h-4 w-4 text-primary" />
-                            <span>{pack.images} images</span>
+                            <span>{pack.images} {m.store_images()}</span>
                           </li>
                           {pack.emails > 0 && (
                             <li className="flex items-center gap-2 text-sm">
                               <Mail className="h-4 w-4 text-primary" />
-                              <span>{pack.emails.toLocaleString()} emails</span>
+                              <span>{pack.emails.toLocaleString()} {m.store_emails()}</span>
                             </li>
                           )}
                         </ul>
@@ -262,8 +265,8 @@ function StorePage() {
                               }
                             >
                               {selectedPackId === pack.id
-                                ? 'Cancel'
-                                : 'Buy Pack'}
+                                ? m.common_cancel()
+                                : m.store_buyPack()}
                             </Button>
                           </div>
                           {selectedPackId === pack.id && session.data?.user && (
@@ -284,7 +287,7 @@ function StorePage() {
         ) : (
           <Card className="p-6">
             <p className="text-center text-muted-foreground">
-              No packs available at the moment. Check back later!
+              {m.store_noPacks()}
             </p>
           </Card>
         )}
@@ -292,24 +295,23 @@ function StorePage() {
         {/* Monthly Free Info */}
         <Card className="mt-8 bg-primary/5 border-primary/20">
           <CardHeader>
-            <CardTitle>Monthly Free Allowance</CardTitle>
+            <CardTitle>{m.store_monthlyFree_title()}</CardTitle>
             <CardDescription>
-              Active users receive free resources each month
+              {m.store_monthlyFree_description()}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex gap-4 text-sm">
               <span className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
-                100 participants (Raffle only)
+                {m.store_monthlyFree_participants()}
               </span>
               <span className="flex items-center gap-1">
-                <Image className="h-4 w-4" />1 image
+                <Image className="h-4 w-4" />{m.store_monthlyFree_images()}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              * Monthly allowances expire at the end of each month and cannot be
-              accumulated.
+              {m.store_monthlyFree_note()}
             </p>
           </CardContent>
         </Card>
