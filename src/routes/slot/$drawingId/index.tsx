@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { eq, desc } from 'drizzle-orm'
@@ -227,6 +227,23 @@ function SlotDrawingParticipation() {
   const NUMBERS_PER_PAGE = 6 * 17 // 6 columns × 17 rows = 102 numbers per page
 
   const { data: reservationTimeData } = useReservationTime()
+
+  // Memoize translated strings to avoid re-translation on every render
+  const selectTypeText = useMemo(
+    () =>
+      drawing.isPaid
+        ? t('slot.howItWorks.selectNumberMultiple')
+        : t('slot.howItWorks.selectNumberSingle'),
+    [drawing.isPaid, t]
+  )
+
+  const numberTypeText = useMemo(
+    () =>
+      drawing.isPaid
+        ? t('slot.howItWorks.reservationNumbers')
+        : t('slot.howItWorks.reservationNumber'),
+    [drawing.isPaid, t]
+  )
 
   // Fetch drawing details
   // const { data: drawing, isLoading: drawingLoading } = useDrawing(drawingId)
@@ -487,7 +504,7 @@ function SlotDrawingParticipation() {
   // Drawing not found
   if (!drawing) {
     return (
-      <div className="min-h-screenp-6">
+      <div className="min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center text-xl">{t('slot.drawingNotFound')}</p>
@@ -835,17 +852,13 @@ function SlotDrawingParticipation() {
               <>
                 <li>
                   {t('slot.howItWorks.selectNumber', {
-                    selectType: drawing.isPaid
-                      ? t('slot.howItWorks.selectNumberMultiple')
-                      : t('slot.howItWorks.selectNumberSingle')
+                    selectType: selectTypeText
                   })}
                 </li>
                 <li>{t('slot.howItWorks.clickArrow')}</li>
                 <li>
                   {t('slot.howItWorks.reservation', {
-                    numberType: drawing.isPaid
-                      ? t('slot.howItWorks.reservationNumbers')
-                      : t('slot.howItWorks.reservationNumber'),
+                    numberType: numberTypeText,
                     minutes: reservationTimeData?.reservationTimeMinutes || 4
                   })}
                 </li>
