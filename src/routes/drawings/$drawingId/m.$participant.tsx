@@ -2,6 +2,7 @@ import { Asset, Participant as BaseParticipant } from '@/db/schema'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import type { ParticipantStatus } from '@/lib/participants'
 import { Card } from '@/components/ui/card'
@@ -17,6 +18,7 @@ export const Route = createFileRoute('/drawings/$drawingId/m/$participant')({
 type Participant = BaseParticipant & { numbers: number[] }
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const { participant: participantId, drawingId } = Route.useParams()
   const navigate = useNavigate()
   const [participant, setParticipant] = useState<Participant | null>(null)
@@ -34,7 +36,7 @@ function RouteComponent() {
       )
       const result = await response.json()
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch participant assets')
+        throw new Error(result.error || t('manageParticipant.fetchAssetsFailed'))
       }
       return result
     },
@@ -54,12 +56,12 @@ function RouteComponent() {
       try {
         const response = await fetch(`/api/participant/${participantId}`)
         if (!response.ok) {
-          throw new Error('Failed to fetch participant')
+          throw new Error(t('manageParticipant.fetchFailed'))
         }
         const data = await response.json()
         setParticipant(data)
       } catch (error) {
-        toast.error('Failed to load participant data')
+        toast.error(t('manageParticipant.loadFailed'))
         navigate({
           to: '/drawings/$drawingId',
           params: { drawingId },
@@ -73,11 +75,11 @@ function RouteComponent() {
   }, [participantId, drawingId, navigate])
 
   if (isLoading) {
-    return <div className="container mx-auto p-4">Loading participant...</div>
+    return <div className="container mx-auto p-4">{t('manageParticipant.loading')}</div>
   }
 
   if (!participant) {
-    return <div className="container mx-auto p-4">Participant not found</div>
+    return <div className="container mx-auto p-4">{t('manageParticipant.notFound')}</div>
   }
 
   const currentStatus: ParticipantStatus =
@@ -103,10 +105,10 @@ function RouteComponent() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update participant status')
+        throw new Error(data.error || t('manageParticipant.updateFailed'))
       }
 
-      toast.success(data.message || 'Participant status updated successfully')
+      toast.success(data.message || t('manageParticipant.updateSuccess'))
 
       navigate({
         to: '/drawings/$drawingId',
@@ -116,7 +118,7 @@ function RouteComponent() {
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Failed to update participant status',
+          : t('manageParticipant.updateFailed'),
       )
     } finally {
       setIsSubmitting(false)
@@ -142,22 +144,22 @@ function RouteComponent() {
     <div className="container mx-auto p-4">
       <div className="max-w-2xl mx-auto">
         <Card className="rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">Participant Information</h2>
+          <h2 className="text-2xl font-bold mb-4">{t('manageParticipant.title')}</h2>
           <div className="space-y-3">
             <div>
-              <span className="font-semibold">Name:</span> {participant.name}
+              <span className="font-semibold">{t('manageParticipant.name')}</span> {participant.name}
             </div>
             <div>
-              <span className="font-semibold">Phone:</span> {participant.phone}
+              <span className="font-semibold">{t('manageParticipant.phone')}</span> {participant.phone}
             </div>
             {participant.email && (
               <div>
-                <span className="font-semibold">Email:</span>{' '}
+                <span className="font-semibold">{t('manageParticipant.email')}</span>{' '}
                 {participant.email}
               </div>
             )}
             <div>
-              <span className="font-semibold">Current Status:</span>{' '}
+              <span className="font-semibold">{t('manageParticipant.currentStatus')}</span>{' '}
               <span
                 className={`inline-block px-2 py-1 rounded text-sm ${
                   currentStatus === 'approved'
@@ -171,7 +173,7 @@ function RouteComponent() {
               </span>
             </div>
             <div className="flex flex-wrap gap-2 items-center">
-              <span className="font-semibold">Selected Numbers:</span>{' '}
+              <span className="font-semibold">{t('manageParticipant.selectedNumbers')}</span>{' '}
               <section className="flex gap-2">
                 {participantNumbers().length > 0
                   ? participantNumbers().map((num) => (
@@ -182,7 +184,7 @@ function RouteComponent() {
                         {num}
                       </div>
                     ))
-                  : 'No numbers selected'}
+                  : t('manageParticipant.noNumbers')}
               </section>
             </div>
           </div>
@@ -191,7 +193,7 @@ function RouteComponent() {
         {/* Asset Preview Section */}
         {participantAssets && participantAssets.url && (
           <Card className="rounded-lg p-6 mt-4">
-            <h3 className="text-lg font-semibold mb-2">Payout Proof</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('manageParticipant.payoutProof')}</h3>
             {participantAssets.mimeType?.startsWith('image/') ? (
               <>
                 <figure className="h-50">
@@ -209,8 +211,7 @@ function RouteComponent() {
                   rel="noopener noreferrer"
                   className="text-blue-600 underline ml-2"
                 >
-                  <ImageIcon className=" h-4 w-4 inline-block mr-1" /> Open in
-                  new tab
+                  <ImageIcon className=" h-4 w-4 inline-block mr-1" /> {t('manageParticipant.openInNewTab')}
                 </a>
                 <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
                   <DialogContent className="flex flex-col items-center justify-center p-0 shadow-none sm:max-w-2/3">
@@ -230,7 +231,7 @@ function RouteComponent() {
                 rel="noopener noreferrer"
                 className="text-blue-600 underline"
               >
-                View PDF
+                {t('manageParticipant.viewPdf')}
               </a>
             ) : (
               <a
@@ -239,7 +240,7 @@ function RouteComponent() {
                 rel="noopener noreferrer"
                 className="text-blue-600 underline"
               >
-                Download File
+                {t('manageParticipant.downloadFile')}
               </a>
             )}
           </Card>
@@ -247,26 +248,24 @@ function RouteComponent() {
 
         <div className="bg-white border border-neutral-300 dark:bg-gray-900 dark:border-none rounded-lg shadow-md p-6 mt-4">
           <h3 className="text-xl font-semibold mb-4">
-            Change Participant Status
+            {t('manageParticipant.changeStatus')}
           </h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">
-                Select New Status
+                {t('manageParticipant.selectNewStatus')}
               </label>
               {isStatusLocked && (
                 <div className="mb-2">
                   <div className="flex gap-2 items-center">
                     <AlertCircleIcon className="text-red-500" />
                     <p className="text-sm text-red-500">
-                      This participant was rejected and their status can no
-                      longer be changed.
+                      {t('manageParticipant.rejectedLocked')}
                     </p>
                   </div>
                   <div className="ml-8 mt-2">
                     <p className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                      Re-assigning numbers will be available soon. You can
-                      select the numbers again
+                      {t('manageParticipant.reassignSoon')}
                     </p>
                   </div>
                 </div>
@@ -282,7 +281,7 @@ function RouteComponent() {
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                   } ${isStatusLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  Pending
+                  {t('manageParticipant.pending')}
                 </button>
                 <button
                   type="button"
@@ -294,7 +293,7 @@ function RouteComponent() {
                       : 'bg-gray-50 text-gray-700 hover:bg-red-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-red-900/20'
                   } ${isStatusLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  Reject
+                  {t('manageParticipant.reject')}
                 </button>
                 <button
                   type="button"
@@ -306,7 +305,7 @@ function RouteComponent() {
                       : 'bg-gray-50 text-gray-700 hover:bg-green-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-green-900/20'
                   } ${isStatusLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  Approved
+                  {t('manageParticipant.approved')}
                 </button>
               </div>
             </div>
@@ -319,7 +318,7 @@ function RouteComponent() {
               }
               className="w-full"
             >
-              {isSubmitting ? 'Updating...' : 'Update Status'}
+              {isSubmitting ? t('manageParticipant.updating') : t('manageParticipant.updateStatus')}
             </Button>
           </div>
         </div>

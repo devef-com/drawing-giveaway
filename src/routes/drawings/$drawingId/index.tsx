@@ -14,6 +14,7 @@ import {
   XIcon,
 } from 'lucide-react'
 import { useState, useMemo, FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/card'
 import { authClient } from '@/lib/auth-client'
 import { useDrawing } from '@/querys/useDrawing'
@@ -46,6 +47,7 @@ export const Route = createFileRoute('/drawings/$drawingId/')({
 })
 
 function DrawingDetail() {
+  const { t } = useTranslation()
   const { drawingId } = Route.useParams()
   const session = authClient.useSession()
   const queryClient = useQueryClient()
@@ -190,12 +192,14 @@ function DrawingDetail() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to select winners')
+        throw new Error(data.error || t('drawingDetail.failedToSelectWinners'))
       }
 
       toast.success(
         data.message ||
-          `Successfully selected ${data.data.winners.length} winner(s)`,
+          t('drawingDetail.winnersSelectedSuccess', {
+            count: data.data.winners.length,
+          }),
       )
       setOpenRunWinners(false)
       queryClient.invalidateQueries({ queryKey: ['drawing', drawingId] })
@@ -207,7 +211,7 @@ function DrawingDetail() {
       // navigate({ to: `/drawings/${drawingId}/winners` })
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Failed to select winners',
+        error instanceof Error ? error.message : t('drawingDetail.failedToSelectWinners'),
       )
     } finally {
       setIsSelectingWinners(false)
@@ -216,7 +220,7 @@ function DrawingDetail() {
 
   const ACTIONS = [
     {
-      label: 'Edit',
+      label: t('drawingDetail.edit'),
       icon: PencilIcon,
       onClick: () => {
         navigate({ to: `/drawings/${drawingId}/edit` })
@@ -231,7 +235,7 @@ function DrawingDetail() {
     //   },
     // },
     {
-      label: 'Numbers',
+      label: t('drawingDetail.numbers'),
       icon: GripIcon,
       onClick: () => {
         navigate({ to: `/slot/${drawingId}` })
@@ -239,18 +243,18 @@ function DrawingDetail() {
       },
     },
     {
-      label: 'Copy Link',
+      label: t('drawingDetail.copyLink'),
       icon: CopyIcon,
       onClick: () => {
         const url = `${window.location.origin}/slot/${drawing?.id}`
         navigator.clipboard.writeText(url).then(() => {
-          toast.success('Link copied to clipboard!')
+          toast.success(t('drawingDetail.linkCopied'))
         })
         setIsPopoverOpen(false)
       },
     },
     {
-      label: 'Share',
+      label: t('drawingDetail.share'),
       icon: Share2Icon,
       onClick: () => {
         const url = `${window.location.origin}/slot/${drawing?.id}`
@@ -275,12 +279,12 @@ function DrawingDetail() {
         <div className="max-w-4xl mx-auto">
           <Card className="p-6">
             <p className="text-white text-center">
-              Please log in to view this drawing.{' '}
+              {t('drawingDetail.pleaseLoginToView')}{' '}
               <a
                 href="/authentication/login"
                 className="text-cyan-400 hover:text-cyan-300"
               >
-                Login
+                {t('drawingDetail.login')}
               </a>
             </p>
           </Card>
@@ -312,7 +316,7 @@ function DrawingDetail() {
       <div className="min-h-[calc(100svh-129px)] p-6">
         <div className="max-w-6xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
-            <p className="text-white text-center">Drawing not found</p>
+            <p className="text-white text-center">{t('drawingDetail.drawingNotFound')}</p>
           </Card>
         </div>
       </div>
@@ -352,40 +356,42 @@ function DrawingDetail() {
           </div>
 
           <Expandable>
-            <ExpandableTitle>Basic Info</ExpandableTitle>
+            <ExpandableTitle>{t('drawingDetail.basicInfo')}</ExpandableTitle>
             <ExpandableContent className="border-b border-slate-700">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <p className="mb-2 text-sm">
-                    <strong>Type:</strong>{' '}
+                    <strong>{t('drawingDetail.type')}:</strong>{' '}
                     {drawing.isPaid && drawing.price
-                      ? `Paid ($${formatNumber(drawing.price ?? 0)})`
-                      : 'Free'}
+                      ? t('drawingDetail.paid', {
+                          price: formatNumber(drawing.price ?? 0),
+                        })
+                      : t('drawingDetail.free')}
                   </p>
                   <p className="mb-2  text-sm">
-                    <strong>Selection Method:</strong>{' '}
+                    <strong>{t('drawingDetail.selectionMethod')}:</strong>{' '}
                     {drawing.winnerSelection === 'manually'
-                      ? 'Enter number manually'
-                      : 'System generated'}
+                      ? t('drawingDetail.enterNumberManually')
+                      : t('drawingDetail.systemGenerated')}
                   </p>
                   <p className="mb-2 text-sm">
-                    <strong>Play with Numbers:</strong>{' '}
-                    {drawing.playWithNumbers ? 'Yes' : 'No'}
+                    <strong>{t('drawingDetail.playWithNumbers')}:</strong>{' '}
+                    {drawing.playWithNumbers ? t('drawingDetail.yes') : t('drawingDetail.no')}
                   </p>
                   {drawing.playWithNumbers && (
                     <p className="mb-2 text-sm">
-                      <strong>Total Numbers:</strong>{' '}
+                      <strong>{t('drawingDetail.totalNumbers')}:</strong>{' '}
                       {drawing.quantityOfNumbers}
                     </p>
                   )}
                   <p className="mb-2 text-sm">
-                    <strong>End Date:</strong>{' '}
+                    <strong>{t('drawingDetail.endDate')}:</strong>{' '}
                     {new Date(drawing.endAt).toLocaleString(navigator.language)}
                   </p>
                 </div>
                 {drawing.guidelines && drawing.guidelines.length > 0 && (
                   <div>
-                    <strong className="">Guidelines:</strong>
+                    <strong className="">{t('drawingDetail.guidelines')}:</strong>
                     <ul className="list-disc list-inside text-sm mt-2">
                       {drawing.guidelines.map(
                         (guideline: string, index: number) => (
@@ -400,29 +406,29 @@ function DrawingDetail() {
           </Expandable>
 
           <Expandable>
-            <ExpandableTitle>Winner Selection</ExpandableTitle>
+            <ExpandableTitle>{t('drawingDetail.winnerSelection')}</ExpandableTitle>
             <ExpandableContent>
               <div className="space-y-4">
                 <div className="space-y-2">
                   <p className="text-sm">
-                    <strong>Selection Method:</strong>{' '}
+                    <strong>{t('drawingDetail.selectionMethod')}:</strong>{' '}
                     {drawing.winnerSelection === 'manually'
-                      ? 'Enter number manually'
-                      : 'System generated'}
+                      ? t('drawingDetail.enterNumberManually')
+                      : t('drawingDetail.systemGenerated')}
                   </p>
                   <p className="text-sm">
-                    <strong>Winners to Select:</strong> {drawing.winnersAmount}
+                    <strong>{t('drawingDetail.winnersToSelect')}:</strong> {drawing.winnersAmount}
                   </p>
                   <p className="text-sm">
-                    <strong>Eligible Participants:</strong>{' '}
+                    <strong>{t('drawingDetail.eligibleParticipants')}:</strong>{' '}
                     {participants?.filter((p) => p.isEligible === true)
                       .length || 0}
                   </p>
                   {drawing.playWithNumbers &&
                     drawing.winnerSelection === 'manually' && (
                       <p className="text-sm">
-                        <strong>Winner Numbers:</strong>{' '}
-                        {drawing.winnerNumbers?.join(', ') || 'Not set'}
+                        <strong>{t('drawingDetail.winnerNumbers')}:</strong>{' '}
+                        {drawing.winnerNumbers?.join(', ') || t('drawingDetail.notSet')}
                       </p>
                     )}
                 </div>
@@ -432,7 +438,9 @@ function DrawingDetail() {
                     onClick={() => setLoadWinners(true)}
                   >
                     <ExpandableTitle>
-                      Winners #({drawing.winnerNumbers.join(', ')})
+                      {t('drawingDetail.winners', {
+                        numbers: drawing.winnerNumbers.join(', '),
+                      })}
                     </ExpandableTitle>
                     <ExpandableContent>
                       {loadingWinners && <span>...</span>}
@@ -470,7 +478,7 @@ function DrawingDetail() {
                     variant="primary"
                     onClick={() => setOpenRunWinners(true)}
                   >
-                    Run Winner Selection
+                    {t('drawingDetail.runWinnerSelection')}
                   </Button>
                 </div>
                 {drawing.winnerSelection === 'manually' && (
@@ -497,11 +505,13 @@ function DrawingDetail() {
                           id={index.toString()}
                           name={`number_${index + 1}`}
                           className="border border-slate-700 text-sm rounded-md p-2 w-24 mr-2 mb-2"
-                          placeholder={`#${index + 1} Winner`}
+                          placeholder={t('drawingDetail.winnerPlaceholder', {
+                            number: index + 1,
+                          })}
                         />
                       ),
                     )}
-                    <Button type="submit">Save</Button>
+                    <Button type="submit">{t('drawingDetail.save')}</Button>
                   </form>
                 )}
 
@@ -512,9 +522,7 @@ function DrawingDetail() {
                   )}
                 >
                   <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                    <strong>Note:</strong> This will select winners based on
-                    your drawing configuration. You can re-run the selection if
-                    needed.
+                    <strong>Note:</strong> {t('drawingDetail.noteManual')}
                   </p>
                 </div>
 
@@ -530,8 +538,8 @@ function DrawingDetail() {
                     className="md:max-w-max"
                   >
                     {isSelectingWinners
-                      ? 'Selecting Winners...'
-                      : 'Select Winners'}
+                      ? t('drawingDetail.selectingWinners')
+                      : t('drawingDetail.selectWinners')}
                   </Button>
                 </div>
               </div>
@@ -541,12 +549,14 @@ function DrawingDetail() {
 
         <Card className="p-4 border-slate-700">
           <h2 className="text-xl font-bold">
-            Participants ({pagination?.total || participants?.length || 0})
+            {t('drawingDetail.participants', {
+              count: pagination?.total || participants?.length || 0,
+            })}
           </h2>
 
           {/* Filters Expandable */}
           <Expandable defaultOpen>
-            <ExpandableTitle>filters</ExpandableTitle>
+            <ExpandableTitle>{t('drawingDetail.filters')}</ExpandableTitle>
             <ExpandableContent>
               <div className="space-y-4 mt-1">
                 {/* Status Filter Tabs */}
@@ -564,7 +574,7 @@ function DrawingDetail() {
                       }`}
                     >
                       {/* {status === 'all' && '• '} */}
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                      {t(`drawingDetail.${status}`)}
                     </button>
                   ))}
                 </div>
@@ -573,7 +583,7 @@ function DrawingDetail() {
                 <div className="flex gap-2">
                   <Input
                     type="text"
-                    placeholder="Search by name"
+                    placeholder={t('drawingDetail.searchByName')}
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -605,7 +615,7 @@ function DrawingDetail() {
                     className="text-left p-2 cursor-pointer hover:bg-accent/50 select-none"
                     onClick={() => handleSort('name')}
                   >
-                    Name
+                    {t('drawingDetail.name')}
                     <SortIndicator field="name" />
                   </th>
                   {/* <th className="text-left p-2">Phone</th> */}
@@ -616,14 +626,14 @@ function DrawingDetail() {
                     className="text-left p-2 cursor-pointer hover:bg-accent/50 select-none"
                     onClick={() => handleSort('status')}
                   >
-                    Status
+                    {t('drawingDetail.status')}
                     <SortIndicator field="status" />
                   </th>
                   <th
                     className="text-left p-2 cursor-pointer hover:bg-accent/50 select-none"
                     onClick={() => handleSort('createdAt')}
                   >
-                    Date
+                    {t('drawingDetail.date')}
                     <SortIndicator field="createdAt" />
                   </th>
                 </tr>
@@ -693,11 +703,11 @@ function DrawingDetail() {
                       )}
                       <td className="p-2 text-sm">
                         {participant.isEligible === null ? (
-                          <span className="text-yellow-400">Pending</span>
+                          <span className="text-yellow-400">{t('drawingDetail.pending')}</span>
                         ) : participant.isEligible ? (
-                          <span className="text-green-400">Approved</span>
+                          <span className="text-green-400">{t('drawingDetail.approved')}</span>
                         ) : (
-                          <span className="text-red-400">Rejected</span>
+                          <span className="text-red-400">{t('drawingDetail.rejected')}</span>
                         )}
                       </td>
                       <td className="p-2 text-xs text-text-light-secondary dark:text-text-dark-secondary">
@@ -713,7 +723,7 @@ function DrawingDetail() {
                       colSpan={drawing.playWithNumbers ? 4 : 3}
                       className="p-4 text-center text-text-light-secondary dark:text-text-dark-secondary"
                     >
-                      No participants found
+                      {t('drawingDetail.noParticipantsFound')}
                     </td>
                   </tr>
                 )}
@@ -732,7 +742,7 @@ function DrawingDetail() {
                   disabled={isFetchingNextPage}
                   className="text-sm text-blue-400 hover:text-blue-300 disabled:opacity-50"
                 >
-                  {isFetchingNextPage ? 'Loading...' : 'show more'}
+                  {isFetchingNextPage ? t('drawingDetail.loading') : t('drawingDetail.showMore')}
                 </button>
               )}
             </div>
