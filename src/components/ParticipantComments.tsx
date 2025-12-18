@@ -115,10 +115,11 @@ export function ParticipantComments({
           comments.map((comment) => (
             <div
               key={comment.id}
-              className={`border rounded-lg p-4 ${comment.authorType === 'participant'
-                ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950'
-                : 'border-gray-200 dark:border-gray-700'
-                }`}
+              className={`border rounded-lg p-4 ${
+                comment.authorType === 'participant'
+                  ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950'
+                  : 'border-gray-200 dark:border-gray-700'
+              }`}
             >
               <div className="flex justify-between items-start mb-2">
                 <div>

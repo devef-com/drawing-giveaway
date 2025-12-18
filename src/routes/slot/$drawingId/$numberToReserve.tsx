@@ -409,9 +409,7 @@ function ReserveNumberForm() {
 
         toast.success(t('reserveForm.numbersReservedSuccess'))
       } else {
-        toast.error(
-          t('reserveForm.someNumbersReserveFailed'),
-        )
+        toast.error(t('reserveForm.someNumbersReserveFailed'))
       }
     } catch (error) {
       console.error('Error reserving numbers again:', error)
@@ -485,7 +483,9 @@ function ReserveNumberForm() {
                 onClick={() => setIsTitleExpanded(!isTitleExpanded)}
                 className="text-cyan-600 dark:text-cyan-400 text-sm hover:underline mt-1"
               >
-                {isTitleExpanded ? t('drawing.header.less') : t('drawing.header.more')}
+                {isTitleExpanded
+                  ? t('drawing.header.less')
+                  : t('drawing.header.more')}
               </button>
             )}
           </div>
@@ -662,7 +662,9 @@ function ReserveNumberForm() {
                 {participateMutation.isPending || isUploadingProof ? (
                   <span className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    {isUploadingProof ? t('reserveForm.uploading') : t('slot.registering')}
+                    {isUploadingProof
+                      ? t('reserveForm.uploading')
+                      : t('slot.registering')}
                   </span>
                 ) : (
                   t('reserveForm.registerNow')
@@ -692,16 +694,15 @@ function ReserveNumberForm() {
               </p>
               <ul className="space-y-1">
                 <li>
-                  • {t('reserveForm.numberReservedFor', {
+                  •{' '}
+                  {t('reserveForm.numberReservedFor', {
                     plural: selectedNumbers.length > 1 ? 's' : '',
                     is: selectedNumbers.length > 1 ? 'are' : 'is',
-                    minutes: reservationTimeData?.reservationTimeMinutes || 4
+                    minutes: reservationTimeData?.reservationTimeMinutes || 4,
                   })}
                 </li>
                 <li>• {t('reserveForm.completeFormBeforeExpiry')}</li>
-                <li>
-                  • {t('reserveForm.leavePageWarning')}
-                </li>
+                <li>• {t('reserveForm.leavePageWarning')}</li>
               </ul>
             </div>
           </div>

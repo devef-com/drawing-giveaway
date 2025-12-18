@@ -19,8 +19,8 @@ import appCss from '../styles.css?url'
 import type { QueryClient } from '@tanstack/react-query'
 import { Toaster } from '@/components/ui/sonner'
 import Footer from '@/components/Footer'
-import { useTranslation } from "react-i18next"
-import { setSSRLanguage } from "@/lib/i18n"
+import { useTranslation } from 'react-i18next'
+import { setSSRLanguage } from '@/lib/i18n'
 interface MyRouterContext {
   queryClient: QueryClient
 }
@@ -119,9 +119,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     const handler = () => {
       router.invalidate()
     }
-    i18n.on("languageChanged", handler)
+    i18n.on('languageChanged', handler)
     return () => {
-      i18n.off("languageChanged", handler)
+      i18n.off('languageChanged', handler)
     }
   }, [router])
 

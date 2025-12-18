@@ -160,7 +160,8 @@ function DrawingsList() {
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
                         <span className="text-sm text-text-light-secondary dark:text-text-dark-secondary">
-                          {t('drawings.endDate')}: {getTimeRemainingText(drawing.endAt)}
+                          {t('drawings.endDate')}:{' '}
+                          {getTimeRemainingText(drawing.endAt)}
                         </span>
                       </div>
                     </div>

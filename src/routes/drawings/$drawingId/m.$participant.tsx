@@ -36,7 +36,9 @@ function RouteComponent() {
       )
       const result = await response.json()
       if (!response.ok) {
-        throw new Error(result.error || t('manageParticipant.fetchAssetsFailed'))
+        throw new Error(
+          result.error || t('manageParticipant.fetchAssetsFailed'),
+        )
       }
       return result
     },
@@ -75,11 +77,19 @@ function RouteComponent() {
   }, [participantId, drawingId, navigate])
 
   if (isLoading) {
-    return <div className="container mx-auto p-4">{t('manageParticipant.loading')}</div>
+    return (
+      <div className="container mx-auto p-4">
+        {t('manageParticipant.loading')}
+      </div>
+    )
   }
 
   if (!participant) {
-    return <div className="container mx-auto p-4">{t('manageParticipant.notFound')}</div>
+    return (
+      <div className="container mx-auto p-4">
+        {t('manageParticipant.notFound')}
+      </div>
+    )
   }
 
   const currentStatus: ParticipantStatus =
@@ -144,22 +154,34 @@ function RouteComponent() {
     <div className="container mx-auto p-4">
       <div className="max-w-2xl mx-auto">
         <Card className="rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">{t('manageParticipant.title')}</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            {t('manageParticipant.title')}
+          </h2>
           <div className="space-y-3">
             <div>
-              <span className="font-semibold">{t('manageParticipant.name')}</span> {participant.name}
+              <span className="font-semibold">
+                {t('manageParticipant.name')}
+              </span>{' '}
+              {participant.name}
             </div>
             <div>
-              <span className="font-semibold">{t('manageParticipant.phone')}</span> {participant.phone}
+              <span className="font-semibold">
+                {t('manageParticipant.phone')}
+              </span>{' '}
+              {participant.phone}
             </div>
             {participant.email && (
               <div>
-                <span className="font-semibold">{t('manageParticipant.email')}</span>{' '}
+                <span className="font-semibold">
+                  {t('manageParticipant.email')}
+                </span>{' '}
                 {participant.email}
               </div>
             )}
             <div>
-              <span className="font-semibold">{t('manageParticipant.currentStatus')}</span>{' '}
+              <span className="font-semibold">
+                {t('manageParticipant.currentStatus')}
+              </span>{' '}
               <span
                 className={`inline-block px-2 py-1 rounded text-sm ${
                   currentStatus === 'approved'
@@ -173,7 +195,9 @@ function RouteComponent() {
               </span>
             </div>
             <div className="flex flex-wrap gap-2 items-center">
-              <span className="font-semibold">{t('manageParticipant.selectedNumbers')}</span>{' '}
+              <span className="font-semibold">
+                {t('manageParticipant.selectedNumbers')}
+              </span>{' '}
               <section className="flex gap-2">
                 {participantNumbers().length > 0
                   ? participantNumbers().map((num) => (
@@ -193,7 +217,9 @@ function RouteComponent() {
         {/* Asset Preview Section */}
         {participantAssets && participantAssets.url && (
           <Card className="rounded-lg p-6 mt-4">
-            <h3 className="text-lg font-semibold mb-2">{t('manageParticipant.payoutProof')}</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              {t('manageParticipant.payoutProof')}
+            </h3>
             {participantAssets.mimeType?.startsWith('image/') ? (
               <>
                 <figure className="h-50">
@@ -211,7 +237,8 @@ function RouteComponent() {
                   rel="noopener noreferrer"
                   className="text-blue-600 underline ml-2"
                 >
-                  <ImageIcon className=" h-4 w-4 inline-block mr-1" /> {t('manageParticipant.openInNewTab')}
+                  <ImageIcon className=" h-4 w-4 inline-block mr-1" />{' '}
+                  {t('manageParticipant.openInNewTab')}
                 </a>
                 <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
                   <DialogContent className="flex flex-col items-center justify-center p-0 shadow-none sm:max-w-2/3">
@@ -318,7 +345,9 @@ function RouteComponent() {
               }
               className="w-full"
             >
-              {isSubmitting ? t('manageParticipant.updating') : t('manageParticipant.updateStatus')}
+              {isSubmitting
+                ? t('manageParticipant.updating')
+                : t('manageParticipant.updateStatus')}
             </Button>
           </div>
         </div>

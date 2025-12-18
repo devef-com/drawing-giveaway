@@ -60,7 +60,9 @@ export default function Header() {
           className="w-full h-full object-contain"
         />
       </figure>
-      <span className="text-lg font-bold text-foreground">{t('app.title')}</span>
+      <span className="text-lg font-bold text-foreground">
+        {t('app.title')}
+      </span>
     </Link>
   )
 
@@ -144,7 +146,6 @@ export default function Header() {
           )}
 
           <LanguageSwitcher />
-
         </div>
       </header>
 
@@ -206,7 +207,9 @@ export default function Header() {
         {/* Theme Switcher */}
         <div className="p-4 border-t border-border">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">{t("theme.label")}</span>
+            <span className="text-sm text-muted-foreground">
+              {t('theme.label')}
+            </span>
             <ThemeSwitcher />
           </div>
         </div>

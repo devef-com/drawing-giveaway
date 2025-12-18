@@ -84,8 +84,12 @@ function SignUp() {
             {t('auth.signup.backgroundQuote')}
           </h2>
           <div className="mt-6">
-            <p className="text-lg font-semibold">{t('auth.signup.backgroundTitle')}</p>
-            <p className="text-sm text-gray-300">{t('auth.signup.backgroundSubtitle')}</p>
+            <p className="text-lg font-semibold">
+              {t('auth.signup.backgroundTitle')}
+            </p>
+            <p className="text-sm text-gray-300">
+              {t('auth.signup.backgroundSubtitle')}
+            </p>
           </div>
         </div>
         <div className="absolute top-8 left-8 flex items-center gap-2 text-white font-bold text-xl">

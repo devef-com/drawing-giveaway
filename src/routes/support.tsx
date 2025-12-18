@@ -19,7 +19,9 @@ function SupportPage() {
         <div className="space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-bold">{t('support.title')}</h1>
-            <p className="text-muted-foreground text-lg">{t('support.subtitle')}</p>
+            <p className="text-muted-foreground text-lg">
+              {t('support.subtitle')}
+            </p>
           </div>
 
           <Card>
@@ -28,7 +30,9 @@ function SupportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <Expandable className="border rounded-md">
-                <ExpandableTitle>{t('support.faq.whatIsGiway.q')}</ExpandableTitle>
+                <ExpandableTitle>
+                  {t('support.faq.whatIsGiway.q')}
+                </ExpandableTitle>
                 <ExpandableContent>
                   <p className="text-muted-foreground">
                     {t('support.faq.whatIsGiway.a')}
@@ -37,7 +41,9 @@ function SupportPage() {
               </Expandable>
 
               <Expandable className="border rounded-md">
-                <ExpandableTitle>{t('support.faq.freeVsPaid.q')}</ExpandableTitle>
+                <ExpandableTitle>
+                  {t('support.faq.freeVsPaid.q')}
+                </ExpandableTitle>
                 <ExpandableContent>
                   <p className="text-muted-foreground">
                     {t('support.faq.freeVsPaid.a')}
@@ -46,7 +52,9 @@ function SupportPage() {
               </Expandable>
 
               <Expandable className="border rounded-md">
-                <ExpandableTitle>{t('support.faq.playWithNumbers.q')}</ExpandableTitle>
+                <ExpandableTitle>
+                  {t('support.faq.playWithNumbers.q')}
+                </ExpandableTitle>
                 <ExpandableContent>
                   <p className="text-muted-foreground">
                     {t('support.faq.playWithNumbers.a')}
@@ -55,7 +63,9 @@ function SupportPage() {
               </Expandable>
 
               <Expandable className="border rounded-md">
-                <ExpandableTitle>{t('support.faq.moreParticipants.q')}</ExpandableTitle>
+                <ExpandableTitle>
+                  {t('support.faq.moreParticipants.q')}
+                </ExpandableTitle>
                 <ExpandableContent>
                   <p className="text-muted-foreground">
                     {t('support.faq.moreParticipants.a')}
@@ -64,7 +74,9 @@ function SupportPage() {
               </Expandable>
 
               <Expandable className="border rounded-md">
-                <ExpandableTitle>{t('support.faq.rejectParticipant.q')}</ExpandableTitle>
+                <ExpandableTitle>
+                  {t('support.faq.rejectParticipant.q')}
+                </ExpandableTitle>
                 <ExpandableContent>
                   <p className="text-muted-foreground">
                     {t('support.faq.rejectParticipant.a')}
@@ -73,7 +85,9 @@ function SupportPage() {
               </Expandable>
 
               <Expandable className="border rounded-md">
-                <ExpandableTitle>{t('support.faq.packsExpire.q')}</ExpandableTitle>
+                <ExpandableTitle>
+                  {t('support.faq.packsExpire.q')}
+                </ExpandableTitle>
                 <ExpandableContent>
                   <p className="text-muted-foreground">
                     {t('support.faq.packsExpire.a')}
@@ -84,8 +98,12 @@ function SupportPage() {
           </Card>
 
           <div className="text-center space-y-4 pt-8">
-            <h2 className="text-2xl font-semibold">{t('support.contact.title')}</h2>
-            <p className="text-muted-foreground">{t('support.contact.subtitle')}</p>
+            <h2 className="text-2xl font-semibold">
+              {t('support.contact.title')}
+            </h2>
+            <p className="text-muted-foreground">
+              {t('support.contact.subtitle')}
+            </p>
             {/* Placeholder for contact button or email */}
             <a
               href="mailto:team@giway.com"

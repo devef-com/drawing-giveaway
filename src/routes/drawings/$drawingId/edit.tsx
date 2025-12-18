@@ -227,9 +227,7 @@ function EditDrawing() {
         navigate({ to: `/drawings/${drawingId}` })
       } else {
         const error = await response.json()
-        toast.error(
-          error.message || t('editDrawing.failedToUpdate'),
-        )
+        toast.error(error.message || t('editDrawing.failedToUpdate'))
       }
     } catch (error) {
       console.error('Error updating drawing:', error)
@@ -305,7 +303,9 @@ function EditDrawing() {
             </div>
 
             <div>
-              <Label className="mb-2">{t('editDrawing.guidelinesOptional')}</Label>
+              <Label className="mb-2">
+                {t('editDrawing.guidelinesOptional')}
+              </Label>
               <div className="relative">
                 <textarea
                   value={currentGuideline}
@@ -471,13 +471,17 @@ function EditDrawing() {
                 disabled={!formData.playWithNumbers}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t('editDrawing.winnerSelectionMethod')} />
+                  <SelectValue
+                    placeholder={t('editDrawing.winnerSelectionMethod')}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="manually">
                     {t('editDrawing.enterNumberManually')}
                   </SelectItem>
-                  <SelectItem value="system">{t('editDrawing.systemGenerated')}</SelectItem>
+                  <SelectItem value="system">
+                    {t('editDrawing.systemGenerated')}
+                  </SelectItem>
                 </SelectContent>
               </Select>
               {formData.winnerSelection === 'manually' ? (
@@ -580,7 +584,9 @@ function EditDrawing() {
                   </DrawerTrigger>
                   <DrawerContent className="max-h-full">
                     <DrawerHeader>
-                      <DrawerTitle>{t('editDrawing.selectEndDateTime')}</DrawerTitle>
+                      <DrawerTitle>
+                        {t('editDrawing.selectEndDateTime')}
+                      </DrawerTitle>
                     </DrawerHeader>
 
                     <div
@@ -600,7 +606,9 @@ function EditDrawing() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="justify-center text-md">{t('editDrawing.time')}</Label>
+                        <Label className="justify-center text-md">
+                          {t('editDrawing.time')}
+                        </Label>
                         <div className="flex gap-2 items-center justify-center">
                           <Select
                             value={selectedTime.hours}
@@ -798,7 +806,9 @@ function EditDrawing() {
                 {t('editDrawing.cancel')}
               </Button>
               <Button type="submit" disabled={isSubmitting} variant="primary">
-                {isSubmitting ? t('editDrawing.saving') : t('editDrawing.saveChanges')}
+                {isSubmitting
+                  ? t('editDrawing.saving')
+                  : t('editDrawing.saveChanges')}
               </Button>
             </div>
           </form>

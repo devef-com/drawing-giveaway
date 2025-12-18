@@ -138,9 +138,7 @@ export function ImageCropDialog({
       >
         <DialogHeader>
           <DialogTitle>{t('image.crop.title')}</DialogTitle>
-          <DialogDescription>
-            {t('image.crop.description')}
-          </DialogDescription>
+          <DialogDescription>{t('image.crop.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">

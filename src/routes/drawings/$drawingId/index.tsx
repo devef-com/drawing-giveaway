@@ -211,7 +211,9 @@ function DrawingDetail() {
       // navigate({ to: `/drawings/${drawingId}/winners` })
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('drawingDetail.failedToSelectWinners'),
+        error instanceof Error
+          ? error.message
+          : t('drawingDetail.failedToSelectWinners'),
       )
     } finally {
       setIsSelectingWinners(false)
@@ -316,7 +318,9 @@ function DrawingDetail() {
       <div className="min-h-[calc(100svh-129px)] p-6">
         <div className="max-w-6xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
-            <p className="text-white text-center">{t('drawingDetail.drawingNotFound')}</p>
+            <p className="text-white text-center">
+              {t('drawingDetail.drawingNotFound')}
+            </p>
           </Card>
         </div>
       </div>
@@ -376,7 +380,9 @@ function DrawingDetail() {
                   </p>
                   <p className="mb-2 text-sm">
                     <strong>{t('drawingDetail.playWithNumbers')}:</strong>{' '}
-                    {drawing.playWithNumbers ? t('drawingDetail.yes') : t('drawingDetail.no')}
+                    {drawing.playWithNumbers
+                      ? t('drawingDetail.yes')
+                      : t('drawingDetail.no')}
                   </p>
                   {drawing.playWithNumbers && (
                     <p className="mb-2 text-sm">
@@ -391,7 +397,9 @@ function DrawingDetail() {
                 </div>
                 {drawing.guidelines && drawing.guidelines.length > 0 && (
                   <div>
-                    <strong className="">{t('drawingDetail.guidelines')}:</strong>
+                    <strong className="">
+                      {t('drawingDetail.guidelines')}:
+                    </strong>
                     <ul className="list-disc list-inside text-sm mt-2">
                       {drawing.guidelines.map(
                         (guideline: string, index: number) => (
@@ -406,7 +414,9 @@ function DrawingDetail() {
           </Expandable>
 
           <Expandable>
-            <ExpandableTitle>{t('drawingDetail.winnerSelection')}</ExpandableTitle>
+            <ExpandableTitle>
+              {t('drawingDetail.winnerSelection')}
+            </ExpandableTitle>
             <ExpandableContent>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -417,7 +427,8 @@ function DrawingDetail() {
                       : t('drawingDetail.systemGenerated')}
                   </p>
                   <p className="text-sm">
-                    <strong>{t('drawingDetail.winnersToSelect')}:</strong> {drawing.winnersAmount}
+                    <strong>{t('drawingDetail.winnersToSelect')}:</strong>{' '}
+                    {drawing.winnersAmount}
                   </p>
                   <p className="text-sm">
                     <strong>{t('drawingDetail.eligibleParticipants')}:</strong>{' '}
@@ -428,7 +439,8 @@ function DrawingDetail() {
                     drawing.winnerSelection === 'manually' && (
                       <p className="text-sm">
                         <strong>{t('drawingDetail.winnerNumbers')}:</strong>{' '}
-                        {drawing.winnerNumbers?.join(', ') || t('drawingDetail.notSet')}
+                        {drawing.winnerNumbers?.join(', ') ||
+                          t('drawingDetail.notSet')}
                       </p>
                     )}
                 </div>
@@ -703,11 +715,17 @@ function DrawingDetail() {
                       )}
                       <td className="p-2 text-sm">
                         {participant.isEligible === null ? (
-                          <span className="text-yellow-400">{t('drawingDetail.pending')}</span>
+                          <span className="text-yellow-400">
+                            {t('drawingDetail.pending')}
+                          </span>
                         ) : participant.isEligible ? (
-                          <span className="text-green-400">{t('drawingDetail.approved')}</span>
+                          <span className="text-green-400">
+                            {t('drawingDetail.approved')}
+                          </span>
                         ) : (
-                          <span className="text-red-400">{t('drawingDetail.rejected')}</span>
+                          <span className="text-red-400">
+                            {t('drawingDetail.rejected')}
+                          </span>
                         )}
                       </td>
                       <td className="p-2 text-xs text-text-light-secondary dark:text-text-dark-secondary">
@@ -742,7 +760,9 @@ function DrawingDetail() {
                   disabled={isFetchingNextPage}
                   className="text-sm text-blue-400 hover:text-blue-300 disabled:opacity-50"
                 >
-                  {isFetchingNextPage ? t('drawingDetail.loading') : t('drawingDetail.showMore')}
+                  {isFetchingNextPage
+                    ? t('drawingDetail.loading')
+                    : t('drawingDetail.showMore')}
                 </button>
               )}
             </div>

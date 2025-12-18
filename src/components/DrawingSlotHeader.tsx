@@ -41,7 +41,9 @@ function DrawingSlotHeader({
               onClick={() => setIsTitleExpanded(!isTitleExpanded)}
               className="text-cyan-600 dark:text-cyan-400 text-sm hover:underline self-start"
             >
-              {isTitleExpanded ? t('drawing.header.less') : t('drawing.header.more')}
+              {isTitleExpanded
+                ? t('drawing.header.less')
+                : t('drawing.header.more')}
             </button>
           )}
         </section>

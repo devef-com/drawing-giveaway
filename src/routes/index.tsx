@@ -185,7 +185,9 @@ function LandingPage() {
         </p>
         <div className="flex gap-4">
           <Button asChild size="lg">
-            <Link to="/authentication/signup">{t('landing.cta.getStarted')}</Link>
+            <Link to="/authentication/signup">
+              {t('landing.cta.getStarted')}
+            </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>
             <Link to="/authentication/login">{t('landing.cta.login')}</Link>
@@ -528,9 +530,7 @@ function LandingPage() {
       {/* CTA */}
       <section className="py-20 px-4 bg-primary/5">
         <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-3xl font-bold">
-            {t('landing.cta.title')}
-          </h2>
+          <h2 className="text-3xl font-bold">{t('landing.cta.title')}</h2>
           <p className="text-muted-foreground text-lg">
             {t('landing.cta.subtitle')}
           </p>

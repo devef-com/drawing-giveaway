@@ -103,9 +103,7 @@ function RouteComponent() {
             <h1 className="text-3xl font-bold tracking-tight">
               {t('account.title')}
             </h1>
-            <p className="text-muted-foreground">
-              {t('account.subtitle')}
-            </p>
+            <p className="text-muted-foreground">{t('account.subtitle')}</p>
           </div>
           <Button variant="outline" size="icon" onClick={signOut}>
             <LogOut />
@@ -118,9 +116,7 @@ function RouteComponent() {
               <User className="h-5 w-5" />
               {t('account.profileInfo')}
             </CardTitle>
-            <CardDescription>
-              {t('account.profileDescription')}
-            </CardDescription>
+            <CardDescription>{t('account.profileDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
@@ -147,7 +143,9 @@ function RouteComponent() {
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <p className="text-sm font-medium">{t('account.memberSince')}</p>
+                <p className="text-sm font-medium">
+                  {t('account.memberSince')}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   {new Date(user.createdAt).toLocaleDateString(
                     navigator.language,
@@ -165,7 +163,9 @@ function RouteComponent() {
               <div className="flex items-center gap-3">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium">{t('account.profilePicture')}</p>
+                  <p className="text-sm font-medium">
+                    {t('account.profilePicture')}
+                  </p>
                   <img
                     src={user.image}
                     alt={t('account.profilePicture')}
@@ -183,9 +183,7 @@ function RouteComponent() {
               <Coins className="h-5 w-5" />
               {t('account.balance')}
             </CardTitle>
-            <CardDescription>
-              {t('account.balanceDescription')}
-            </CardDescription>
+            <CardDescription>{t('account.balanceDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             {balanceLoading ? (
@@ -203,7 +201,8 @@ function RouteComponent() {
                   </h4>
                   <div className="space-y-1 text-sm text-muted-foreground">
                     <p>
-                      {t('store.participants')}: {balance.playWithNumbers.participants}
+                      {t('store.participants')}:{' '}
+                      {balance.playWithNumbers.participants}
                     </p>
                     <p>
                       {t('store.images')}: {balance.playWithNumbers.images}
@@ -219,7 +218,8 @@ function RouteComponent() {
                   </h4>
                   <div className="space-y-1 text-sm text-muted-foreground">
                     <p>
-                      {t('store.participants')}: {balance.noNumbers.participants}
+                      {t('store.participants')}:{' '}
+                      {balance.noNumbers.participants}
                     </p>
                     <p>
                       {t('store.images')}: {balance.noNumbers.images}

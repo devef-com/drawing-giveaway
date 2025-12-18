@@ -151,10 +151,11 @@ export function PayoutProofUpload({
         </Card>
       ) : (
         <div
-          className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${disabled || isProcessing
+          className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+            disabled || isProcessing
               ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
               : 'border-gray-300 hover:border-cyan-500 cursor-pointer'
-            }`}
+          }`}
           onClick={() =>
             !disabled && !isProcessing && fileInputRef.current?.click()
           }

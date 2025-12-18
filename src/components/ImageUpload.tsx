@@ -104,9 +104,7 @@ export function ImageUpload({
       // Validate file types
       const validFiles = filesToProcess.filter((file) => {
         if (!isAllowedImageType(file.type)) {
-          toast.error(
-            t('image.upload.invalidFileType', { name: file.name }),
-          )
+          toast.error(t('image.upload.invalidFileType', { name: file.name }))
           return false
         }
         return true
@@ -489,16 +487,15 @@ export function ImageUpload({
         <>
           <p className="text-xs text-muted-foreground">
             {t('image.upload.clickToEdit')}
-            {images.length > 1
-              ? ` ${t('image.upload.setCover')}`
-              : ''}
+            {images.length > 1 ? ` ${t('image.upload.setCover')}` : ''}
           </p>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
             {images.map((image) => (
               <Card
                 key={image.id}
-                className={`group relative aspect-square overflow-hidden p-0 ${image.isCover ? 'ring-2 ring-primary ring-offset-2' : ''
-                  }`}
+                className={`group relative aspect-square overflow-hidden p-0 ${
+                  image.isCover ? 'ring-2 ring-primary ring-offset-2' : ''
+                }`}
               >
                 <img
                   src={image.previewUrl}
@@ -558,12 +555,13 @@ export function ImageUpload({
       {/* Upload area */}
       {canAddMore && (
         <div
-          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${disabled || isCompressing
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+            disabled || isCompressing
               ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
               : isDragging
                 ? 'border-primary bg-primary/10 cursor-pointer'
                 : 'border-gray-300 hover:border-primary cursor-pointer'
-            }`}
+          }`}
           onClick={() =>
             !disabled && !isCompressing && fileInputRef.current?.click()
           }

@@ -77,9 +77,7 @@ function StorePage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">{t('store.title')}</h1>
-            <p className="text-muted-foreground">
-              {t('store.subtitle')}
-            </p>
+            <p className="text-muted-foreground">{t('store.subtitle')}</p>
           </div>
           <Link to="/drawings/create">
             <Button>{t('store.createGiway')}</Button>
@@ -98,13 +96,12 @@ function StorePage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-lg border bg-muted/50">
-                  <p className="font-medium mb-2">
-                    {t('store.raffleBalance')}
-                  </p>
+                  <p className="font-medium mb-2">{t('store.raffleBalance')}</p>
                   <div className="flex gap-4 text-sm">
                     <span className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
-                      {balance.playWithNumbers.participants} {t('store.participants')}
+                      {balance.playWithNumbers.participants}{' '}
+                      {t('store.participants')}
                     </span>
                     <span className="flex items-center gap-1">
                       <Image className="h-4 w-4" />
@@ -117,7 +114,9 @@ function StorePage() {
                   </div>
                 </div>
                 <div className="p-4 rounded-lg border bg-muted/50">
-                  <p className="font-medium mb-2">{t('store.giveawayBalance')}</p>
+                  <p className="font-medium mb-2">
+                    {t('store.giveawayBalance')}
+                  </p>
                   <div className="flex gap-4 text-sm">
                     <span className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
@@ -167,7 +166,8 @@ function StorePage() {
                           <li className="flex items-center gap-2 text-sm">
                             <Users className="h-4 w-4 text-primary" />
                             <span>
-                              {pack.participants.toLocaleString()} {t('store.participants')}
+                              {pack.participants.toLocaleString()}{' '}
+                              {t('store.participants')}
                             </span>
                           </li>
                           <li className="flex items-center gap-2 text-sm">
@@ -241,7 +241,8 @@ function StorePage() {
                           <li className="flex items-center gap-2 text-sm">
                             <Users className="h-4 w-4 text-primary" />
                             <span>
-                              {pack.participants.toLocaleString()} {t('store.participants')}
+                              {pack.participants.toLocaleString()}{' '}
+                              {t('store.participants')}
                             </span>
                           </li>
                           <li className="flex items-center gap-2 text-sm">
@@ -254,7 +255,8 @@ function StorePage() {
                             <li className="flex items-center gap-2 text-sm">
                               <Mail className="h-4 w-4 text-primary" />
                               <span>
-                                {pack.emails.toLocaleString()} {t('store.emails')}
+                                {pack.emails.toLocaleString()}{' '}
+                                {t('store.emails')}
                               </span>
                             </li>
                           )}

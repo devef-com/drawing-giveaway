@@ -309,7 +309,7 @@
   "slot.reservation.failed": "Failed to save reservation. Please try again.",
   "slot.reservation.someNumbersFailed": "Some numbers could not be reserved. Please try again.",
   "slot.reservation.error": "An error occurred while reserving numbers",
-  
+
   "participantView.title": "Participant for Drawing - {{title}}",
   "participantView.status": "Status:",
   "participantView.statusApproved": "Approved",
@@ -318,7 +318,7 @@
   "participantView.pendingApproval": "Your participation is pending approval.",
   "participantView.downloadTicket": "Download ticket",
   "participantView.noData": "No participant data found.",
-  
+
   "manageParticipant.title": "Participant Information",
   "manageParticipant.name": "Name:",
   "manageParticipant.phone": "Phone:",
@@ -346,12 +346,12 @@
   "manageParticipant.updateFailed": "Failed to update participant status",
   "manageParticipant.updateSuccess": "Participant status updated successfully",
   "manageParticipant.fetchAssetsFailed": "Failed to fetch participant assets",
-  
+
   "slot.reservation.noReservation": "No reservation found. Please select numbers again.",
   "slot.reservation.expired": "Reservation expired. Please select numbers again.",
   "slot.reservation.invalid": "Invalid reservation. Please select numbers again.",
   "slot.reservation.expiredReserveAgain": "Reservation expired. Click 'Reserve again' to continue.",
-  
+
   "reserveForm.assetUpdateFailed": "Failed to update asset",
   "reserveForm.uploadProofRequired": "Please upload payment proof before registering",
   "reserveForm.fileTooLarge": "File size too large. Maximum allowed: 1MB",
@@ -379,7 +379,7 @@
   "reserveForm.numberReservedFor": "Your number {{plural}} {{is}} reserved for {{minutes}} minutes",
   "reserveForm.completeFormBeforeExpiry": "Complete the form before time expires",
   "reserveForm.leavePageWarning": "If you leave this page, your reservation will be released",
-  
+
   "createDrawing.title": "Create New Drawing",
   "createDrawing.yourBalance": "Your Balance",
   "createDrawing.raffleBalance": "Raffle: {{participants}} participants available",
@@ -432,7 +432,7 @@
   "createDrawing.failedToGetUploadUrl": "Failed to get upload URL",
   "createDrawing.failedToUploadToStorage": "Failed to upload to storage",
   "createDrawing.failedToCreateDrawing": "Failed to create drawing. Please try again.",
-  
+
   "editDrawing.title": "Edit Drawing",
   "editDrawing.titleLabel": "Title",
   "editDrawing.guidelinesOptional": "Guidelines (Optional)",
@@ -468,7 +468,7 @@
   "editDrawing.drawingNotFound": "Drawing not found",
   "editDrawing.updatedSuccessfully": "Drawing updated successfully",
   "editDrawing.failedToUpdate": "Failed to update drawing. Please try again.",
-  
+
   "drawingDetail.basicInfo": "Basic Info",
   "drawingDetail.type": "Type",
   "drawingDetail.paid": "Paid (${{price}})",

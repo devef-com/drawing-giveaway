@@ -172,7 +172,9 @@ function Login() {
               className="w-full h-11 bg-teal-primary hover:bg-teal-primary-dark text-white font-semibold text-base"
               disabled={loading}
             >
-              {loading ? t('auth.login.loggingIn') : t('auth.login.loginButton')}
+              {loading
+                ? t('auth.login.loggingIn')
+                : t('auth.login.loginButton')}
             </Button>
 
             <div className="hidden relative">

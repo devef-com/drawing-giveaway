@@ -112,7 +112,9 @@ function CreateDrawing() {
       setCouponCode('')
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : t('createDrawing.failedRedeemCoupon'),
+        error instanceof Error
+          ? error.message
+          : t('createDrawing.failedRedeemCoupon'),
       )
     }
   }
@@ -338,7 +340,9 @@ function CreateDrawing() {
           }).length
 
           if (failedCount > 0) {
-            toast.error(t('createDrawing.failedToUploadImages', { count: failedCount }))
+            toast.error(
+              t('createDrawing.failedToUploadImages', { count: failedCount }),
+            )
           }
         }
 
@@ -369,7 +373,9 @@ function CreateDrawing() {
             <div className="p-4 rounded-lg border bg-muted/50" id="balance">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm font-medium">{t('createDrawing.yourBalance')}</p>
+                  <p className="text-sm font-medium">
+                    {t('createDrawing.yourBalance')}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {formData.playWithNumbers
                       ? t('createDrawing.raffleBalance', {
@@ -472,7 +478,9 @@ function CreateDrawing() {
             {/* </div> */}
 
             <div>
-              <Label className="mb-2">{t('createDrawing.guidelinesOptional')}</Label>
+              <Label className="mb-2">
+                {t('createDrawing.guidelinesOptional')}
+              </Label>
               <div className="relative">
                 <textarea
                   value={currentGuideline}
@@ -678,13 +686,17 @@ function CreateDrawing() {
                 disabled={!formData.playWithNumbers}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t('createDrawing.winnerSelectionMethod')} />
+                  <SelectValue
+                    placeholder={t('createDrawing.winnerSelectionMethod')}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="manually">
                     {t('createDrawing.enterNumberManually')}
                   </SelectItem>
-                  <SelectItem value="system">{t('createDrawing.systemGenerated')}</SelectItem>
+                  <SelectItem value="system">
+                    {t('createDrawing.systemGenerated')}
+                  </SelectItem>
                 </SelectContent>
               </Select>
               {formData.winnerSelection === 'manually' ? (
@@ -787,7 +799,9 @@ function CreateDrawing() {
                   </DrawerTrigger>
                   <DrawerContent className="max-h-full">
                     <DrawerHeader>
-                      <DrawerTitle>{t('createDrawing.selectEndDateTime')}</DrawerTitle>
+                      <DrawerTitle>
+                        {t('createDrawing.selectEndDateTime')}
+                      </DrawerTitle>
                       {/* <DrawerDescription>
                         Choose when the drawing should end
                       </DrawerDescription> */}
@@ -810,7 +824,9 @@ function CreateDrawing() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="justify-center text-md">{t('createDrawing.time')}</Label>
+                        <Label className="justify-center text-md">
+                          {t('createDrawing.time')}
+                        </Label>
                         <div className="flex gap-2 items-center justify-center">
                           <Select
                             value={selectedTime.hours}
@@ -1031,7 +1047,9 @@ function CreateDrawing() {
 
                 // className="bg-cyan-600 hover:bg-cyan-700"
               >
-                {isSubmitting ? t('createDrawing.creating') : t('createDrawing.createDrawing')}
+                {isSubmitting
+                  ? t('createDrawing.creating')
+                  : t('createDrawing.createDrawing')}
               </Button>
             </div>
           </form>

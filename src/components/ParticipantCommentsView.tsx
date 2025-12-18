@@ -101,10 +101,11 @@ export function ParticipantCommentsView({
           comments.map((comment) => (
             <div
               key={comment.id}
-              className={`rounded-lg p-3 ${comment.authorType === 'host'
-                ? 'bg-gray-50 dark:bg-gray-800'
-                : 'bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800'
-                }`}
+              className={`rounded-lg p-3 ${
+                comment.authorType === 'host'
+                  ? 'bg-gray-50 dark:bg-gray-800'
+                  : 'bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800'
+              }`}
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-semibold">

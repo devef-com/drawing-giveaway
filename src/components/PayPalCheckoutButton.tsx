@@ -141,7 +141,11 @@ export function PayPalCheckoutButton({
           setError(t('checkout.paypal.loadFailed'))
         } else {
           // Keep server responses (if any), otherwise fall back to a friendly, translated message
-          setError(code && !code.startsWith('PAYPAL_') ? code : t('checkout.paypal.loadFailed'))
+          setError(
+            code && !code.startsWith('PAYPAL_')
+              ? code
+              : t('checkout.paypal.loadFailed'),
+          )
         }
       } finally {
         setIsLoading(false)

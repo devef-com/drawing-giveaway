@@ -234,7 +234,7 @@ function SlotDrawingParticipation() {
       drawing.isPaid
         ? t('slot.howItWorks.selectNumberMultiple')
         : t('slot.howItWorks.selectNumberSingle'),
-    [drawing.isPaid, t]
+    [drawing.isPaid, t],
   )
 
   const numberTypeText = useMemo(
@@ -242,7 +242,7 @@ function SlotDrawingParticipation() {
       drawing.isPaid
         ? t('slot.howItWorks.reservationNumbers')
         : t('slot.howItWorks.reservationNumber'),
-    [drawing.isPaid, t]
+    [drawing.isPaid, t],
   )
 
   // Fetch drawing details
@@ -507,7 +507,9 @@ function SlotDrawingParticipation() {
       <div className="min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
-            <p className="text-white text-center text-xl">{t('slot.drawingNotFound')}</p>
+            <p className="text-white text-center text-xl">
+              {t('slot.drawingNotFound')}
+            </p>
             <div className="text-center mt-4">
               <Button
                 onClick={() => navigate({ to: '/' })}
@@ -596,13 +598,18 @@ function SlotDrawingParticipation() {
             ) : winnersData?.winners && winnersData.winners.length > 0 ? (
               <div>
                 <p className="text-amber-700 dark:text-amber-300 mb-3">
-                  {t('slot.congratulations', { plural: winnersData.winners.length > 1 ? 's' : '' })}
+                  {t('slot.congratulations', {
+                    plural: winnersData.winners.length > 1 ? 's' : '',
+                  })}
                 </p>
                 {winnersData.winnerNumbers &&
                   winnersData.winnerNumbers.length > 0 && (
                     <div className="mb-3">
                       <p className="text-sm text-amber-600 dark:text-amber-400 mb-1">
-                        {t('slot.winningNumber', { plural: winnersData.winnerNumbers.length > 1 ? 's' : '' })}
+                        {t('slot.winningNumber', {
+                          plural:
+                            winnersData.winnerNumbers.length > 1 ? 's' : '',
+                        })}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {winnersData.winnerNumbers.map((num) => (
@@ -852,28 +859,24 @@ function SlotDrawingParticipation() {
               <>
                 <li>
                   {t('slot.howItWorks.selectNumber', {
-                    selectType: selectTypeText
+                    selectType: selectTypeText,
                   })}
                 </li>
                 <li>{t('slot.howItWorks.clickArrow')}</li>
                 <li>
                   {t('slot.howItWorks.reservation', {
                     numberType: numberTypeText,
-                    minutes: reservationTimeData?.reservationTimeMinutes || 4
+                    minutes: reservationTimeData?.reservationTimeMinutes || 4,
                   })}
                 </li>
                 <li>{t('slot.howItWorks.completeForm')}</li>
-                {drawing.isPaid && (
-                  <li>{t('slot.howItWorks.uploadProof')}</li>
-                )}
+                {drawing.isPaid && <li>{t('slot.howItWorks.uploadProof')}</li>}
                 <li>{t('slot.howItWorks.waitForDrawing')}</li>
               </>
             ) : (
               <>
                 <li>{t('slot.howItWorks.fillForm')}</li>
-                {drawing.isPaid && (
-                  <li>{t('slot.howItWorks.uploadProof')}</li>
-                )}
+                {drawing.isPaid && <li>{t('slot.howItWorks.uploadProof')}</li>}
                 <li>{t('slot.howItWorks.randomSelection')}</li>
               </>
             )}
