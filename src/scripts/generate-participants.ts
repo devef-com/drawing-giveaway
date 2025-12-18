@@ -2,6 +2,7 @@ import { config } from 'dotenv'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
 import { eq, and } from 'drizzle-orm'
+import { nanoid } from 'nanoid'
 import { parseArgs } from 'util'
 import * as schema from '../db/schema'
 
@@ -203,6 +204,7 @@ async function generateParticipants(drawingId: string, amount: number) {
     const [participant] = await db
       .insert(schema.participants)
       .values({
+        id: nanoid(5),
         drawingId,
         name,
         phone: generateRandomPhone(),
