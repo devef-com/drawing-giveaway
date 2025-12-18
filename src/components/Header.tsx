@@ -179,7 +179,7 @@ export default function Header() {
         </div>
 
         {/* User Info */}
-        <div className="px-4 py-3 border-b border-border">
+        <div className="hidden px-4 py-3 border-b border-border">
           <p className="text-sm text-muted-foreground">username@domain.com</p>
         </div>
 
@@ -204,7 +204,7 @@ export default function Header() {
         {/* Theme Switcher */}
         <div className="p-4 border-t border-border">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Theme</span>
+            <span className="text-sm text-muted-foreground">{t("theme.label")}</span>
             <ThemeSwitcher />
           </div>
         </div>

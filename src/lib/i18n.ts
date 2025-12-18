@@ -1,5 +1,5 @@
 import { createIsomorphicFn } from '@tanstack/react-start'
-import { getCookie } from '@tanstack/react-start/server'
+import { getCookie, getRequest } from '@tanstack/react-start/server'
 import i18n from 'i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import { initReactI18next } from 'react-i18next'
@@ -36,9 +36,39 @@ i18n
     interpolation: { escapeValue: false },
   })
 
+const supportedLngs = ['en', 'es'] as const
+type SupportedLng = (typeof supportedLngs)[number]
+
+function pickSupportedLanguage(
+  acceptLanguageHeader: string | null,
+): SupportedLng | null {
+  if (!acceptLanguageHeader) return null
+
+  // Example: "es-ES,es;q=0.9,en;q=0.8"
+  const parts = acceptLanguageHeader
+    .split(',')
+    .map((p) => p.trim().split(';')[0])
+    .filter(Boolean)
+
+  for (const tag of parts) {
+    const base = tag.toLowerCase().split('-')[0] as SupportedLng
+    if ((supportedLngs as readonly string[]).includes(base)) return base
+  }
+
+  return null
+}
+
 export const setSSRLanguage = createIsomorphicFn().server(async () => {
-  const language = getCookie(i18nCookieName)
-  await i18n.changeLanguage(language || 'en')
+  const req = getRequest()
+
+  const cookieLng = getCookie(i18nCookieName) as string | undefined
+  const headerLng = pickSupportedLanguage(req.headers.get('accept-language'))
+  console.log('Detected languages:', { cookieLng, headerLng })
+
+  const language = (cookieLng || headerLng || 'en') as SupportedLng
+  console.log('Setting SSR language to:', language)
+
+  await i18n.changeLanguage(language)
 })
 
 export default i18n
