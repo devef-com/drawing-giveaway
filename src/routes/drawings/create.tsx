@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { format } from 'date-fns'
+import { useTranslation } from 'react-i18next'
 import {
   AlertCircle,
   CalendarIcon,
@@ -64,6 +65,7 @@ export const Route = createFileRoute('/drawings/create')({
 })
 
 function CreateDrawing() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { session } = Route.useLoaderData()
   const { data: balance, isLoading: isBalanceLoading } =
@@ -102,12 +104,15 @@ function CreateDrawing() {
     try {
       const result = await redeemCoupon.mutateAsync({ code: couponCode.trim() })
       toast.success(result.message, {
-        description: `+${result.rewards.participants} participants, +${result.rewards.images} images`,
+        description: t('createDrawing.couponRedeemed', {
+          participants: result.rewards.participants,
+          images: result.rewards.images,
+        }),
       })
       setCouponCode('')
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Failed to redeem coupon',
+        error instanceof Error ? error.message : t('createDrawing.failedRedeemCoupon'),
       )
     }
   }
@@ -197,7 +202,7 @@ function CreateDrawing() {
 
     // Validate endAt before submission
     if (!formData.endAt) {
-      setEndAtError('Please select an end date and time')
+      setEndAtError(t('createDrawing.pleaseSelectEndDateTime'))
       const endAtSection = document.getElementById('endAt-section')
       if (endAtSection) {
         endAtSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -211,7 +216,10 @@ function CreateDrawing() {
       formData.quantityOfNumbers > maxParticipants
     ) {
       setBalanceError(
-        `Insufficient balance. You need ${formData.quantityOfNumbers} participants but only have ${maxParticipants} available.`,
+        t('createDrawing.insufficientBalanceMessage', {
+          needed: formData.quantityOfNumbers,
+          available: maxParticipants,
+        }),
       )
 
       return
@@ -268,7 +276,7 @@ function CreateDrawing() {
                 `Failed to get upload URL: ${uploadUrlResponse.status}`,
                 errorData,
               )
-              throw new Error('Failed to get upload URL')
+              throw new Error(t('createDrawing.failedToGetUploadUrl'))
             }
 
             const { uploadUrl, s3Key, publicUrl } =
@@ -287,7 +295,7 @@ function CreateDrawing() {
               console.error(
                 `Failed to upload to storage: ${uploadResponse.status}`,
               )
-              throw new Error('Failed to upload to storage')
+              throw new Error(t('createDrawing.failedToUploadToStorage'))
             }
 
             // 3. Confirm upload and save asset metadata
@@ -330,7 +338,7 @@ function CreateDrawing() {
           }).length
 
           if (failedCount > 0) {
-            toast.error(`Failed to upload ${failedCount} image(s)`)
+            toast.error(t('createDrawing.failedToUploadImages', { count: failedCount }))
           }
         }
 
@@ -340,7 +348,7 @@ function CreateDrawing() {
         if (error.error === 'Insufficient balance') {
           setBalanceError(error.message)
         } else {
-          alert(error.message || 'Failed to create drawing. Please try again.')
+          alert(error.message || t('createDrawing.failedToCreateDrawing'))
         }
       }
     } catch (error) {
@@ -354,23 +362,27 @@ function CreateDrawing() {
     <div className="min-h-screen p-6">
       <div className="max-w-2xl mx-auto">
         <Card className="p-6">
-          <h1 className="text-xl font-bold mb-2">Create New Drawing</h1>
+          <h1 className="text-xl font-bold mb-2">{t('createDrawing.title')}</h1>
 
           {/* Balance Info */}
           {!isBalanceLoading && balance && (
             <div className="p-4 rounded-lg border bg-muted/50" id="balance">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm font-medium">Your Balance</p>
+                  <p className="text-sm font-medium">{t('createDrawing.yourBalance')}</p>
                   <p className="text-xs text-muted-foreground">
                     {formData.playWithNumbers
-                      ? `Raffle: ${balance.playWithNumbers.participants} participants available`
-                      : `Giveaway: ${balance.noNumbers.participants} participants available`}
+                      ? t('createDrawing.raffleBalance', {
+                          participants: balance.playWithNumbers.participants,
+                        })
+                      : t('createDrawing.giveawayBalance', {
+                          participants: balance.noNumbers.participants,
+                        })}
                   </p>
                 </div>
                 <Link to="/store">
                   <Button variant="outline" size="sm">
-                    Get More
+                    {t('createDrawing.getMore')}
                   </Button>
                 </Link>
               </div>
@@ -378,17 +390,17 @@ function CreateDrawing() {
           )}
 
           {/* Coupon Code Section */}
-          <Expandable title="Have a coupon code?">
+          <Expandable title={t('createDrawing.haveCoupon')}>
             <ExpandableTitle className="flex">
               <span className="flex gap-2 items-center">
                 <Ticket className="h-4 w-4" />
-                Have a coupon?
+                {t('createDrawing.haveCoupon')}
               </span>
             </ExpandableTitle>
             <ExpandableContent>
               <div className="flex gap-2 mt-2">
                 <Input
-                  placeholder="Enter coupon code"
+                  placeholder={t('createDrawing.enterCouponCode')}
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   className="flex-1"
@@ -408,7 +420,7 @@ function CreateDrawing() {
                   {redeemCoupon.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    'Redeem'
+                    t('createDrawing.redeem')
                   )}
                 </Button>
               </div>
@@ -418,7 +430,7 @@ function CreateDrawing() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <Label htmlFor="title" className="mb-1">
-                Title
+                {t('createDrawing.titleLabel')}
               </Label>
               <Input
                 id="title"
@@ -446,13 +458,13 @@ function CreateDrawing() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-muted-foreground">
-                    No image uploads available
+                    {t('createDrawing.noImagesAvailable')}
                   </p>
                   <Link
                     to="/store"
                     className="text-xs text-primary hover:underline"
                   >
-                    Get a pack to add images
+                    {t('createDrawing.getPackToAddImages')}
                   </Link>
                 </div>
               </div>
@@ -460,7 +472,7 @@ function CreateDrawing() {
             {/* </div> */}
 
             <div>
-              <Label className="mb-2">Guidelines (Optional)</Label>
+              <Label className="mb-2">{t('createDrawing.guidelinesOptional')}</Label>
               <div className="relative">
                 <textarea
                   value={currentGuideline}
@@ -472,7 +484,7 @@ function CreateDrawing() {
                       ;(e.target as HTMLTextAreaElement).style.height = 'auto'
                     }
                   }}
-                  placeholder="Enter guideline text..."
+                  placeholder={t('createDrawing.enterGuidelineText')}
                   className="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 pr-24 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none overflow-hidden"
                   style={{
                     height: 'auto',
@@ -545,7 +557,7 @@ function CreateDrawing() {
             {/* Paid Event Switch */}
             <div className="flex items-center justify-between rounded-lg border p-4">
               <Label htmlFor="isPaid" className="flex-1">
-                Paid
+                {t('createDrawing.paid')}
               </Label>
               <Switch
                 id="isPaid"
@@ -559,7 +571,7 @@ function CreateDrawing() {
             {formData.isPaid && (
               <div>
                 <Label htmlFor="price" className="mb-1">
-                  Price
+                  {t('createDrawing.priceLabel')}
                 </Label>
                 <Input
                   id="price"
@@ -580,7 +592,7 @@ function CreateDrawing() {
             {/* Play with Numbers Switch */}
             <div className="flex items-center justify-between rounded-lg border p-4">
               <Label htmlFor="playWithNumbers" className="flex-1">
-                Play with numbers
+                {t('createDrawing.playWithNumbers')}
               </Label>
               <Switch
                 id="playWithNumbers"
@@ -601,13 +613,14 @@ function CreateDrawing() {
             {formData.playWithNumbers ? (
               <p className="text-xs text-muted-foreground -mt-4">
                 {formData.isPaid
-                  ? 'Participants can choose multiple numbers.'
-                  : 'Participants can choose a single number. Max participants: ' +
-                    formData.quantityOfNumbers}
+                  ? t('createDrawing.participantsChooseMultiple')
+                  : t('createDrawing.participantsChooseSingle', {
+                      max: formData.quantityOfNumbers,
+                    })}
               </p>
             ) : (
               <p className="text-xs text-muted-foreground -mt-4">
-                The System will choose the winners amount the participants
+                {t('createDrawing.systemChoosesWinners')}
               </p>
             )}
 
@@ -615,7 +628,7 @@ function CreateDrawing() {
             {formData.playWithNumbers && (
               <div>
                 <Label htmlFor="quantityOfNumbers" className="mb-1">
-                  Quantity of Numbers
+                  {t('createDrawing.quantityOfNumbers')}
                 </Label>
                 <Input
                   id="quantityOfNumbers"
@@ -635,11 +648,14 @@ function CreateDrawing() {
                   }}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  System will generate {formData.quantityOfNumbers} numbers to
-                  play.
+                  {t('createDrawing.systemWillGenerate', {
+                    quantity: formData.quantityOfNumbers,
+                  })}
                   {maxParticipants > 0 && (
                     <span className="block text-primary">
-                      Max available from your balance: {maxParticipants}
+                      {t('createDrawing.maxAvailableFromBalance', {
+                        max: maxParticipants,
+                      })}
                     </span>
                   )}
                 </p>
@@ -649,7 +665,7 @@ function CreateDrawing() {
             {/* Winner Selection Method */}
             <div>
               <Label htmlFor="winnerSelection" className="mb-1">
-                Winner Selection Method
+                {t('createDrawing.winnerSelectionMethod')}
               </Label>
               <Select
                 value={formData.winnerSelection}
@@ -662,28 +678,27 @@ function CreateDrawing() {
                 disabled={!formData.playWithNumbers}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select winner selection method" />
+                  <SelectValue placeholder={t('createDrawing.winnerSelectionMethod')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="manually">
-                    Enter number manually
+                    {t('createDrawing.enterNumberManually')}
                   </SelectItem>
-                  <SelectItem value="system">System generated</SelectItem>
+                  <SelectItem value="system">{t('createDrawing.systemGenerated')}</SelectItem>
                 </SelectContent>
               </Select>
               {formData.winnerSelection === 'manually' ? (
                 <p className="text-xs text-muted-foreground mt-1">
-                  User must enter the winner numbers once the giway ends.
+                  {t('createDrawing.userMustEnterWinnerNumbers')}
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground mt-1">
-                  The system will choose randomly the eligible winners. You can
-                  re-run this to select them again.
+                  {t('createDrawing.systemWillChooseRandomly')}
                 </p>
               )}
               {!formData.playWithNumbers && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  Not allowed to change for this giway.
+                  {t('createDrawing.notAllowedToChange')}
                 </p>
               )}
             </div>
@@ -691,7 +706,7 @@ function CreateDrawing() {
             {/* Number of Winners */}
             <div>
               <Label htmlFor="winnersAmount" className="mb-1">
-                Numbers of winners
+                {t('createDrawing.numbersOfWinners')}
               </Label>
               <Input
                 id="winnersAmount"
@@ -707,7 +722,7 @@ function CreateDrawing() {
                 }}
                 onInvalid={(e) => {
                   ;(e.target as HTMLInputElement).setCustomValidity(
-                    'Please enter a number greater than 0',
+                    t('createDrawing.pleaseEnterNumberGreaterThanZero'),
                   )
                 }}
                 onInput={(e) => {
@@ -718,7 +733,7 @@ function CreateDrawing() {
             </div>
 
             <div id="endAt-section">
-              <Label className="mb-1">End Date & Time</Label>
+              <Label className="mb-1">{t('createDrawing.endDateTime')}</Label>
               {endAtError && (
                 <p className="text-sm text-destructive mt-1 mb-2">
                   {endAtError}
@@ -732,7 +747,7 @@ function CreateDrawing() {
                   className="text-xs font-thin"
                   onClick={() => handleQuickPreset(168)}
                 >
-                  Next week
+                  {t('createDrawing.nextWeek')}
                 </Button>
                 <Button
                   type="button"
@@ -741,7 +756,7 @@ function CreateDrawing() {
                   className="text-xs font-thin"
                   onClick={() => handleQuickPreset(360)}
                 >
-                  15 days
+                  {t('createDrawing.fifteenDays')}
                 </Button>
                 <Button
                   type="button"
@@ -750,7 +765,7 @@ function CreateDrawing() {
                   className="text-xs font-thin"
                   onClick={() => handleQuickPreset(720)}
                 >
-                  Next Month
+                  {t('createDrawing.nextMonth')}
                 </Button>
               </div>
 
@@ -772,7 +787,7 @@ function CreateDrawing() {
                   </DrawerTrigger>
                   <DrawerContent className="max-h-full">
                     <DrawerHeader>
-                      <DrawerTitle>Select End Date & Time</DrawerTitle>
+                      <DrawerTitle>{t('createDrawing.selectEndDateTime')}</DrawerTitle>
                       {/* <DrawerDescription>
                         Choose when the drawing should end
                       </DrawerDescription> */}
@@ -795,7 +810,7 @@ function CreateDrawing() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="justify-center text-md">Time</Label>
+                        <Label className="justify-center text-md">{t('createDrawing.time')}</Label>
                         <div className="flex gap-2 items-center justify-center">
                           <Select
                             value={selectedTime.hours}
@@ -861,11 +876,11 @@ function CreateDrawing() {
                           onClick={handleDateTimeConfirm}
                           disabled={!selectedDate}
                         >
-                          Confirm
+                          {t('createDrawing.confirm')}
                         </Button>
                         <DrawerClose asChild>
                           <Button variant="outline" className="w-1/2">
-                            Cancel
+                            {t('createDrawing.cancel')}
                           </Button>
                         </DrawerClose>
                       </DrawerFooter>
@@ -884,7 +899,7 @@ function CreateDrawing() {
                       {formData.endAt ? (
                         format(new Date(formData.endAt), 'PPP p')
                       ) : (
-                        <span>Pick a date and time</span>
+                        <span>{t('createDrawing.pickDateTime')}</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -901,7 +916,7 @@ function CreateDrawing() {
                       />
 
                       <div className="space-y-2 px-4">
-                        <Label>Time</Label>
+                        <Label>{t('createDrawing.time')}</Label>
                         <div className="flex gap-2 items-center">
                           <Select
                             value={selectedTime.hours}
@@ -968,14 +983,14 @@ function CreateDrawing() {
                           onClick={handleDateTimeConfirm}
                           disabled={!selectedDate}
                         >
-                          Confirm
+                          {t('createDrawing.confirm')}
                         </Button>
                         <Button
                           className="flex-1"
                           variant="outline"
                           onClick={() => setIsOpen(false)}
                         >
-                          Cancel
+                          {t('createDrawing.cancel')}
                         </Button>
                       </div>
                     </div>
@@ -989,14 +1004,14 @@ function CreateDrawing() {
               className={cn('mb-6', balanceError ? '' : 'hidden')}
             >
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Insufficient Balance</AlertTitle>
+              <AlertTitle>{t('createDrawing.insufficientBalance')}</AlertTitle>
               <AlertDescription>
                 {balanceError}{' '}
                 <Link
                   to="/store"
                   className="underline font-medium hover:no-underline"
                 >
-                  Get more packs
+                  {t('createDrawing.getMorePacks')}
                 </Link>
               </AlertDescription>
             </Alert>
@@ -1007,7 +1022,7 @@ function CreateDrawing() {
                 onClick={() => navigate({ to: '/drawings' })}
                 variant="outline"
               >
-                Cancel
+                {t('createDrawing.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -1016,7 +1031,7 @@ function CreateDrawing() {
 
                 // className="bg-cyan-600 hover:bg-cyan-700"
               >
-                {isSubmitting ? 'Creating...' : 'Create Drawing'}
+                {isSubmitting ? t('createDrawing.creating') : t('createDrawing.createDrawing')}
               </Button>
             </div>
           </form>

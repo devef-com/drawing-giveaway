@@ -6,6 +6,7 @@ import { ArrowLeft, CircleAlert, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { eq } from 'drizzle-orm/sql'
 import z from 'zod'
+import { useTranslation } from 'react-i18next'
 import type { Participant } from '@/db/schema'
 import { assets } from '@/db/schema'
 import { db } from '@/db/index'
@@ -36,7 +37,7 @@ export const updateAssetModelId = createServerFn({ method: 'POST' })
       return { success: true }
     } catch (error) {
       console.error('Error updating asset modelId:', error)
-      throw new Error('Failed to update asset')
+      throw new Error(t('reserveForm.assetUpdateFailed'))
     }
   })
 
@@ -45,6 +46,7 @@ export const Route = createFileRoute('/slot/$drawingId/$numberToReserve')({
 })
 
 function ReserveNumberForm() {
+  const { t } = useTranslation()
   const { drawingId, numberToReserve } = Route.useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -111,7 +113,7 @@ function ReserveNumberForm() {
     const storedReservation = localStorage.getItem(reservationKey)
     console.log(window.location)
     if (!storedReservation) {
-      toast.error('No reservation found. Please select numbers again.')
+      toast.error(t('slot.reservation.noReservation'))
       // navigate({
       //   to: '/slot/$drawingId',
       //   params: { drawingId },
@@ -139,7 +141,7 @@ function ReserveNumberForm() {
       }
 
       releaseReservation()
-      toast.error('Reservation expired. Please select numbers again.')
+      toast.error(t('slot.reservation.expired'))
       // navigate({
       //   to: '/slot/$drawingId',
       //   params: { drawingId },
@@ -147,7 +149,7 @@ function ReserveNumberForm() {
       // })
     } catch {
       releaseReservation()
-      toast.error('Invalid reservation. Please select numbers again.')
+      toast.error(t('slot.reservation.invalid'))
       // navigate({
       //   to: '/slot/$drawingId',
       //   params: { drawingId },
@@ -183,7 +185,7 @@ function ReserveNumberForm() {
         })
 
         // queryClient.invalidateQueries({ queryKey: ['number-slots', drawingId] })
-        toast.error('Reservation expired. Click "Reserve again" to continue.')
+        toast.error(t('slot.reservation.expiredReserveAgain'))
       }
     }
 
@@ -278,7 +280,7 @@ function ReserveNumberForm() {
 
     // If the drawing is paid and no payout proof is uploaded, show error
     if (drawing?.isPaid && !payoutProofFile) {
-      toast.error('Please upload payment proof before registering')
+      toast.error(t('reserveForm.uploadProofRequired'))
       return
     }
 
@@ -305,11 +307,11 @@ function ReserveNumberForm() {
             uploadUrlResponse.status === 413 ||
             error.error?.includes('too large')
           ) {
-            throw new Error('File size too large. Maximum allowed: 1MB')
+            throw new Error(t('reserveForm.fileTooLarge'))
           } else if (uploadUrlResponse.status === 400) {
-            throw new Error(error.error || 'Invalid file type or size')
+            throw new Error(error.error || t('reserveForm.invalidFileType'))
           }
-          throw new Error(error.error || 'Failed to get upload URL')
+          throw new Error(error.error || t('reserveForm.getUploadUrlFailed'))
         }
 
         const { uploadUrl, s3Key, publicUrl } = await uploadUrlResponse.json()
@@ -325,9 +327,9 @@ function ReserveNumberForm() {
 
         if (!uploadResponse.ok) {
           if (uploadResponse.status === 403) {
-            throw new Error('Upload URL expired. Please try again')
+            throw new Error(t('reserveForm.uploadUrlExpired'))
           }
-          throw new Error('Failed to upload file. Please try again')
+          throw new Error(t('reserveForm.uploadFileFailed'))
         }
 
         // 3. Confirm upload and save asset metadata
@@ -344,7 +346,7 @@ function ReserveNumberForm() {
 
         if (!confirmResponse.ok) {
           const error = await confirmResponse.json()
-          throw new Error(error.error || 'Failed to save asset')
+          throw new Error(error.error || t('reserveForm.saveAssetFailed'))
         }
 
         const { asset } = await confirmResponse.json()
@@ -354,7 +356,7 @@ function ReserveNumberForm() {
         toast.error(
           error instanceof Error
             ? error.message
-            : 'Failed to upload payment proof',
+            : t('reserveForm.uploadPaymentProofFailed'),
         )
         return
       } finally {
@@ -405,15 +407,15 @@ function ReserveNumberForm() {
         // Reset the timer by updating the timestamp
         setReservationTimestamp(Date.now())
 
-        toast.success('Numbers reserved successfully!')
+        toast.success(t('reserveForm.numbersReservedSuccess'))
       } else {
         toast.error(
-          'Some numbers could not be reserved. They may have been taken.',
+          t('reserveForm.someNumbersReserveFailed'),
         )
       }
     } catch (error) {
       console.error('Error reserving numbers again:', error)
-      toast.error('Error reserving numbers again')
+      toast.error(t('reserveForm.reserveAgainError'))
     }
   }
 
@@ -424,7 +426,7 @@ function ReserveNumberForm() {
           <Card className="p-6">
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>
-              <p className="ml-4">Loading...</p>
+              <p className="ml-4">{t('common.loading')}</p>
             </div>
           </Card>
         </div>
@@ -437,13 +439,13 @@ function ReserveNumberForm() {
       <div className="min-h-screen bg-background-light dark:bg-background-dark p-6">
         <div className="max-w-2xl mx-auto">
           <Card className="p-6">
-            <p className="text-center text-xl">Drawing not found</p>
+            <p className="text-center text-xl">{t('slot.drawingNotFound')}</p>
             <div className="text-center mt-4">
               <Button
                 onClick={() => navigate({ to: '/' })}
                 className="bg-cyan-600 hover:bg-cyan-700"
               >
-                Go Home
+                {t('slot.goHome')}
               </Button>
             </div>
           </Card>
@@ -462,10 +464,10 @@ function ReserveNumberForm() {
             className="flex items-center gap-2 text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary mb-4"
           >
             <ArrowLeft size={20} />
-            <span>Back</span>
+            <span>{t('reserveForm.back')}</span>
           </button>
           <h1 className="text-2xl font-semibold text-text-light-primary dark:text-text-dark-primary mb-2">
-            Confirm Your Registration
+            {t('reserveForm.confirmRegistration')}
           </h1>
           <div>
             <p
@@ -483,7 +485,7 @@ function ReserveNumberForm() {
                 onClick={() => setIsTitleExpanded(!isTitleExpanded)}
                 className="text-cyan-600 dark:text-cyan-400 text-sm hover:underline mt-1"
               >
-                {isTitleExpanded ? 'less' : 'more'}
+                {isTitleExpanded ? t('drawing.header.less') : t('drawing.header.more')}
               </button>
             )}
           </div>
@@ -492,7 +494,7 @@ function ReserveNumberForm() {
         {/* Selected Numbers Info */}
         <Card className="p-4 mb-6 border border-gray-300 dark:border-gray-600">
           <h2 className="text-center text-xl font-semibold text-gray-700 dark:text-gray-300 mb-0">
-            Selected Numbers
+            {t('reserveForm.selectedNumbers')}
           </h2>
           <div className="flex justify-center gap-3 flex-wrap">
             {selectedNumbers.map((num) => (
@@ -518,11 +520,10 @@ function ReserveNumberForm() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-orange-900 dark:text-orange-100">
-                    Time Remaining
+                    {t('reserveForm.timeRemaining')}
                   </p>
                   <p className="text-xs text-orange-700 dark:text-orange-300">
-                    Complete your registration before time runs out. If the
-                    timer reaches zero, your reserved numbers will be released.
+                    {t('reserveForm.completeBeforeExpiry')}
                   </p>
                 </div>
               </div>
@@ -535,13 +536,13 @@ function ReserveNumberForm() {
                   )}
                 </p>
                 <p className="text-xs text-orange-600 dark:text-orange-400">
-                  minutes
+                  {t('reserveForm.minutes')}
                 </p>
               </div>
             </div>
             {timeRemaining === 0 && (
               <Button className="max-w-max self-end" onClick={reserveAgain}>
-                Reserve again
+                {t('reserveForm.reserveAgain')}
               </Button>
             )}
           </Card>
@@ -555,7 +556,7 @@ function ReserveNumberForm() {
                 htmlFor="name"
                 className="text-text-light-primary dark:text-text-dark-primary mb-1"
               >
-                Full Name *
+                {t('slot.form.fullName')} *
               </Label>
               <Input
                 id="name"
@@ -564,7 +565,7 @@ function ReserveNumberForm() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                placeholder="Enter your full name"
+                placeholder={t('slot.form.fullNamePlaceholder')}
                 className="bg-white dark:bg-slate-700 text-text-light-primary dark:text-text-dark-primary border-gray-300 dark:border-slate-600 focus:border-cyan-500"
               />
             </div>
@@ -574,7 +575,7 @@ function ReserveNumberForm() {
                 htmlFor="email"
                 className="text-text-light-primary dark:text-text-dark-primary mb-1"
               >
-                Email (Optional)
+                {t('slot.form.emailOptional')}
               </Label>
               <Input
                 id="email"
@@ -583,7 +584,7 @@ function ReserveNumberForm() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                placeholder="your@email.com"
+                placeholder={t('slot.form.emailPlaceholder')}
                 className="bg-white dark:bg-slate-700 text-text-light-primary dark:text-text-dark-primary border-gray-300 dark:border-slate-600 focus:border-cyan-500"
               />
             </div>
@@ -593,7 +594,7 @@ function ReserveNumberForm() {
                 htmlFor="phone"
                 className="text-text-light-primary dark:text-text-dark-primary mb-1"
               >
-                Phone Number *
+                {t('slot.form.phone')} *
               </Label>
               <Input
                 id="phone"
@@ -603,7 +604,7 @@ function ReserveNumberForm() {
                   setFormData({ ...formData, phone: e.target.value })
                 }
                 required
-                placeholder="+1 (555) 000-0000"
+                placeholder={t('slot.form.phonePlaceholder')}
                 className="bg-white dark:bg-slate-700 text-text-light-primary dark:text-text-dark-primary border-gray-300 dark:border-slate-600 focus:border-cyan-500"
               />
             </div>
@@ -615,11 +616,10 @@ function ReserveNumberForm() {
                     <CircleAlert className="w-6 h-6 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
                     <div>
                       <p className="text-yellow-800 dark:text-yellow-200 font-medium">
-                        Payment Required
+                        {t('slot.form.paymentRequired')}
                       </p>
                       <p className="text-yellow-700 dark:text-yellow-100 text-sm mt-1">
-                        This is a paid event. Please upload your payment proof
-                        to confirm your participation.
+                        {t('reserveForm.paidEventUploadProof')}
                       </p>
                     </div>
                   </div>
@@ -630,7 +630,7 @@ function ReserveNumberForm() {
                     htmlFor="payoutProof"
                     className="text-text-light-primary dark:text-text-dark-primary mb-2 block"
                   >
-                    Payment Proof *
+                    {t('reserveForm.paymentProof')}
                   </Label>
                   <PayoutProofUpload
                     onFileChange={setPayoutProofFile}
@@ -648,7 +648,7 @@ function ReserveNumberForm() {
                 disabled={participateMutation.isPending || isUploadingProof}
                 className="flex-1"
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -662,10 +662,10 @@ function ReserveNumberForm() {
                 {participateMutation.isPending || isUploadingProof ? (
                   <span className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    {isUploadingProof ? 'Uploading...' : 'Registering...'}
+                    {isUploadingProof ? t('reserveForm.uploading') : t('slot.registering')}
                   </span>
                 ) : (
-                  'Register Now'
+                  t('reserveForm.registerNow')
                 )}
               </Button>
             </div>
@@ -688,17 +688,19 @@ function ReserveNumberForm() {
             </svg>
             <div>
               <p className="text-gray-800 dark:text-gray-200 font-medium mb-1">
-                Important:
+                {t('reserveForm.important')}
               </p>
               <ul className="space-y-1">
                 <li>
-                  • Your number{selectedNumbers.length > 1 ? 's are' : ' is'}{' '}
-                  reserved for{' '}
-                  {reservationTimeData?.reservationTimeMinutes || 4} minutes
+                  • {t('reserveForm.numberReservedFor', {
+                    plural: selectedNumbers.length > 1 ? 's' : '',
+                    is: selectedNumbers.length > 1 ? 'are' : 'is',
+                    minutes: reservationTimeData?.reservationTimeMinutes || 4
+                  })}
                 </li>
-                <li>• Complete the form before time expires</li>
+                <li>• {t('reserveForm.completeFormBeforeExpiry')}</li>
                 <li>
-                  • If you leave this page, your reservation will be released
+                  • {t('reserveForm.leavePageWarning')}
                 </li>
               </ul>
             </div>

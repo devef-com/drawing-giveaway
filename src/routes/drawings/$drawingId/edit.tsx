@@ -7,6 +7,7 @@ import {
   CalendarIcon,
   PlusIcon,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -47,6 +48,7 @@ export const Route = createFileRoute('/drawings/$drawingId/edit')({
 })
 
 function EditDrawing() {
+  const { t } = useTranslation()
   const { drawingId } = Route.useParams()
   const navigate = useNavigate()
   const session = authClient.useSession()
@@ -187,7 +189,7 @@ function EditDrawing() {
 
     // Validate endAt before submission
     if (!formData.endAt) {
-      setEndAtError('Please select an end date and time')
+      setEndAtError(t('editDrawing.pleaseSelectEndDateTime'))
       const endAtSection = document.getElementById('endAt-section')
       if (endAtSection) {
         endAtSection.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -220,18 +222,18 @@ function EditDrawing() {
       })
 
       if (response.ok) {
-        toast.success('Drawing updated successfully')
+        toast.success(t('editDrawing.updatedSuccessfully'))
         queryClient.invalidateQueries({ queryKey: ['drawing', drawingId] })
         navigate({ to: `/drawings/${drawingId}` })
       } else {
         const error = await response.json()
         toast.error(
-          error.message || 'Failed to update drawing. Please try again.',
+          error.message || t('editDrawing.failedToUpdate'),
         )
       }
     } catch (error) {
       console.error('Error updating drawing:', error)
-      toast.error('Failed to update drawing. Please try again.')
+      toast.error(t('editDrawing.failedToUpdate'))
     } finally {
       setIsSubmitting(false)
     }
@@ -243,12 +245,12 @@ function EditDrawing() {
         <div className="max-w-2xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
             <p className="text-white text-center">
-              Please log in to edit this drawing.{' '}
+              {t('editDrawing.pleaseLoginToEdit')}{' '}
               <a
                 href="/authentication/login"
                 className="text-cyan-400 hover:text-cyan-300"
               >
-                Login
+                {t('editDrawing.login')}
               </a>
             </p>
           </Card>
@@ -262,7 +264,7 @@ function EditDrawing() {
       <div className="min-h-screen p-6">
         <div className="max-w-2xl mx-auto">
           <Card className="p-6">
-            <p className="text-center">Loading...</p>
+            <p className="text-center">{t('editDrawing.loading')}</p>
           </Card>
         </div>
       </div>
@@ -274,7 +276,7 @@ function EditDrawing() {
       <div className="min-h-screen p-6">
         <div className="max-w-2xl mx-auto">
           <Card className="p-6">
-            <p className="text-center">Drawing not found</p>
+            <p className="text-center">{t('editDrawing.drawingNotFound')}</p>
           </Card>
         </div>
       </div>
@@ -285,12 +287,12 @@ function EditDrawing() {
     <div className="min-h-screen p-6">
       <div className="max-w-2xl mx-auto">
         <Card className="p-6">
-          <h1 className="text-xl font-bold mb-2">Edit Drawing</h1>
+          <h1 className="text-xl font-bold mb-2">{t('editDrawing.title')}</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <Label htmlFor="title" className="mb-1">
-                Title
+                {t('editDrawing.titleLabel')}
               </Label>
               <Input
                 id="title"
@@ -303,7 +305,7 @@ function EditDrawing() {
             </div>
 
             <div>
-              <Label className="mb-2">Guidelines (Optional)</Label>
+              <Label className="mb-2">{t('editDrawing.guidelinesOptional')}</Label>
               <div className="relative">
                 <textarea
                   value={currentGuideline}
@@ -315,7 +317,7 @@ function EditDrawing() {
                       ;(e.target as HTMLTextAreaElement).style.height = 'auto'
                     }
                   }}
-                  placeholder="Enter guideline text..."
+                  placeholder={t('editDrawing.enterGuidelineText')}
                   className="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 pr-24 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 resize-none overflow-hidden"
                   style={{
                     height: 'auto',
@@ -388,7 +390,7 @@ function EditDrawing() {
             {/* Paid Event Switch */}
             <div className="flex items-center justify-between rounded-lg border p-4">
               <Label htmlFor="isPaid" className="flex-1">
-                Pago
+                {t('editDrawing.paid')}
               </Label>
               <Switch
                 id="isPaid"
@@ -402,7 +404,7 @@ function EditDrawing() {
             {formData.isPaid && (
               <div>
                 <Label htmlFor="price" className="mb-1">
-                  Price
+                  {t('editDrawing.priceLabel')}
                 </Label>
                 <Input
                   id="price"
@@ -423,7 +425,7 @@ function EditDrawing() {
             {/* Play with Numbers - Read Only */}
             <div className="hidden items-center justify-between rounded-lg border p-4 opacity-60">
               <Label htmlFor="playWithNumbers" className="flex-1">
-                Play with numbers
+                {t('editDrawing.playWithNumbers')}
               </Label>
               <Switch
                 id="playWithNumbers"
@@ -432,14 +434,14 @@ function EditDrawing() {
               />
             </div>
             <p className="hidden text-xs text-muted-foreground -mt-4">
-              This setting cannot be changed after creation.
+              {t('editDrawing.cannotChangeAfterCreation')}
             </p>
 
             {/* Quantity of Numbers - Read Only when playWithNumbers is true */}
             {formData.playWithNumbers && (
               <div className="hidden opacity-60">
                 <Label htmlFor="quantityOfNumbers" className="mb-1">
-                  Quantity of Numbers
+                  {t('editDrawing.quantityOfNumbers')}
                 </Label>
                 <Input
                   id="quantityOfNumbers"
@@ -448,7 +450,7 @@ function EditDrawing() {
                   disabled
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  This setting cannot be changed after creation.
+                  {t('editDrawing.cannotChangeAfterCreation')}
                 </p>
               </div>
             )}
@@ -456,7 +458,7 @@ function EditDrawing() {
             {/* Winner Selection Method */}
             <div>
               <Label htmlFor="winnerSelection" className="mb-1">
-                Winner Selection Method
+                {t('editDrawing.winnerSelectionMethod')}
               </Label>
               <Select
                 value={formData.winnerSelection}
@@ -469,28 +471,27 @@ function EditDrawing() {
                 disabled={!formData.playWithNumbers}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select winner selection method" />
+                  <SelectValue placeholder={t('editDrawing.winnerSelectionMethod')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="manually">
-                    Enter number manually
+                    {t('editDrawing.enterNumberManually')}
                   </SelectItem>
-                  <SelectItem value="system">System generated</SelectItem>
+                  <SelectItem value="system">{t('editDrawing.systemGenerated')}</SelectItem>
                 </SelectContent>
               </Select>
               {formData.winnerSelection === 'manually' ? (
                 <p className="text-xs text-muted-foreground mt-1">
-                  User must enter the winner numbers once the giway ends.
+                  {t('editDrawing.userMustEnterWinnerNumbers')}
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground mt-1">
-                  The system will choose randomly the eligible winners. You can
-                  re-run this to select them again.
+                  {t('editDrawing.systemWillChooseRandomly')}
                 </p>
               )}
               {!formData.playWithNumbers && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  Not allowed to change for this giway.
+                  {t('editDrawing.notAllowedToChange')}
                 </p>
               )}
             </div>
@@ -498,7 +499,7 @@ function EditDrawing() {
             {/* Number of Winners */}
             <div>
               <Label htmlFor="winnersAmount" className="mb-1">
-                Numbers of winners
+                {t('editDrawing.numbersOfWinners')}
               </Label>
               <Input
                 id="winnersAmount"
@@ -514,7 +515,7 @@ function EditDrawing() {
                 }}
                 onInvalid={(e) => {
                   ;(e.target as HTMLInputElement).setCustomValidity(
-                    'Please enter a number greater than 0',
+                    t('editDrawing.pleaseEnterNumberGreaterThanZero'),
                   )
                 }}
                 onInput={(e) => {
@@ -525,7 +526,7 @@ function EditDrawing() {
             </div>
 
             <div id="endAt-section">
-              <Label className="mb-1">End Date & Time</Label>
+              <Label className="mb-1">{t('editDrawing.endDateTime')}</Label>
               {endAtError && (
                 <p className="text-sm text-destructive mt-1 mb-2">
                   {endAtError}
@@ -539,7 +540,7 @@ function EditDrawing() {
                   className="text-xs font-thin"
                   onClick={() => handleQuickPreset(168)}
                 >
-                  Next week
+                  {t('editDrawing.nextWeek')}
                 </Button>
                 <Button
                   type="button"
@@ -548,7 +549,7 @@ function EditDrawing() {
                   className="text-xs font-thin"
                   onClick={() => handleQuickPreset(360)}
                 >
-                  15 days
+                  {t('editDrawing.fifteenDays')}
                 </Button>
                 <Button
                   type="button"
@@ -557,7 +558,7 @@ function EditDrawing() {
                   className="text-xs font-thin"
                   onClick={() => handleQuickPreset(720)}
                 >
-                  Next Month
+                  {t('editDrawing.nextMonth')}
                 </Button>
               </div>
 
@@ -573,13 +574,13 @@ function EditDrawing() {
                       {formData.endAt ? (
                         format(new Date(formData.endAt), 'PPP p')
                       ) : (
-                        <span>Pick a date and time</span>
+                        <span>{t('editDrawing.pickDateTime')}</span>
                       )}
                     </Button>
                   </DrawerTrigger>
                   <DrawerContent className="max-h-full">
                     <DrawerHeader>
-                      <DrawerTitle>Select End Date & Time</DrawerTitle>
+                      <DrawerTitle>{t('editDrawing.selectEndDateTime')}</DrawerTitle>
                     </DrawerHeader>
 
                     <div
@@ -599,7 +600,7 @@ function EditDrawing() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="justify-center text-md">Time</Label>
+                        <Label className="justify-center text-md">{t('editDrawing.time')}</Label>
                         <div className="flex gap-2 items-center justify-center">
                           <Select
                             value={selectedTime.hours}
@@ -665,11 +666,11 @@ function EditDrawing() {
                           onClick={handleDateTimeConfirm}
                           disabled={!selectedDate}
                         >
-                          Confirm
+                          {t('editDrawing.confirm')}
                         </Button>
                         <DrawerClose asChild>
                           <Button variant="outline" className="w-1/2">
-                            Cancel
+                            {t('editDrawing.cancel')}
                           </Button>
                         </DrawerClose>
                       </DrawerFooter>
@@ -688,7 +689,7 @@ function EditDrawing() {
                       {formData.endAt ? (
                         format(new Date(formData.endAt), 'PPP p')
                       ) : (
-                        <span>Pick a date and time</span>
+                        <span>{t('editDrawing.pickDateTime')}</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -705,7 +706,7 @@ function EditDrawing() {
                       />
 
                       <div className="space-y-2 px-4">
-                        <Label>Time</Label>
+                        <Label>{t('editDrawing.time')}</Label>
                         <div className="flex gap-2 items-center">
                           <Select
                             value={selectedTime.hours}
@@ -772,14 +773,14 @@ function EditDrawing() {
                           onClick={handleDateTimeConfirm}
                           disabled={!selectedDate}
                         >
-                          Confirm
+                          {t('editDrawing.confirm')}
                         </Button>
                         <Button
                           className="flex-1"
                           variant="outline"
                           onClick={() => setIsOpen(false)}
                         >
-                          Cancel
+                          {t('editDrawing.cancel')}
                         </Button>
                       </div>
                     </div>
@@ -794,10 +795,10 @@ function EditDrawing() {
                 onClick={() => navigate({ to: `/drawings/${drawingId}` })}
                 variant="outline"
               >
-                Cancel
+                {t('editDrawing.cancel')}
               </Button>
               <Button type="submit" disabled={isSubmitting} variant="primary">
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                {isSubmitting ? t('editDrawing.saving') : t('editDrawing.saveChanges')}
               </Button>
             </div>
           </form>

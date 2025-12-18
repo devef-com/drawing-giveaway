@@ -1,8 +1,10 @@
 import { Link, useLocation } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Menu, X } from 'lucide-react'
 import ThemeSwitcher from './ThemeSwitcher'
 import { cn } from '@/lib/utils'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const NOT_VISIBLE_AT = [
   '/',
@@ -13,19 +15,6 @@ const NOT_VISIBLE_AT = [
   '/drawings/$drawingId/p/$participateId',
   '/d/$drawingId/p/$participateId',
 ]
-
-const Logo = () => (
-  <Link to="/" className="inline-flex items-center gap-2">
-    <figure className="w-6 h-6">
-      <img
-        src="/logo192.png"
-        alt="Giway logo"
-        className="w-full h-full object-contain"
-      />
-    </figure>
-    <span className="text-lg font-bold text-foreground">Giway</span>
-  </Link>
-)
 
 interface NavLinkProps {
   to: string
@@ -58,8 +47,22 @@ const NavLink = ({ to, children, onClick, isMobile = false }: NavLinkProps) => (
 )
 
 export default function Header() {
+  const { t } = useTranslation()
   const location = useLocation()
   const currentPath = location.pathname
+
+  const Logo = () => (
+    <Link to="/" className="inline-flex items-center gap-2">
+      <figure className="w-6 h-6">
+        <img
+          src="/logo192.png"
+          alt={t('app.logoAlt')}
+          className="w-full h-full object-contain"
+        />
+      </figure>
+      <span className="text-lg font-bold text-foreground">{t('app.title')}</span>
+    </Link>
+  )
 
   /**
    * Determines if the navigation menu should be visible based on the current path.
@@ -117,7 +120,7 @@ export default function Header() {
               <button
                 onClick={() => setIsOpen(true)}
                 className="p-2 -ml-2 text-foreground hover:bg-muted rounded-lg transition-colors"
-                aria-label="Open menu"
+                aria-label={t('nav.openMenu')}
               >
                 <Menu size={20} />
               </button>
@@ -133,21 +136,15 @@ export default function Header() {
           {/* Desktop Navigation */}
           {isNavVisible() && (
             <nav className="hidden md:flex md:items-center md:gap-6">
-              <NavLink to="/">Home</NavLink>
-              <NavLink to="/drawings">Drawings</NavLink>
-              <NavLink to="/store">Store</NavLink>
-              <NavLink to="/account">Account</NavLink>
+              <NavLink to="/">{t('nav.home')}</NavLink>
+              <NavLink to="/drawings">{t('nav.drawings')}</NavLink>
+              <NavLink to="/store">{t('nav.store')}</NavLink>
+              <NavLink to="/account">{t('nav.account')}</NavLink>
             </nav>
           )}
 
-          {/* Desktop Theme Switcher (dev only) */}
-          {process.env.NODE_ENV === 'production' ? (
-            <div className="hidden md:block">
-              <ThemeSwitcher />
-            </div>
-          ) : (
-            <span className="hidden md:block w-24" />
-          )}
+          <LanguageSwitcher />
+
         </div>
       </header>
 
@@ -173,7 +170,7 @@ export default function Header() {
           <button
             onClick={() => setIsOpen(false)}
             className="p-2 -ml-2 text-foreground hover:bg-muted rounded-lg transition-colors"
-            aria-label="Close menu"
+            aria-label={t('nav.closeMenu')}
           >
             <X size={20} />
           </button>
@@ -182,24 +179,26 @@ export default function Header() {
         </div>
 
         {/* User Info */}
-        <div className="px-4 py-3 border-b border-border">
-          <p className="text-sm text-muted-foreground">username@domain.com</p>
+        <div className="hidden px-4 py-3 border-b border-border">
+          <p className="text-sm text-muted-foreground">
+            {t('nav.userPlaceholderEmail')}
+          </p>
         </div>
 
         {/* Navigation Links */}
         {isNavVisible() && (
           <nav className="flex-1 p-4 overflow-y-auto space-y-1">
             <NavLink to="/" onClick={() => setIsOpen(false)} isMobile>
-              Home
+              {t('nav.home')}
             </NavLink>
             <NavLink to="/drawings" onClick={() => setIsOpen(false)} isMobile>
-              Drawings
+              {t('nav.drawings')}
             </NavLink>
             <NavLink to="/store" onClick={() => setIsOpen(false)} isMobile>
-              Store
+              {t('nav.store')}
             </NavLink>
             <NavLink to="/account" onClick={() => setIsOpen(false)} isMobile>
-              Account
+              {t('nav.account')}
             </NavLink>
           </nav>
         )}
@@ -207,7 +206,7 @@ export default function Header() {
         {/* Theme Switcher */}
         <div className="p-4 border-t border-border">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Theme</span>
+            <span className="text-sm text-muted-foreground">{t("theme.label")}</span>
             <ThemeSwitcher />
           </div>
         </div>
