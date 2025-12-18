@@ -2,6 +2,7 @@ import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { eq, desc } from 'drizzle-orm'
 import {
@@ -138,39 +139,40 @@ interface FormProps {
 }
 
 const Form: React.FC<FormProps> = ({ formData, setFormData, drawing }) => {
+  const { t } = useTranslation()
   return (
     <>
       <div>
         <Label htmlFor="name" className="text-black dark:text-white mb-1">
-          Full Name *
+          {t('slot.form.fullName')} *
         </Label>
         <Input
           id="name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           required
-          placeholder="Enter your full name"
+          placeholder={t('slot.form.fullNamePlaceholder')}
           className="bg-white dark:bg-slate-700 text-black dark:text-white border-gray-300 dark:border-slate-600 focus:border-cyan-500"
         />
       </div>
 
       <div>
         <Label htmlFor="email" className="text-black dark:text-white mb-1">
-          Email (Optional)
+          {t('slot.form.emailOptional')}
         </Label>
         <Input
           id="email"
           type="email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          placeholder="your@email.com"
+          placeholder={t('slot.form.emailPlaceholder')}
           className="bg-white dark:bg-slate-700 text-black dark:text-white border-gray-300 dark:border-slate-600 focus:border-cyan-500"
         />
       </div>
 
       <div>
         <Label htmlFor="phone" className="text-black dark:text-white mb-1">
-          Phone Number *
+          {t('slot.form.phone')} *
         </Label>
         <Input
           id="phone"
@@ -178,7 +180,7 @@ const Form: React.FC<FormProps> = ({ formData, setFormData, drawing }) => {
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           required
-          placeholder="+1 (555) 000-0000"
+          placeholder={t('slot.form.phonePlaceholder')}
           className="bg-white dark:bg-slate-700 text-black dark:text-white border-gray-300 dark:border-slate-600 focus:border-cyan-500"
         />
       </div>
@@ -189,11 +191,10 @@ const Form: React.FC<FormProps> = ({ formData, setFormData, drawing }) => {
             <CircleAlert className="w-6 h-6 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
             <div>
               <p className="text-yellow-800 dark:text-yellow-200 font-medium">
-                Payment Required
+                {t('slot.form.paymentRequired')}
               </p>
               <p className="text-yellow-700 dark:text-yellow-100 text-sm mt-1">
-                This is a paid event. Attach your payment proof to confirm your
-                participation.
+                {t('slot.form.paymentRequiredDesc')}
               </p>
             </div>
           </div>
@@ -204,6 +205,7 @@ const Form: React.FC<FormProps> = ({ formData, setFormData, drawing }) => {
 }
 
 function SlotDrawingParticipation() {
+  const { t } = useTranslation()
   const drawing = Route.useLoaderData()
   const { drawingId } = Route.useParams()
   const navigate = useNavigate()
@@ -432,7 +434,7 @@ function SlotDrawingParticipation() {
         const verified = localStorage.getItem(reservationKey)
         if (!verified) {
           console.error('Failed to store reservation in localStorage')
-          toast.error('Failed to save reservation. Please try again.')
+          toast.error(t('slot.reservation.failed'))
           setSelectedNumbers([])
           return
         }
@@ -456,12 +458,12 @@ function SlotDrawingParticipation() {
           },
         })
       } else {
-        toast.error('Some numbers could not be reserved. Please try again.')
+        toast.error(t('slot.reservation.someNumbersFailed'))
         setSelectedNumbers([])
       }
     } catch (error) {
       console.error('Error reserving numbers:', error)
-      toast.error('An error occurred while reserving numbers')
+      toast.error(t('slot.reservation.error'))
       setSelectedNumbers([])
     }
   }
@@ -488,13 +490,13 @@ function SlotDrawingParticipation() {
       <div className="min-h-screenp-6">
         <div className="max-w-7xl mx-auto">
           <Card className="p-6 bg-slate-800/50 border-slate-700">
-            <p className="text-white text-center text-xl">Drawing not found</p>
+            <p className="text-white text-center text-xl">{t('slot.drawingNotFound')}</p>
             <div className="text-center mt-4">
               <Button
                 onClick={() => navigate({ to: '/' })}
                 className="bg-cyan-600 hover:bg-cyan-700"
               >
-                Go Home
+                {t('slot.goHome')}
               </Button>
             </div>
           </Card>
@@ -548,7 +550,7 @@ function SlotDrawingParticipation() {
           {drawing.guidelines && drawing.guidelines.length > 0 && (
             <div>
               <h2 className="font-regular mb-2 text-text-light-primary dark:text-text-dark-primary">
-                Guidelines
+                {t('slot.guidelines')}
               </h2>
               <ul className="list-disc list-inside space-y-1 text-sm text-text-light-secondary dark:text-text-dark-secondary">
                 {drawing.guidelines.map((guideline, index) => (
@@ -564,28 +566,26 @@ function SlotDrawingParticipation() {
             <div className="flex items-center gap-2 mb-3">
               <Trophy className="w-6 h-6 text-amber-500" />
               <h2 className="text-lg font-semibold text-amber-800 dark:text-amber-200">
-                Drawing Ended
+                {t('slot.drawingEnded')}
               </h2>
             </div>
             {winnersLoading ? (
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-500"></div>
                 <span className="ml-2 text-amber-700 dark:text-amber-300">
-                  Loading winners...
+                  {t('slot.loadingWinners')}
                 </span>
               </div>
             ) : winnersData?.winners && winnersData.winners.length > 0 ? (
               <div>
                 <p className="text-amber-700 dark:text-amber-300 mb-3">
-                  🎉 Congratulations to the winner
-                  {winnersData.winners.length > 1 ? 's' : ''}!
+                  {t('slot.congratulations', { plural: winnersData.winners.length > 1 ? 's' : '' })}
                 </p>
                 {winnersData.winnerNumbers &&
                   winnersData.winnerNumbers.length > 0 && (
                     <div className="mb-3">
                       <p className="text-sm text-amber-600 dark:text-amber-400 mb-1">
-                        Winning number
-                        {winnersData.winnerNumbers.length > 1 ? 's' : ''}:
+                        {t('slot.winningNumber', { plural: winnersData.winnerNumbers.length > 1 ? 's' : '' })}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {winnersData.winnerNumbers.map((num) => (
@@ -617,7 +617,7 @@ function SlotDrawingParticipation() {
               </div>
             ) : (
               <p className="text-amber-700 dark:text-amber-300">
-                Winners have not been selected yet. Check back soon!
+                {t('slot.winnersNotSelected')}
               </p>
             )}
           </Card>
@@ -778,7 +778,7 @@ function SlotDrawingParticipation() {
 
                     return (
                       <>
-                        Selected: {shown.join(', ')}
+                        {t('slot.selected')}: {shown.join(', ')}
                         {remaining > 0 ? ` +${remaining}` : ''}
                       </>
                     )
@@ -811,10 +811,10 @@ function SlotDrawingParticipation() {
                 {participateMutation.isPending ? (
                   <span className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Registering...
+                    {t('slot.registering')}
                   </span>
                 ) : (
-                  'Complete Registration'
+                  t('slot.completeRegistration')
                 )}
               </Button>
             </div>
@@ -827,37 +827,41 @@ function SlotDrawingParticipation() {
           <div className="flex items-center gap-2 text-sm text-gray-400">
             <InfoIcon className="w-5 h-5 text-cyan-400" />
             <p className="text-text-light-primary dark:text-text-dark-primary font-medium ">
-              How it works:
+              {t('slot.howItWorks')}
             </p>
           </div>
           <ul className="space-y-1 ml-4 text-sm text-gray-600 dark:text-gray-400">
             {drawing.playWithNumbers ? (
               <>
                 <li>
-                  • Select {drawing.isPaid ? 'one or more numbers' : 'a number'}{' '}
-                  from the grid
+                  {t('slot.howItWorks.selectNumber', {
+                    selectType: drawing.isPaid
+                      ? t('slot.howItWorks.selectNumberMultiple')
+                      : t('slot.howItWorks.selectNumberSingle')
+                  })}
                 </li>
-                <li>• Click the arrow button to proceed</li>
+                <li>{t('slot.howItWorks.clickArrow')}</li>
                 <li>
-                  • Your {drawing.isPaid ? 'numbers' : 'number'} will be
-                  reserved for{' '}
-                  {reservationTimeData?.reservationTimeMinutes || 4} minutes
+                  {t('slot.howItWorks.reservation', {
+                    numberType: drawing.isPaid
+                      ? t('slot.howItWorks.reservationNumbers')
+                      : t('slot.howItWorks.reservationNumber'),
+                    minutes: reservationTimeData?.reservationTimeMinutes || 4
+                  })}
                 </li>
-                <li>• Complete the registration form with your details</li>
+                <li>{t('slot.howItWorks.completeForm')}</li>
                 {drawing.isPaid && (
-                  <li>• Upload payment proof to confirm your participation</li>
+                  <li>{t('slot.howItWorks.uploadProof')}</li>
                 )}
-                <li>• Wait for the drawing date to see if you win!</li>
+                <li>{t('slot.howItWorks.waitForDrawing')}</li>
               </>
             ) : (
               <>
-                <li>• Fill out the registration form with your details</li>
+                <li>{t('slot.howItWorks.fillForm')}</li>
                 {drawing.isPaid && (
-                  <li>• Upload payment proof to confirm your participation</li>
+                  <li>{t('slot.howItWorks.uploadProof')}</li>
                 )}
-                <li>
-                  • The winner will be selected randomly on the drawing date
-                </li>
+                <li>{t('slot.howItWorks.randomSelection')}</li>
               </>
             )}
           </ul>
