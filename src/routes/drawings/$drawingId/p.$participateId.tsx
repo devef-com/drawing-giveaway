@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tantml:router'
 import { Download, InfoIcon } from 'lucide-react'
 // import html2pdf from "html2pdf.js";
 import QRCodeSVG from 'qrcode-svg'
 import { jsPDF } from 'jspdf'
 import 'svg2pdf.js'
+import { useTranslation } from 'react-i18next'
 import type { Participant } from '@/db/schema'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -20,6 +21,7 @@ export const Route = createFileRoute('/drawings/$drawingId/p/$participateId')({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation()
   const { drawingId, participateId } = Route.useParams()
 
   const { data: drawingData } = useDrawing(drawingId)
@@ -115,7 +117,7 @@ function RouteComponent() {
   if (error) {
     return (
       <div className="mx-auto max-w-md mt-10">
-        Error: {JSON.stringify(error)}
+        {t('common.error')}: {JSON.stringify(error)}
       </div>
     )
   }
@@ -126,10 +128,10 @@ function RouteComponent() {
         <>
           <Card className="p-4 gap-0.5">
             <h1 className="text-regular font-semibold line-clamp-2">
-              Participant for Drawing - {drawingData?.title}
+              {t('participantView.title', { title: drawingData?.title })}
             </h1>
             <div className="flex items-center gap-4 mt-1">
-              <p className="m-0">Status:</p>
+              <p className="m-0">{t('participantView.status')}</p>
 
               <p
                 className={cn(
@@ -144,10 +146,10 @@ function RouteComponent() {
                 )}
               >
                 {participantData.isEligible
-                  ? 'Approved'
+                  ? t('participantView.statusApproved')
                   : participantData.isEligible == null
-                    ? 'Pending'
-                    : 'Not Eligible'}
+                    ? t('participantView.statusPending')
+                    : t('participantView.statusNotEligible')}
               </p>
             </div>
 
@@ -175,7 +177,7 @@ function RouteComponent() {
               )}
             >
               <InfoIcon size={18} />
-              Your participation is pending approval.
+              {t('participantView.pendingApproval')}
             </span>
           </Card>
 
@@ -220,7 +222,7 @@ function RouteComponent() {
           <div className="mt-6 flex justify-center">
             <Button variant="outline" onClick={handleDownloadPdf}>
               <Download className="mr-2 h-4 w-4" />
-              Download ticket
+              {t('participantView.downloadTicket')}
             </Button>
           </div>
 
@@ -246,7 +248,7 @@ function RouteComponent() {
           <Skeleton className="h-32 w-full mt-4" />
         </div>
       ) : (
-        <div>No participant data found.</div>
+        <div>{t('participantView.noData')}</div>
       )}
     </div>
   )
