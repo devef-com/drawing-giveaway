@@ -1,5 +1,6 @@
 import { Link, useLocation } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Menu, X } from 'lucide-react'
 import ThemeSwitcher from './ThemeSwitcher'
 import { cn } from '@/lib/utils'
@@ -59,6 +60,7 @@ const NavLink = ({ to, children, onClick, isMobile = false }: NavLinkProps) => (
 )
 
 export default function Header() {
+  const { t } = useTranslation()
   const location = useLocation()
   const currentPath = location.pathname
 
@@ -134,23 +136,16 @@ export default function Header() {
           {/* Desktop Navigation */}
           {isNavVisible() && (
             <nav className="hidden md:flex md:items-center md:gap-6">
-              <NavLink to="/">Home</NavLink>
-              <NavLink to="/drawings">Drawings</NavLink>
-              <NavLink to="/store">Store</NavLink>
-              <NavLink to="/account">Account</NavLink>
+              <NavLink to="/">{t('nav.home')}</NavLink>
+              <NavLink to="/drawings">{t('nav.drawings')}</NavLink>
+              <NavLink to="/store">{t('nav.store')}</NavLink>
+              <NavLink to="/account">{t('nav.account')}</NavLink>
             </nav>
           )}
 
-          {/* Desktop Theme Switcher (dev only) */}
-          {process.env.NODE_ENV === 'production' ? (
-            <div className="hidden md:block">
-              <ThemeSwitcher />
-            </div>
-          ) : (
-            <span className="hidden md:block w-24" />
-          )}
+          <LanguageSwitcher />
+
         </div>
-        <LanguageSwitcher />
       </header>
 
       {/* Mobile Menu Overlay */}
@@ -192,16 +187,16 @@ export default function Header() {
         {isNavVisible() && (
           <nav className="flex-1 p-4 overflow-y-auto space-y-1">
             <NavLink to="/" onClick={() => setIsOpen(false)} isMobile>
-              Home
+              {t('nav.home')}
             </NavLink>
             <NavLink to="/drawings" onClick={() => setIsOpen(false)} isMobile>
-              Drawings
+              {t('nav.drawings')}
             </NavLink>
             <NavLink to="/store" onClick={() => setIsOpen(false)} isMobile>
-              Store
+              {t('nav.store')}
             </NavLink>
             <NavLink to="/account" onClick={() => setIsOpen(false)} isMobile>
-              Account
+              {t('nav.account')}
             </NavLink>
           </nav>
         )}
